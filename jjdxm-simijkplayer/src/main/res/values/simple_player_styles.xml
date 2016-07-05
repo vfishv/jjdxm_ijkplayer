@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="AppTheme" parent="android:Theme.NoTitleBar">
-    </style>
-
     <style name="SeekBarAppTheme" parent="android:Widget.SeekBar">
         <item name="android:progressDrawable">
             @drawable/simple_player_progress_horizontal_holo_dark

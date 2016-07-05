@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/jjdxm-simijkplayer/ijkplayer.iml" filepath="$PROJECT_DIR$/jjdxm-simijkplayer/ijkplayer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/jjdxm-simijkplayer/jjdxm-simijkplayer.iml" filepath="$PROJECT_DIR$/jjdxm-simijkplayer/jjdxm-simijkplayer.iml" />
       <module fileurl="file://$PROJECT_DIR$/jjdxm_simijkplayer.iml" filepath="$PROJECT_DIR$/jjdxm_simijkplayer.iml" />
     </modules>
   </component>
