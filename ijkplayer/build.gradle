@@ -1,24 +1,42 @@
 apply plugin: 'com.android.library'
 
+ext {
+    //类库的module名、bintray上项目名、artifactId最好是一致的
+    jjdxm_bintrayRepo = 'maven'
+    jjdxm_bintrayName = 'jjdxm-ijkplayer_simple'
+
+    jjdxm_packaging = 'aar'
+    jjdxm_groupId = 'com.dou361.ijkplayer_simple'
+    jjdxm_artifactId = 'jjdxm-ijkplayer_simple'
+
+    jjdxm_libraryVersion = '1.0.1'
+    jjdxm_libraryName = 'jjdxm-ijkplayer_simple'
+    jjdxm_libraryDescription = 'this is a ijkplayer_simple library of the application'
+
+    jjdxm_siteUrl = 'https://github.com/jjdxmashl/jjdxm_ijkplayer_simple'
+    jjdxm_gitUrl = 'https://github.com/jjdxmashl/jjdxm_ijkplayer_simple.git'
+
+    jjdxm_developerId = 'jjdxmashl'
+    jjdxm_developerName = 'jjdxmashl'
+    jjdxm_developerEmail = '316988670@qq.com'
+
+    jjdxm_licenseName = 'The Apache Software License, Version 2.0'
+    jjdxm_licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    jjdxm_allLicenses = ["Apache-2.0"]
+
+    jjdxm_singlePath = 'build/intermediates/classes/release'
+    jjdxm_singleJar = jjdxm_artifactId+'-'+jjdxm_libraryVersion+'.jar'
+}
 
 android {
-    // http://tools.android.com/tech-docs/new-build-system/tips
-    //noinspection GroovyAssignabilityCheck
     compileSdkVersion rootProject.ext.compileSdkVersion
-    //noinspection GroovyAssignabilityCheck
     buildToolsVersion rootProject.ext.buildToolsVersion
-    packagingOptions {
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/NOTICE.txt'
-    }
-    lintOptions {
-        abortOnError false
-    }
+
     defaultConfig {
-        minSdkVersion 9
+        minSdkVersion rootProject.ext.jjdxm_minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode rootProject.ext.ijk_versionCode
-        versionName rootProject.ext.ijk_versionName
+        versionCode rootProject.ext.jjdxm_versionCode
+        versionName rootProject.ext.jjdxm_versionName
     }
     buildTypes {
         release {
@@ -29,7 +47,10 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:support-v4:23.1.1'
-    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
+    compile rootProject.ext.jjdxm_v7
 }
+
+//apply from: 'https://raw.githubusercontent.com/jjdxmashl/jjdxm_ecodingprocess/master/bulidlib.gradle'
+apply from: 'https://raw.githubusercontent.com/jjdxmashl/jjdxm_ecodingprocess/master/bintray.gradle'

@@ -701,10 +701,10 @@ public class LivePlayerView {
     private void endGesture() {
         volume = -1;
         brightness = -1f;
-//        if (newPosition >= 0) {
-//            mHandler.removeMessages(MESSAGE_SEEK_NEW_POSITION);
-//            mHandler.sendEmptyMessage(MESSAGE_SEEK_NEW_POSITION);
-//        }
+        if (newPosition >= 0) {
+            mHandler.removeMessages(MESSAGE_SEEK_NEW_POSITION);
+            mHandler.sendEmptyMessage(MESSAGE_SEEK_NEW_POSITION);
+        }
         mHandler.removeMessages(MESSAGE_HIDE_CENTER_BOX);
         mHandler.sendEmptyMessageDelayed(MESSAGE_HIDE_CENTER_BOX, 500);
 

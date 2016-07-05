@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme" parent="android:Theme.NoTitleBar">
     </style>
 
     <style name="SeekBarAppTheme" parent="android:Widget.SeekBar">
-        <item name="android:progressDrawable">@drawable/simple_player_progress_horizontal_holo_dark</item>
-        <item name="android:indeterminateDrawable">@drawable/simple_player_progress_horizontal_holo_dark</item>
+        <item name="android:progressDrawable">
+            @drawable/simple_player_progress_horizontal_holo_dark
+        </item>
+        <item name="android:indeterminateDrawable">
+            @drawable/simple_player_progress_horizontal_holo_dark
+        </item>
         <item name="android:minHeight">13dip</item>
         <item name="android:maxHeight">13dip</item>
         <item name="android:thumb">@drawable/simple_player_control_selector_holo_dark</item>

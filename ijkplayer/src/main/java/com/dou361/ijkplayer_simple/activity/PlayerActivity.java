@@ -1,10 +1,10 @@
 package com.dou361.ijkplayer_simple.activity;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
 
 import com.dou361.ijkplayer_simple.PlayStateParams;
@@ -33,7 +33,7 @@ import com.dou361.ijkplayer_simple.utils.ResourceUtils;
  * <p/>
  * ========================================
  */
-public class PlayerActivity extends AppCompatActivity {
+public class PlayerActivity extends Activity {
 
     private PlayerView player;
     private String trumb;
