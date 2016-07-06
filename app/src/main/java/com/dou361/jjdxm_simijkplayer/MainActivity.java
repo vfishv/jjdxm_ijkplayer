@@ -6,8 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
-import com.dou361.jjdxm_simijkplayer.activity.PlayerActivity;
 import com.dou361.jjdxm_simijkplayer.R;
+import com.dou361.simijkplayer.activity.PlayerActivity;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 

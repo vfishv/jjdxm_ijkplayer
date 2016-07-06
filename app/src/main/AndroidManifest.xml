@@ -11,17 +11,17 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.dou361.jjdxm_simijkplayer.MainActivity">
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name="com.dou361.jjdxm_simijkplayer.PlayerLiveActivity"/>
+        <activity android:name=".PlayerLiveActivity"/>
 
         <activity
-            android:name="com.dou361.jjdxm_simijkplayer.activity.PlayerActivity"
+            android:name="com.dou361.simijkplayer.activity.PlayerActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:screenOrientation="user"

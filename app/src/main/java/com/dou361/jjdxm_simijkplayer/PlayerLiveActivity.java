@@ -7,9 +7,11 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
 
+import com.dou361.simijkplayer.LivePlayerView;
+import com.dou361.simijkplayer.PlayStateParams;
 import com.dou361.jjdxm_simijkplayer.R;
-import com.dou361.jjdxm_simijkplayer.listener.OnShowThumbnailListener;
-import com.dou361.jjdxm_simijkplayer.utils.ResourceUtils;
+import com.dou361.simijkplayer.listener.OnShowThumbnailListener;
+import com.dou361.simijkplayer.utils.ResourceUtils;
 
 
 /**
