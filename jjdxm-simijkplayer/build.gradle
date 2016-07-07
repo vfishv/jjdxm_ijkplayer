@@ -13,8 +13,8 @@ ext {
     jjdxm_libraryName = 'jjdxm-simijkplayer'
     jjdxm_libraryDescription = 'this is a simijkplayer library of the application'
 
-    jjdxm_siteUrl = 'https://github.com/jjdxmashl/jjdxm_ijkplayer_simple'
-    jjdxm_gitUrl = 'https://github.com/jjdxmashl/jjdxm_ijkplayer_simple.git'
+    jjdxm_siteUrl = 'https://github.com/jjdxmashl/jjdxm_simijkplayer'
+    jjdxm_gitUrl = 'https://github.com/jjdxmashl/jjdxm_simijkplayer.git'
 
     jjdxm_developerId = 'jjdxmashl'
     jjdxm_developerName = 'jjdxmashl'

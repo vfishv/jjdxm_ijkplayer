@@ -24,15 +24,23 @@ import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.dou361.simijkplayer.adapter.StreamSelectAdapter;
+import com.dou361.simijkplayer.bean.VideoijkBean;
 import com.dou361.simijkplayer.listener.OnControlPanelVisibilityChangeListener;
 import com.dou361.simijkplayer.listener.OnInfoListener;
 import com.dou361.simijkplayer.listener.OnShowThumbnailListener;
 import com.dou361.simijkplayer.utils.ResourceUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
@@ -71,6 +79,9 @@ public class PlayerView {
     private final Context mContext;
     private final Query query;
     private final IjkVideoView videoView;
+    private final LinearLayout streamSelectView;
+    private final ListView streamSelectListView;
+    private final StreamSelectAdapter streamSelectAdapter;
     /**
      * 第三方so是否支持
      */
@@ -78,11 +89,7 @@ public class PlayerView {
     /**
      * 码流列表
      */
-    private String[] streamArr;
-    /**
-     * 不同码流对应的视频地址列表
-     */
-    private String[] urlArr;
+    private List<VideoijkBean> listVideos = new ArrayList<VideoijkBean>();
     /**
      * 是否是直播 true为直播false为点播
      */
@@ -245,12 +252,33 @@ public class PlayerView {
                 return true;
             }
         });
+        streamSelectView = (LinearLayout) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_stream_container"));
+        streamSelectListView = (ListView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_streams_list"));
+
+        this.streamSelectAdapter = new StreamSelectAdapter(mContext, listVideos);
+        this.streamSelectListView.setAdapter(this.streamSelectAdapter);
+        this.streamSelectListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                hideStreamSelectView();
+                switchStream(position);
+                for (int i = 0; i < listVideos.size(); i++) {
+                    if (i == position) {
+                        listVideos.get(i).setSelect(true);
+                    } else {
+                        listVideos.get(i).setSelect(false);
+                    }
+                }
+                startPlay();
+            }
+        });
+
         iv_trumb = (ImageView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "iv_trumb"));
         rl_bottom_bar = (RelativeLayout) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "rl_bottom_bar"));
         seekBar = (SeekBar) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_seekBar"));
         seekBar.setMax(1000);
         seekBar.setOnSeekBarChangeListener(mSeekListener);
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_play")).clicked(onClickListener);
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_stream")).clicked(onClickListener);
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).clicked(onClickListener);
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie_icon")).clicked(onClickListener);
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen")).clicked(onClickListener);
@@ -315,17 +343,44 @@ public class PlayerView {
 
 
     /**
+     * 显示分辨率列表
+     */
+    private void showStreamSelectView() {
+        this.streamSelectView.setVisibility(View.VISIBLE);
+        this.streamSelectListView.setItemsCanFocus(true);
+    }
+
+    /**
+     * 隐藏分辨率列表
+     */
+    private void hideStreamSelectView() {
+        this.streamSelectView.setVisibility(View.GONE);
+    }
+
+
+    /**
      * 设置播放地址
      * 包括视频清晰度列表
      * 对应地址列表
      */
-    public void setPlaySource(String[] streamArr, String[] urlArr) {
-        this.streamArr = streamArr;
-        this.urlArr = urlArr;
-        if (urlArr == null || urlArr.length <= 0) {
-            return;
+    public void setPlaySource(List<VideoijkBean> list) {
+        listVideos.clear();
+        if (list != null && list.size() > 0) {
+            listVideos.addAll(list);
+            switchStream(0);
         }
-        switchStream(0);
+    }
+
+    /**
+     * 设置播放地址
+     * 单个视频地址时
+     */
+    public void setPlaySource(VideoijkBean videoijkBean) {
+        listVideos.clear();
+        if (videoijkBean != null) {
+            listVideos.add(videoijkBean);
+            switchStream(0);
+        }
     }
 
     /**
@@ -333,7 +388,10 @@ public class PlayerView {
      * 单个视频地址时
      */
     public void setPlaySource(String stream, String url) {
-        setPlaySource(new String[]{stream}, new String[]{url});
+        VideoijkBean mVideoijkBean = new VideoijkBean();
+        mVideoijkBean.setStream(stream);
+        mVideoijkBean.setUrl(url);
+        setPlaySource(mVideoijkBean);
     }
 
     /**
@@ -396,10 +454,10 @@ public class PlayerView {
      * 选择要播放的流
      */
     public void switchStream(int index) {
-        if (urlArr != null && urlArr.length > index) {
-            currentUrl = urlArr[index];
+        if (listVideos.size() > index) {
+            currentUrl = listVideos.get(index).getUrl();
             isLive();
-            currentPosition = 0;
+            currentPosition = index;
         }
     }
 
@@ -745,7 +803,11 @@ public class PlayerView {
     private final View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen")) {
+            if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_stream")) {
+                if (!isLive) {
+                    showStreamSelectView();
+                }
+            } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen")) {
                 toggleFullScreen();
             } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_play") || v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")) {
                 doPauseResume();
@@ -885,6 +947,7 @@ public class PlayerView {
     private void hideAll() {
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_top_box")).gone();
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "rl_bottom_bar")).gone();
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_stream_container")).gone();
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay")).gone();
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie")).gone();
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_loading")).gone();
@@ -1332,7 +1395,7 @@ public class PlayerView {
         @Override
         public boolean onDoubleTap(MotionEvent e) {
             /**视频视窗双击事件*/
-            if (!forbidTouch&&isDoubleTap) {
+            if (!forbidTouch && isDoubleTap) {
                 toggleFullScreen();
             }
             return true;
