@@ -124,6 +124,10 @@ public class PlayerView {
      */
     private boolean isDragging;
     /**
+     * 是否可以双击
+     */
+    private boolean isDoubleTap = true;
+    /**
      * 设备宽度
      */
     private final int screenWidthPixels;
@@ -338,6 +342,13 @@ public class PlayerView {
      */
     public void setPlaySource(String url) {
         setPlaySource("标清", url);
+    }
+
+    /**
+     * 设置是否可以双击
+     */
+    public void setDoubleTap(boolean flag) {
+        this.isDoubleTap = flag;
     }
 
 
@@ -1321,7 +1332,7 @@ public class PlayerView {
         @Override
         public boolean onDoubleTap(MotionEvent e) {
             /**视频视窗双击事件*/
-            if (!forbidTouch) {
+            if (!forbidTouch&&isDoubleTap) {
                 toggleFullScreen();
             }
             return true;

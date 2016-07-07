@@ -46,11 +46,11 @@ public class PlayerActivity extends Activity {
         setContentView(ResourceUtils.getResourceIdByName(mContext, "layout", "simple_player_view_player"));
         trumb = "http://115.159.45.251/fbei-test/2016/0512/LA5254B58E265011C.jpg";
 //        String url = "rtmp://2026.liveplay.myqcloud.com/live/2026_6b0e62df231111e6b91fa4dcbef5e35a";
-//        String url = "http://2026.liveplay.myqcloud.com/2026_ff1d60c6092a11e6b91fa4dcbef5e35a.m3u8";
-        String url = "http://9890.vod.myqcloud.com/9890_9c1fa3e2aea011e59fc841df10c92278.f20.mp4";
+//        String url = "http://9890.vod.myqcloud.com/9890_9c1fa3e2aea011e59fc841df10c92278.f20.mp4";
+        String url = "rtmp://stream.nodemedia.cn/live/demo";
         player = new PlayerView(this);
         player.setTitle("什么");
-        player.setScaleType(PlayStateParams.fitparent);
+        player.setScaleType(PlayStateParams.fillparent);
         player.hideMenu(true);
         player.forbidTouch(false);
         player.showThumbnail(new OnShowThumbnailListener() {
@@ -69,6 +69,7 @@ public class PlayerActivity extends Activity {
             }
         });
         player.setPlaySource(url);
+        player.startPlay();
     }
 
     @Override

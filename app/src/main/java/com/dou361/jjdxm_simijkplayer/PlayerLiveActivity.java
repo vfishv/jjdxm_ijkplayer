@@ -1,40 +1,39 @@
 package com.dou361.jjdxm_simijkplayer;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
 
 import com.dou361.simijkplayer.LivePlayerView;
 import com.dou361.simijkplayer.PlayStateParams;
-import com.dou361.jjdxm_simijkplayer.R;
 import com.dou361.simijkplayer.listener.OnShowThumbnailListener;
 import com.dou361.simijkplayer.utils.ResourceUtils;
 
 
 /**
  * ========================================
- * <p/>
+ * <p>
  * 版 权：深圳市晶网科技控股有限公司 版权所有 （C） 2015
- * <p/>
+ * <p>
  * 作 者：陈冠明
- * <p/>
+ * <p>
  * 个人网站：http://www.dou361.com
- * <p/>
+ * <p>
  * 版 本：1.0
- * <p/>
+ * <p>
  * 创建日期：2015/11/18 9:40
- * <p/>
+ * <p>
  * 描 述：测试临时使用
- * <p/>
- * <p/>
+ * <p>
+ * <p>
  * 修订历史：
- * <p/>
+ * <p>
  * ========================================
  */
-public class PlayerLiveActivity extends AppCompatActivity {
+public class PlayerLiveActivity extends Activity {
 
     private LivePlayerView player;
     private String trumb;
@@ -48,7 +47,8 @@ public class PlayerLiveActivity extends AppCompatActivity {
         trumb = "http://115.159.45.251/fbei-test/2016/0512/LA5254B58E265011C.jpg";
 //        String url = "rtmp://2026.liveplay.myqcloud.com/live/2026_6b0e62df231111e6b91fa4dcbef5e35a";
 //        String url = "http://2026.liveplay.myqcloud.com/2026_ff1d60c6092a11e6b91fa4dcbef5e35a.m3u8";
-        String url = "http://9890.vod.myqcloud.com/9890_9c1fa3e2aea011e59fc841df10c92278.f20.mp4";
+//        String url = "http://9890.vod.myqcloud.com/9890_9c1fa3e2aea011e59fc841df10c92278.f20.mp4";
+        String url = "rtmp://stream.nodemedia.cn/live/demo";
         player = new LivePlayerView(this);
         player.setTitle("什么");
         player.setScaleType(PlayStateParams.fitparent);

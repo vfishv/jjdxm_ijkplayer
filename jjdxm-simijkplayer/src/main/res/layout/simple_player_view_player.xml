@@ -62,15 +62,17 @@
         android:gravity="center"
         android:orientation="vertical"
         android:visibility="gone">
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:gravity="center"
             android:paddingLeft="8dp"
             android:paddingRight="8dp"
-            android:layout_marginBottom="8dp"
             android:text="您正在使用移动网络播放视频\n可能产生较高流量费用"
             android:textColor="@android:color/white"/>
+
         <TextView
             android:id="@+id/app_video_netTie_icon"
             android:layout_width="wrap_content"
@@ -122,6 +124,22 @@
         android:layout_centerInParent="true"
         android:layout_marginTop="8dp"
         android:src="@drawable/simple_player_circle_outline_white_36dp"/>
+
+    <!--分辨率选择-->
+    <LinearLayout
+        android:id="@+id/qcloud_player_select_stream_container"
+        android:layout_width="150dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:background="#80000000"
+        android:gravity="center_vertical"
+        android:visibility="gone">
+
+        <ListView
+            android:id="@+id/qcloud_player_select_streams_list"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
 
 
 </RelativeLayout>

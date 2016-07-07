@@ -19,12 +19,18 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="player"
-        android:id="@+id/btn_player"/>
+        android:text="半屏播放"
+        android:id="@+id/btn_h"/>
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="live"
+        android:text="竖屏播放"
+        android:id="@+id/btn_v"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="直播"
         android:id="@+id/btn_live"/>
 </LinearLayout>
