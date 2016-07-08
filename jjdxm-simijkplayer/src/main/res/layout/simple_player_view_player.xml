@@ -130,9 +130,7 @@
         android:id="@+id/simple_player_select_stream_container"
         android:layout_width="150dp"
         android:layout_height="match_parent"
-        android:layout_above="@+id/rl_bottom_bar"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/app_video_top_box"
         android:background="#80000000"
         android:gravity="center_vertical"
         android:visibility="gone">

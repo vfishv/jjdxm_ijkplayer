@@ -60,10 +60,12 @@ public class PlayStateParams {
      * 准备中/加载中
      */
     public static final int STATE_PREPARING = 1;
+    public static final int STATE_BUFFERING_START = 701;
     /**
      * 准备完成
      */
     public static final int STATE_PREPARED = 2;
+    public static final int STATE_BUFFERING_END = 702;
     /**
      * 播放中
      */

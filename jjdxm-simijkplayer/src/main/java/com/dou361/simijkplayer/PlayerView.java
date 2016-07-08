@@ -131,10 +131,6 @@ public class PlayerView {
      */
     private boolean isDragging;
     /**
-     * 是否可以双击
-     */
-    private boolean isDoubleTap = true;
-    /**
      * 设备宽度
      */
     private final int screenWidthPixels;
@@ -158,6 +154,10 @@ public class PlayerView {
      * 是否只有全屏
      */
     private boolean fullScreenOnly;
+    /**
+     * 是否禁止双击
+     */
+    private boolean isForbidDoulbeUp;
 
     private OnInfoListener onInfoListener = new OnInfoListener() {
         @Override
@@ -180,6 +180,9 @@ public class PlayerView {
         }
     };
     private boolean closePlay;
+    private int currentSelect;
+    private boolean isSwitchStream;
+    private boolean isHideBar;
 
 
     /**
@@ -260,6 +263,10 @@ public class PlayerView {
         this.streamSelectListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 hideStreamSelectView();
+                if (currentSelect == position) {
+                    return;
+                }
+                currentSelect = position;
                 switchStream(position);
                 for (int i = 0; i < listVideos.size(); i++) {
                     if (i == position) {
@@ -268,6 +275,7 @@ public class PlayerView {
                         listVideos.get(i).setSelect(false);
                     }
                 }
+                streamSelectAdapter.notifyDataSetChanged();
                 startPlay();
             }
         });
@@ -347,6 +355,8 @@ public class PlayerView {
      */
     private void showStreamSelectView() {
         this.streamSelectView.setVisibility(View.VISIBLE);
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_top_box")).gone();
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "rl_bottom_bar")).gone();
         this.streamSelectListView.setItemsCanFocus(true);
     }
 
@@ -403,14 +413,6 @@ public class PlayerView {
     }
 
     /**
-     * 设置是否可以双击
-     */
-    public void setDoubleTap(boolean flag) {
-        this.isDoubleTap = flag;
-    }
-
-
-    /**
      * 自动播放
      */
     public void autoPlay(String path) {
@@ -426,8 +428,10 @@ public class PlayerView {
             videoView.setVideoPath(currentUrl);
             videoView.seekTo(0);
         } else {
-            if (currentPosition <= 0) {
+            if (isSwitchStream) {
                 videoView.setVideoPath(currentUrl);
+                videoView.seekTo(currentPosition);
+                isSwitchStream = false;
             }
         }
         hideAll();
@@ -455,9 +459,14 @@ public class PlayerView {
      */
     public void switchStream(int index) {
         if (listVideos.size() > index) {
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_stream")).text(listVideos.get(index).getStream());
             currentUrl = listVideos.get(index).getUrl();
+            listVideos.get(index).setSelect(true);
             isLive();
-            currentPosition = index;
+            if (videoView.isPlaying()) {
+                pausePlay();
+            }
+            isSwitchStream = true;
         }
     }
 
@@ -548,6 +557,20 @@ public class PlayerView {
     }
 
     /**
+     * 设置是否禁止双击
+     */
+    public void setForbidDoulbeUp(boolean flag) {
+        this.isForbidDoulbeUp = flag;
+    }
+
+    /**
+     * 设置是否禁止双击
+     */
+    public void setHideBar(boolean flag) {
+        this.isHideBar = flag;
+    }
+
+    /**
      * 当前播放的是否是直播
      */
     public boolean isLive() {
@@ -569,6 +592,15 @@ public class PlayerView {
 
     }
 
+    /**
+     * 隐藏加载框
+     */
+    public void hideAllUI() {
+        if (query != null) {
+            hideAll();
+        }
+    }
+
 
     /**
      * 隐藏菜单栏
@@ -586,9 +618,12 @@ public class PlayerView {
      */
     public void operatorPanl() {
         isShowControlPanl = !isShowControlPanl;
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_stream_container")).gone();
         if (isShowControlPanl) {
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_top_box")).visible();
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "rl_bottom_bar")).visible();
+            if (!isHideBar) {
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_top_box")).visible();
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "rl_bottom_bar")).visible();
+            }
             if (isLive) {
                 query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_seekBar")).gone();
                 query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime")).gone();
@@ -600,16 +635,15 @@ public class PlayerView {
                 query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime")).visible();
                 query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_stream")).visible();
             }
-            if (!fullScreenOnly) {
+            if (fullScreenOnly || isForbidDoulbeUp) {
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen")).gone();
+            } else {
                 query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen")).visible();
             }
             onControlPanelVisibilityChangeListener.change(true);
             /**显示面板的时候再根据状态显示播放按钮*/
             if (status == PlayStateParams.STATE_PLAYING
-                    || status == PlayStateParams.STATE_PREPARED
-                    || status == PlayStateParams.STATE_IDLE
-                    || status == PlayStateParams.STATE_PAUSED
-                    || status == PlayStateParams.STATE_COMPLETED) {
+                    || status == PlayStateParams.STATE_PAUSED) {
                 if (isLive) {
                     query.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).gone();
                 } else {
@@ -670,9 +704,7 @@ public class PlayerView {
             if (isLive) {
                 videoView.seekTo(0);
             } else {
-                if (currentPosition > 0) {
-                    videoView.seekTo(currentPosition);
-                }
+                videoView.seekTo(currentPosition);
             }
             doPauseResume();
         }
@@ -899,12 +931,11 @@ public class PlayerView {
         status = newStatus;
         if (!isLive && newStatus == PlayStateParams.STATE_COMPLETED) {
             hideAll();
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay")).visible();
-
-        } else if (newStatus == PlayStateParams.STATE_PREPARING) {
+            showStatus("播放结束");
+        } else if (newStatus == PlayStateParams.STATE_PREPARING || newStatus == PlayStateParams.STATE_BUFFERING_START) {
             hideAll();
             query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_loading")).visible();
-        } else if (newStatus == PlayStateParams.STATE_PREPARED || newStatus == PlayStateParams.STATE_PLAYING || newStatus == PlayStateParams.STATE_PAUSED) {
+        } else if (newStatus == PlayStateParams.STATE_PREPARED || newStatus == PlayStateParams.STATE_BUFFERING_END || newStatus == PlayStateParams.STATE_PLAYING || newStatus == PlayStateParams.STATE_PAUSED) {
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -939,7 +970,6 @@ public class PlayerView {
                     showStatus(mActivity.getResources().getString(ResourceUtils.getResourceIdByName(mContext, "string", "small_problem")));
                 }
             }
-
         }
     }
 
@@ -1128,7 +1158,6 @@ public class PlayerView {
                 query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_play")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_icon_media_pause"));
                 query.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_icon_media_pause"));
             }
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_loading")).gone();
         } else {
             query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_play")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_arrow_white_24dp"));
             query.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_circle_outline_white_36dp"));
@@ -1395,7 +1424,7 @@ public class PlayerView {
         @Override
         public boolean onDoubleTap(MotionEvent e) {
             /**视频视窗双击事件*/
-            if (!forbidTouch && isDoubleTap) {
+            if (!forbidTouch && !fullScreenOnly && !isForbidDoulbeUp) {
                 toggleFullScreen();
             }
             return true;

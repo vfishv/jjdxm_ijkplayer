@@ -9,8 +9,12 @@ import android.widget.ImageView;
 
 import com.dou361.simijkplayer.PlayStateParams;
 import com.dou361.simijkplayer.PlayerView;
+import com.dou361.simijkplayer.bean.VideoijkBean;
 import com.dou361.simijkplayer.listener.OnShowThumbnailListener;
 import com.dou361.simijkplayer.utils.ResourceUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -38,6 +42,7 @@ public class HPlayerActivity extends AppCompatActivity {
     private PlayerView player;
     private String trumb;
     private Context mContext;
+    private List<VideoijkBean> list;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -45,9 +50,17 @@ public class HPlayerActivity extends AppCompatActivity {
         this.mContext = this;
         setContentView(R.layout.activity_h);
         trumb = "http://115.159.45.251/fbei-test/2016/0512/LA5254B58E265011C.jpg";
-//        String url = "rtmp://2026.liveplay.myqcloud.com/live/2026_6b0e62df231111e6b91fa4dcbef5e35a";
-//        String url = "http://2026.liveplay.myqcloud.com/2026_ff1d60c6092a11e6b91fa4dcbef5e35a.m3u8";
-        String url = "http://9890.vod.myqcloud.com/9890_9c1fa3e2aea011e59fc841df10c92278.f20.mp4";
+        list = new ArrayList<VideoijkBean>();
+        String url1 = "http://9890.vod.myqcloud.com/9890_e76c1172441511e69cbb37996d1ac475.f30.mp4";
+        String url2 = "http://9890.vod.myqcloud.com/9890_e76c1172441511e69cbb37996d1ac475.f20.mp4";
+        VideoijkBean m1 = new VideoijkBean();
+        m1.setStream("标清");
+        m1.setUrl(url1);
+        VideoijkBean m2 = new VideoijkBean();
+        m2.setStream("高清");
+        m2.setUrl(url2);
+        list.add(m1);
+        list.add(m2);
         player = new PlayerView(this);
         player.setTitle("什么");
         player.setScaleType(PlayStateParams.fitparent);
@@ -68,7 +81,8 @@ public class HPlayerActivity extends AppCompatActivity {
                 }
             }
         });
-        player.setPlaySource(url);
+        player.setPlaySource(list);
+        player.startPlay();
     }
 
     @Override

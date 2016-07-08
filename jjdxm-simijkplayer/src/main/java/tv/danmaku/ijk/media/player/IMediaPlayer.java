@@ -34,29 +34,49 @@ public interface IMediaPlayer {
     /*
      * Do not change these values without updating their counterparts in native
      */
+    /**未知信息*/
     int MEDIA_INFO_UNKNOWN = 1;
+    /**下一集*/
     int MEDIA_INFO_STARTED_AS_NEXT = 2;
+    /**渲染开始*/
     int MEDIA_INFO_VIDEO_RENDERING_START = 3;
+    /**轨道日志*/
     int MEDIA_INFO_VIDEO_TRACK_LAGGING = 700;
+    /**缓冲开始*/
     int MEDIA_INFO_BUFFERING_START = 701;
+    /**缓冲结束*/
     int MEDIA_INFO_BUFFERING_END = 702;
+    /**网络带宽*/
     int MEDIA_INFO_NETWORK_BANDWIDTH = 703;
+    /**错误交叉*/
     int MEDIA_INFO_BAD_INTERLEAVING = 800;
+    /**不可设置指定播放位置*/
     int MEDIA_INFO_NOT_SEEKABLE = 801;
+    /**元数据更新*/
     int MEDIA_INFO_METADATA_UPDATE = 802;
+    /**定时文本错误*/
     int MEDIA_INFO_TIMED_TEXT_ERROR = 900;
+    /**不支持的字幕*/
     int MEDIA_INFO_UNSUPPORTED_SUBTITLE = 901;
+    /**字幕超时*/
     int MEDIA_INFO_SUBTITLE_TIMED_OUT = 902;
-
+    /**视频旋转改变*/
     int MEDIA_INFO_VIDEO_ROTATION_CHANGED = 10001;
+    /**视频旋转开始*/
     int MEDIA_INFO_AUDIO_RENDERING_START = 10002;
-
+    /**未知错误*/
     int MEDIA_ERROR_UNKNOWN = 1;
+    /**服务器死了*/
     int MEDIA_ERROR_SERVER_DIED = 100;
+    /**无效的进行渐进式播放*/
     int MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK = 200;
+    /**IO错误*/
     int MEDIA_ERROR_IO = -1004;
+    /**变形*/
     int MEDIA_ERROR_MALFORMED = -1007;
+    /**不支持*/
     int MEDIA_ERROR_UNSUPPORTED = -1010;
+    /**超时*/
     int MEDIA_ERROR_TIMED_OUT = -110;
 
     void setDisplay(SurfaceHolder sh);
