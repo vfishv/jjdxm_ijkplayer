@@ -51,8 +51,8 @@ public class HPlayerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_h);
         trumb = "http://115.159.45.251/fbei-test/2016/0512/LA5254B58E265011C.jpg";
         list = new ArrayList<VideoijkBean>();
-        String url1 = "http://9890.vod.myqcloud.com/9890_c191df0c346811e69953678d749c349f.f30.mp4";
-        String url2 = "http://9890.vod.myqcloud.com/9890_c191df0c346811e69953678d749c349f.f20.mp4";
+        String url1 = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f20.mp4";
+        String url2 = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f30.mp4";
         VideoijkBean m1 = new VideoijkBean();
         m1.setStream("标清");
         m1.setUrl(url1);
