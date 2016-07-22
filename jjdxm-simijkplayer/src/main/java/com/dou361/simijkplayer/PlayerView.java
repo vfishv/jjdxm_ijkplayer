@@ -47,22 +47,22 @@ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 
 /**
  * ========================================
- * <p>
+ * <p/>
  * 版 权：dou361.com 版权所有 （C） 2015
- * <p>
+ * <p/>
  * 作 者：陈冠明
- * <p>
+ * <p/>
  * 个人网站：http://www.dou361.com
- * <p>
+ * <p/>
  * 版 本：1.0
- * <p>
+ * <p/>
  * 创建日期：2016/4/14
- * <p>
+ * <p/>
  * 描 述：
- * <p>
- * <p>
+ * <p/>
+ * <p/>
  * 修订历史：
- * <p>
+ * <p/>
  * ========================================
  */
 public class PlayerView {
@@ -139,6 +139,7 @@ public class PlayerView {
      */
     private boolean isGNetWork = true;
     private final ImageView iv_trumb;
+    private final ImageView iv_rotation;
     private final RelativeLayout rl_bottom_bar;
     private final SeekBar seekBar;
     private final AudioManager audioManager;
@@ -233,6 +234,22 @@ public class PlayerView {
         return this;
     }
 
+    private int rotation = 0;
+
+    /**
+     * 旋转角度
+     */
+    public PlayerView setPlayerRotation() {
+        rotation += 90;
+        if (rotation >= 180) {
+            rotation = -90;
+        }
+        if (videoView != null) {
+            videoView.setPlayerRotation(rotation);
+        }
+        return this;
+    }
+
     public PlayerView(Activity activity) {
         this.mActivity = activity;
         this.mContext = activity;
@@ -281,6 +298,7 @@ public class PlayerView {
         });
 
         iv_trumb = (ImageView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "iv_trumb"));
+        iv_rotation = (ImageView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "ijk_iv_rotation"));
         rl_bottom_bar = (RelativeLayout) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "rl_bottom_bar"));
         seekBar = (SeekBar) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_seekBar"));
         seekBar.setMax(1000);
@@ -289,6 +307,7 @@ public class PlayerView {
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_stream")).clicked(onClickListener);
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).clicked(onClickListener);
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie_icon")).clicked(onClickListener);
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "ijk_iv_rotation")).clicked(onClickListener);
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen")).clicked(onClickListener);
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_finish")).clicked(onClickListener);
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay_icon")).clicked(onClickListener);
@@ -373,57 +392,62 @@ public class PlayerView {
      * 包括视频清晰度列表
      * 对应地址列表
      */
-    public void setPlaySource(List<VideoijkBean> list) {
+    public PlayerView setPlaySource(List<VideoijkBean> list) {
         listVideos.clear();
         if (list != null && list.size() > 0) {
             listVideos.addAll(list);
             switchStream(0);
         }
+        return this;
     }
 
     /**
      * 设置播放地址
      * 单个视频地址时
      */
-    public void setPlaySource(VideoijkBean videoijkBean) {
+    public PlayerView setPlaySource(VideoijkBean videoijkBean) {
         listVideos.clear();
         if (videoijkBean != null) {
             listVideos.add(videoijkBean);
             switchStream(0);
         }
+        return this;
     }
 
     /**
      * 设置播放地址
      * 单个视频地址时
      */
-    public void setPlaySource(String stream, String url) {
+    public PlayerView setPlaySource(String stream, String url) {
         VideoijkBean mVideoijkBean = new VideoijkBean();
         mVideoijkBean.setStream(stream);
         mVideoijkBean.setUrl(url);
         setPlaySource(mVideoijkBean);
+        return this;
     }
 
     /**
      * 设置播放地址
      * 单个视频地址时
      */
-    public void setPlaySource(String url) {
+    public PlayerView setPlaySource(String url) {
         setPlaySource("标清", url);
+        return this;
     }
 
     /**
      * 自动播放
      */
-    public void autoPlay(String path) {
+    public PlayerView autoPlay(String path) {
         setPlaySource(path);
         startPlay();
+        return this;
     }
 
     /**
      * 开始播放
      */
-    public void startPlay() {
+    public PlayerView startPlay() {
         if (isLive) {
             videoView.setVideoPath(currentUrl);
             videoView.seekTo(0);
@@ -445,19 +469,21 @@ public class PlayerView {
                 showStatus(mActivity.getResources().getString(ResourceUtils.getResourceIdByName(mContext, "string", "not_support")));
             }
         }
+        return this;
     }
 
     /**
      * 设置视频名称
      */
-    public void setTitle(String title) {
+    public PlayerView setTitle(String title) {
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_title")).text(title);
+        return this;
     }
 
     /**
      * 选择要播放的流
      */
-    public void switchStream(int index) {
+    public PlayerView switchStream(int index) {
         if (listVideos.size() > index) {
             query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_stream")).text(listVideos.get(index).getStream());
             currentUrl = listVideos.get(index).getUrl();
@@ -468,28 +494,31 @@ public class PlayerView {
             }
             isSwitchStream = true;
         }
+        return this;
     }
 
     /**
      * 暂停播放
      */
-    public void pausePlay() {
+    public PlayerView pausePlay() {
         statusChange(PlayStateParams.STATE_PAUSED);
         if (!isLive) {
             currentPosition = videoView.getCurrentPosition();
         }
         videoView.pause();
+        return this;
     }
 
     /**
      * 暂停播放
      */
-    public void stopPlay() {
+    public PlayerView stopPlay() {
         videoView.stopPlayback();
         closePlay = true;
         if (mHandler != null) {
             mHandler.removeMessages(MESSAGE_RESTART_PLAY);
         }
+        return this;
     }
 
     /**
@@ -522,8 +551,9 @@ public class PlayerView {
      * @param isGNetWork true为进行2/3/4/5G网络类型提示
      *                   false 不进行网络类型提示
      */
-    public void setNetWorkTypeTie(boolean isGNetWork) {
+    public PlayerView setNetWorkTypeTie(boolean isGNetWork) {
         this.isGNetWork = isGNetWork;
+        return this;
     }
 
     /**
@@ -532,21 +562,22 @@ public class PlayerView {
      * @param isCharge    true为收费 false为免费即不做限制
      * @param maxPlaytime 最大能播放时长
      */
-    public void setChargeTie(boolean isCharge, int maxPlaytime) {
-
+    public PlayerView setChargeTie(boolean isCharge, int maxPlaytime) {
+        return this;
     }
 
     /**
      * 设置播放区域拉伸类型
      */
-    public void setScaleType(int showType) {
+    public PlayerView setScaleType(int showType) {
         videoView.setAspectRatio(showType);
+        return this;
     }
 
     /**
      * 是否仅仅为全屏
      */
-    public void setFullScreenOnly(boolean isFull) {
+    public PlayerView setFullScreenOnly(boolean isFull) {
         this.fullScreenOnly = isFull;
         tryFullScreen(fullScreenOnly);
         if (fullScreenOnly) {
@@ -554,20 +585,23 @@ public class PlayerView {
         } else {
             mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
         }
+        return this;
     }
 
     /**
      * 设置是否禁止双击
      */
-    public void setForbidDoulbeUp(boolean flag) {
+    public PlayerView setForbidDoulbeUp(boolean flag) {
         this.isForbidDoulbeUp = flag;
+        return this;
     }
 
     /**
      * 设置是否禁止双击
      */
-    public void setHideBar(boolean flag) {
+    public PlayerView setHideBar(boolean flag) {
         this.isHideBar = flag;
+        return this;
     }
 
     /**
@@ -581,42 +615,52 @@ public class PlayerView {
     /**
      * 是否禁止触摸
      */
-    public void forbidTouch(boolean forbidTouch) {
+    public PlayerView forbidTouch(boolean forbidTouch) {
         this.forbidTouch = forbidTouch;
+        return this;
     }
 
     /**
      * 是否显示拓展栏
      */
-    public void showExpandBar(boolean isShow, BarLocation location) {
-
+    public PlayerView showExpandBar(boolean isShow, BarLocation location) {
+        return this;
     }
 
     /**
      * 隐藏加载框
      */
-    public void hideAllUI() {
+    public PlayerView hideAllUI() {
         if (query != null) {
             hideAll();
         }
+        return this;
+    }
+
+    /**
+     * 获取旋转view
+     */
+    public ImageView getRationView() {
+        return iv_rotation;
     }
 
 
     /**
      * 隐藏菜单栏
      */
-    public void hideMenu(boolean isHide) {
+    public PlayerView hideMenu(boolean isHide) {
         if (isHide) {
             query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_menu")).gone();
         } else {
             query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_menu")).visible();
         }
+        return this;
     }
 
     /**
      * 显示操作面板
      */
-    public void operatorPanl() {
+    public PlayerView operatorPanl() {
         isShowControlPanl = !isShowControlPanl;
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_stream_container")).gone();
         if (isShowControlPanl) {
@@ -643,6 +687,8 @@ public class PlayerView {
             onControlPanelVisibilityChangeListener.change(true);
             /**显示面板的时候再根据状态显示播放按钮*/
             if (status == PlayStateParams.STATE_PLAYING
+                    || status == PlayStateParams.STATE_PREPARED
+                    || status == PlayStateParams.STATE_BUFFERING_END
                     || status == PlayStateParams.STATE_PAUSED) {
                 if (isLive) {
                     query.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).gone();
@@ -663,16 +709,17 @@ public class PlayerView {
             onControlPanelVisibilityChangeListener.change(false);
             mAutoPlayRunnable.stop();
         }
-
+        return this;
     }
 
-    public void toggleFullScreen() {
+    public PlayerView toggleFullScreen() {
         if (getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
             mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         } else {
             mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
         updateFullScreenButton();
+        return this;
     }
 
 
@@ -685,10 +732,11 @@ public class PlayerView {
      * }
      * }
      */
-    public void onPause() {
+    public PlayerView onPause() {
         if (status == PlayStateParams.STATE_PLAYING) {
             pausePlay();
         }
+        return this;
     }
 
     /**
@@ -699,7 +747,7 @@ public class PlayerView {
      * }
      * }
      */
-    public void onResume() {
+    public PlayerView onResume() {
         if (status == PlayStateParams.STATE_PLAYING) {
             if (isLive) {
                 videoView.seekTo(0);
@@ -708,6 +756,7 @@ public class PlayerView {
             }
             doPauseResume();
         }
+        return this;
     }
 
     /**
@@ -718,11 +767,12 @@ public class PlayerView {
      * }
      * }
      */
-    public void onDestroy() {
+    public PlayerView onDestroy() {
         orientationEventListener.disable();
         mHandler.removeMessages(MESSAGE_RESTART_PLAY);
         mHandler.removeMessages(MESSAGE_SEEK_NEW_POSITION);
         videoView.stopPlayback();
+        return this;
     }
 
     /**
@@ -733,9 +783,10 @@ public class PlayerView {
      * }
      * }
      */
-    public void onConfigurationChanged(final Configuration newConfig) {
+    public PlayerView onConfigurationChanged(final Configuration newConfig) {
         portrait = newConfig.orientation == Configuration.ORIENTATION_PORTRAIT;
         doOnConfigurationChanged(portrait);
+        return this;
     }
 
     /**
@@ -839,6 +890,8 @@ public class PlayerView {
                 if (!isLive) {
                     showStreamSelectView();
                 }
+            } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "ijk_iv_rotation")) {
+                setPlayerRotation();
             } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen")) {
                 toggleFullScreen();
             } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_play") || v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")) {
@@ -1156,11 +1209,11 @@ public class PlayerView {
                 query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_play")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_stop_white_24dp"));
             } else {
                 query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_play")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_icon_media_pause"));
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_icon_media_pause"));
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_center_pause"));
             }
         } else {
             query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_play")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_arrow_white_24dp"));
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_circle_outline_white_36dp"));
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_center_play"));
         }
     }
 
@@ -1436,6 +1489,7 @@ public class PlayerView {
             return super.onDown(e);
 
         }
+
 
         /**
          * 滑动

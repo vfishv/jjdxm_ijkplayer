@@ -123,7 +123,7 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:layout_marginTop="8dp"
-        android:src="@drawable/simple_player_circle_outline_white_36dp"/>
+        android:src="@drawable/simple_player_center_play"/>
 
     <!--分辨率选择-->
     <LinearLayout

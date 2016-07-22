@@ -103,8 +103,14 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     private boolean usingOpenSLES = false;
     private String pixelFormat = "";//Auto Select=,RGB 565=fcc-rv16,RGB 888X=fcc-rv32,YV12=fcc-yv12,默认为RGB 888X
     private boolean enableBackgroundPlay = false;
-    private boolean enableSurfaceView = true;
-    private boolean enableTextureView = false;
+    /**
+     * 设置是否可用
+     */
+    private boolean enableSurfaceView = false;
+    /**
+     * 设置是否可用
+     */
+    private boolean enableTextureView = true;
     private boolean enableNoView = false;
 
     public IjkVideoView(Context context) {
@@ -182,6 +188,13 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
 
         mRenderView.addRenderCallback(mSHCallback);
         mRenderView.setVideoRotation(mVideoRotationDegree);
+    }
+
+    public void setPlayerRotation(int rotation) {
+        mVideoRotationDegree = rotation;
+        if (mRenderView != null) {
+            mRenderView.setVideoRotation(mVideoRotationDegree);
+        }
     }
 
     public void setRender(int render) {
