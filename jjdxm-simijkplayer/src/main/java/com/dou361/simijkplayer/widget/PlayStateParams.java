@@ -1,4 +1,4 @@
-package com.dou361.simijkplayer;
+package com.dou361.simijkplayer.widget;
 
 /**
  * ========================================

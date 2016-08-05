@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.dou361.simijkplayer;
+package com.dou361.simijkplayer.widget;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
@@ -36,6 +36,14 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.MediaController;
 
+import com.dou361.simijkplayer.widget.FileMediaDataSource;
+import com.dou361.simijkplayer.widget.IMediaController;
+import com.dou361.simijkplayer.widget.IRenderView;
+import com.dou361.simijkplayer.widget.PlayStateParams;
+import com.dou361.simijkplayer.widget.SurfaceRenderView;
+import com.dou361.simijkplayer.widget.TextureRenderView;
+
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +54,7 @@ import tv.danmaku.ijk.media.player.AndroidMediaPlayer;
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 import tv.danmaku.ijk.media.player.TextureMediaPlayer;
+import tv.danmaku.ijk.media.player.misc.IMediaDataSource;
 
 public class IjkVideoView extends FrameLayout implements MediaController.MediaPlayerControl {
     private String TAG = "IjkVideoView";
@@ -103,6 +112,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
      * 使用编解码是否自转
      */
     private boolean usingMediaCodecAutoRotate = false;
+    private boolean usingMediaCodecResolutionChange = false;
     private boolean usingOpenSLES = false;
     /**
      * Auto Select=,RGB 565=fcc-rv16,RGB 888X=fcc-rv32,YV12=fcc-yv12,默认为RGB 888X
@@ -301,6 +311,11 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                         } else {
                             ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-auto-rotate", 0);
                         }
+//                        if (usingMediaCodecResolutionChange) {
+//                            ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-handle-resolution-change", 1);
+//                        } else {
+//                            ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec-handle-resolution-change", 0);
+//                        }
                     } else {
                         ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 0);
                     }
@@ -318,11 +333,10 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                     }
                     ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 1);
                     ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 0);
-
                     ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "http-detect-range-support", 0);
+
                     ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "timeout", 10000000);
                     ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "reconnect", 1);
-
                     ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_CODEC, "skip_loop_filter", 48);
                 }
                 mMediaPlayer = ijkMediaPlayer;
@@ -351,7 +365,13 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             /**视频其他信息监听*/
             mMediaPlayer.setOnInfoListener(mInfoListener);
             mCurrentBufferPercentage = 0;
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            String scheme = mUri.getScheme();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                    usingAndroidPlayer &&
+                    (TextUtils.isEmpty(scheme) || scheme.equalsIgnoreCase("file"))) {
+                IMediaDataSource dataSource = new FileMediaDataSource(new File(mUri.toString()));
+                mMediaPlayer.setDataSource(dataSource);
+            } else if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
                 mMediaPlayer.setDataSource(mAppContext, mUri, mHeaders);
             } else {
                 mMediaPlayer.setDataSource(mUri.toString());
@@ -980,6 +1000,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         }
     }
 
+    /**视频旋转*/
     public void setAspectRatio(int aspectRatio) {
         for (int i = 0; i < s_allAspectRatio.length; i++) {
             if (s_allAspectRatio[i] == aspectRatio) {

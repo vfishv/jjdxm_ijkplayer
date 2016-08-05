@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.dou361.simijkplayer;
+package com.dou361.simijkplayer.widget;
 
 import android.view.View;
 

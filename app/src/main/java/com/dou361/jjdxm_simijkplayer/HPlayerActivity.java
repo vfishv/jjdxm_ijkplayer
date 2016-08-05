@@ -3,15 +3,17 @@ package com.dou361.jjdxm_simijkplayer;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
 
-import com.dou361.simijkplayer.PlayStateParams;
-import com.dou361.simijkplayer.PlayerView;
+import com.dou361.jjdxm_simijkplayer.utlis.MediaUtils;
 import com.dou361.simijkplayer.bean.VideoijkBean;
 import com.dou361.simijkplayer.listener.OnShowThumbnailListener;
 import com.dou361.simijkplayer.utils.ResourceUtils;
+import com.dou361.simijkplayer.widget.PlayStateParams;
+import com.dou361.simijkplayer.widget.PlayerView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,12 +45,17 @@ public class HPlayerActivity extends AppCompatActivity {
     private String trumb;
     private Context mContext;
     private List<VideoijkBean> list;
+    private PowerManager.WakeLock wakeLock;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.mContext = this;
         setContentView(R.layout.activity_h);
+        /**常亮*/
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "liveTAG");
+        wakeLock.acquire();
         trumb = "http://115.159.45.251/fbei-test/2016/0512/LA5254B58E265011C.jpg";
         list = new ArrayList<VideoijkBean>();
         String url1 = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f20.mp4";
@@ -86,6 +93,7 @@ public class HPlayerActivity extends AppCompatActivity {
         if (player != null) {
             player.onPause();
         }
+        MediaUtils.muteAudioFocus(mContext, true);
     }
 
     @Override
@@ -93,6 +101,10 @@ public class HPlayerActivity extends AppCompatActivity {
         super.onResume();
         if (player != null) {
             player.onResume();
+        }
+        MediaUtils.muteAudioFocus(mContext, false);
+        if (wakeLock != null) {
+            wakeLock.acquire();
         }
     }
 
@@ -118,6 +130,9 @@ public class HPlayerActivity extends AppCompatActivity {
             return;
         }
         super.onBackPressed();
+        if (wakeLock != null) {
+            wakeLock.release();
+        }
     }
 
 }

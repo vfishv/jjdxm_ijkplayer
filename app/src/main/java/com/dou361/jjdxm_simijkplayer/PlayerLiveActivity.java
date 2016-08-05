@@ -4,33 +4,35 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.widget.ImageView;
 
-import com.dou361.simijkplayer.PlayStateParams;
-import com.dou361.simijkplayer.PlayerView;
+import com.dou361.jjdxm_simijkplayer.utlis.MediaUtils;
 import com.dou361.simijkplayer.listener.OnShowThumbnailListener;
 import com.dou361.simijkplayer.utils.ResourceUtils;
+import com.dou361.simijkplayer.widget.PlayStateParams;
+import com.dou361.simijkplayer.widget.PlayerView;
 
 
 /**
  * ========================================
- * <p/>
+ * <p>
  * 版 权：深圳市晶网科技控股有限公司 版权所有 （C） 2015
- * <p/>
+ * <p>
  * 作 者：陈冠明
- * <p/>
+ * <p>
  * 个人网站：http://www.dou361.com
- * <p/>
+ * <p>
  * 版 本：1.0
- * <p/>
+ * <p>
  * 创建日期：2015/11/18 9:40
- * <p/>
+ * <p>
  * 描 述：测试临时使用
- * <p/>
- * <p/>
+ * <p>
+ * <p>
  * 修订历史：
- * <p/>
+ * <p>
  * ========================================
  */
 public class PlayerLiveActivity extends Activity {
@@ -38,12 +40,20 @@ public class PlayerLiveActivity extends Activity {
     private PlayerView player;
     private String trumb;
     private Context mContext;
+    private PowerManager.WakeLock wakeLock;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.mContext = this;
         setContentView(R.layout.simple_player_view_player);
+
+        /**常亮*/
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "liveTAG");
+        wakeLock.acquire();
+
+
         trumb = "http://115.159.45.251/fbei-test/2016/0512/LA5254B58E265011C.jpg";
 //        String url = "http://9890.vod.myqcloud.com/9890_9c1fa3e2aea011e59fc841df10c92278.f20.mp4";
         String url = "rtmp://stream.nodemedia.cn/live/demo";
@@ -70,6 +80,8 @@ public class PlayerLiveActivity extends Activity {
         });
         player.setPlaySource(url);
         player.startPlay();
+
+
     }
 
     @Override
@@ -78,6 +90,7 @@ public class PlayerLiveActivity extends Activity {
         if (player != null) {
             player.onPause();
         }
+        MediaUtils.muteAudioFocus(mContext, true);
     }
 
     @Override
@@ -85,6 +98,10 @@ public class PlayerLiveActivity extends Activity {
         super.onResume();
         if (player != null) {
             player.onResume();
+        }
+        MediaUtils.muteAudioFocus(mContext, false);
+        if (wakeLock != null) {
+            wakeLock.acquire();
         }
     }
 
@@ -110,6 +127,9 @@ public class PlayerLiveActivity extends Activity {
             return;
         }
         super.onBackPressed();
+        if (wakeLock != null) {
+            wakeLock.release();
+        }
     }
 
 }

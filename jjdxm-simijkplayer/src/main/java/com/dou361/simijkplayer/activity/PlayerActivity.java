@@ -7,8 +7,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.widget.ImageView;
 
-import com.dou361.simijkplayer.PlayStateParams;
-import com.dou361.simijkplayer.PlayerView;
+import com.dou361.simijkplayer.widget.PlayStateParams;
+import com.dou361.simijkplayer.widget.PlayerView;
 import com.dou361.simijkplayer.listener.OnShowThumbnailListener;
 import com.dou361.simijkplayer.utils.ResourceUtils;
 
@@ -45,8 +45,8 @@ public class PlayerActivity extends Activity {
         this.mContext = this;
         setContentView(ResourceUtils.getResourceIdByName(mContext, "layout", "simple_player_view_player"));
         trumb = "http://115.159.45.251/fbei-test/2016/0512/LA5254B58E265011C.jpg";
-//        String url = "http://9890.vod.myqcloud.com/9890_9c1fa3e2aea011e59fc841df10c92278.f20.mp4";
-        String url = "rtmp://stream.nodemedia.cn/live/demo";
+        String url = "http://9890.vod.myqcloud.com/9890_9c1fa3e2aea011e59fc841df10c92278.f20.mp4";
+//        String url = "rtmp://stream.nodemedia.cn/live/demo";
         player = new PlayerView(this);
         player.setTitle("什么");
         player.setScaleType(PlayStateParams.fitparent);

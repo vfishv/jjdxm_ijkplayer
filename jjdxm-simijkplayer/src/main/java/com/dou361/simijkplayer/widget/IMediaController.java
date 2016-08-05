@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2014 Zhang Rui <bbcallen@gmail.com>
+ * Copyright (C) 2015 Zhang Rui <bbcallen@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,28 @@
  * limitations under the License.
  */
 
-package tv.danmaku.ijk.media.player;
+package com.dou361.simijkplayer.widget;
 
-public class MediaInfo {
-    public String mMediaPlayerName;
+import android.view.View;
+import android.widget.MediaController;
 
-    public String mVideoDecoder;
-    public String mVideoDecoderImpl;
+public interface IMediaController {
+    void hide();
 
-    public String mAudioDecoder;
-    public String mAudioDecoderImpl;
+    boolean isShowing();
 
-    public IjkMediaMeta mMeta;
+    void setAnchorView(View view);
+
+    void setEnabled(boolean enabled);
+
+    void setMediaPlayer(MediaController.MediaPlayerControl player);
+
+    void show(int timeout);
+
+    void show();
+
+    //----------
+    // Extends
+    //----------
+    void showOnce(View view);
 }
