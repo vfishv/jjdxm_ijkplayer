@@ -28,7 +28,7 @@ import com.dou361.simijkplayer.widget.PlayerView;
  * <p>
  * 创建日期：2015/11/18 9:40
  * <p>
- * 描 述：测试临时使用
+ * 描 述：直播全屏竖屏场景
  * <p>
  * <p>
  * 修订历史：
