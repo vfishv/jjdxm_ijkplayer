@@ -1,9 +1,9 @@
-# [jjdxm_simijkplayer][project] #
+# [jjdxm_ijkplayer][project] #
 ## Introduction ##
 
 ## Features ##
 
-1. base on simijkplayer,support RTMP , HLS (http & https) , MP4,M4A etc.
+1. base on ijkplayer,support RTMP , HLS (http & https) , MP4,M4A etc.
 2. gestures for volume control
 3. gestures for brightness control
 4. gestures for forward or backward
@@ -19,8 +19,8 @@
 
 ## Screenshots ##
 
-<img src="https://raw.githubusercontent.com/jjdxmashl/jjdxm_simijkplayer/master/screenshots/icon01.png" width="300"> 
-<img src="https://raw.githubusercontent.com/jjdxmashl/jjdxm_simijkplayer/master/screenshots/icon02.png" width="300"> 
+<img src="https://raw.githubusercontent.com/jjdxmashl/jjdxm_ijkplayer/master/screenshots/icon01.png" width="300"> 
+<img src="https://raw.githubusercontent.com/jjdxmashl/jjdxm_ijkplayer/master/screenshots/icon02.png" width="300"> 
  
 ## Download ##
 
@@ -33,17 +33,17 @@
 Download or grab via Maven:
 
 	<dependency>
-	  <groupId>com.dou361.simijkplayer</groupId>
-	  <artifactId>jjdxm-simijkplayer</artifactId>
+	  <groupId>com.dou361.ijkplayer</groupId>
+	  <artifactId>jjdxm-ijkplayer</artifactId>
 	  <version>x.x.x</version>
 	</dependency>
 
 or Gradle:
 
-	compile 'com.dou361.simijkplayer:jjdxm-simijkplayer:x.x.x'
+	compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:x.x.x'
 
 
-jjdxm-simijkplayer requires at minimum Java 15 or Android 4.0.
+jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
 
 ## Get Started ##
 
@@ -100,10 +100,10 @@ If you find any bug when using project, please report [here][issues]. Thanks for
 
 [web]:http://www.dou361.com
 [github]:https://github.com/jjdxmashl/
-[project]:https://github.com/jjdxmashl/jjdxm_simijkplayer/
-[issues]:https://github.com/jjdxmashl/jjdxm_simijkplayer/issues/new
-[downapk]:https://raw.githubusercontent.com/jjdxmashl/jjdxm_simijkplayer/master/apk/app-debug.apk
-[lastaar]:https://raw.githubusercontent.com/jjdxmashl/jjdxm_simijkplayer/master/release/jjdxm-simijkplayer-1.0.0.aar
-[lastjar]:https://raw.githubusercontent.com/jjdxmashl/jjdxm_simijkplayer/master/release/jjdxm-simijkplayer-1.0.0.jar
-[icon01]:https://raw.githubusercontent.com/jjdxmashl/jjdxm_simijkplayer/master/screenshots/icon01.png
-[icon02]:https://raw.githubusercontent.com/jjdxmashl/jjdxm_simijkplayer/master/screenshots/icon02.png
+[project]:https://github.com/jjdxmashl/jjdxm_ijkplayer/
+[issues]:https://github.com/jjdxmashl/jjdxm_ijkplayer/issues/new
+[downapk]:https://raw.githubusercontent.com/jjdxmashl/jjdxm_ijkplayer/master/apk/app-debug.apk
+[lastaar]:https://raw.githubusercontent.com/jjdxmashl/jjdxm_ijkplayer/master/release/jjdxm-ijkplayer-1.0.0.aar
+[lastjar]:https://raw.githubusercontent.com/jjdxmashl/jjdxm_ijkplayer/master/release/jjdxm-ijkplayer-1.0.0.jar
+[icon01]:https://raw.githubusercontent.com/jjdxmashl/jjdxm_ijkplayer/master/screenshots/icon01.png
+[icon02]:https://raw.githubusercontent.com/jjdxmashl/jjdxm_ijkplayer/master/screenshots/icon02.png

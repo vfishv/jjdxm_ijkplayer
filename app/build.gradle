@@ -25,7 +25,7 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
-        applicationId "com.dou361.jjdxm_simijkplayer"
+        applicationId "com.dou361.jjdxm_ijkplayer"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode rootProject.ext.versionCode
@@ -51,5 +51,5 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
     compile rootProject.ext.jjdxm_v7
-    compile project(':jjdxm-simijkplayer')
+    compile project(':jjdxm-ijkplayer')
 }
