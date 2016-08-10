@@ -26,6 +26,7 @@
         <activity
             android:name="com.dou361.jjdxm_ijkplayer.HPlayerActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme"/>
 
         <activity
