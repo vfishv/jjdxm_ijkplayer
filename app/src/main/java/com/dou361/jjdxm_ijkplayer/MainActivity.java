@@ -4,39 +4,43 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.Button;
 
-import com.dou361.ijkplayer.activity.PlayerActivity;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-
-    private Button btn_h;
-    private Button btn_v;
-    private Button btn_live;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        btn_h = (Button) findViewById(R.id.btn_h);
-        btn_v = (Button) findViewById(R.id.btn_v);
-        btn_live = (Button) findViewById(R.id.btn_live);
-        btn_h.setOnClickListener(this);
-        btn_v.setOnClickListener(this);
-        btn_live.setOnClickListener(this);
+        ButterKnife.bind(this);
     }
 
-    @Override
-    public void onClick(View v) {
-        if (v.getId() == R.id.btn_h) {
-            Intent intent = new Intent(this, HPlayerActivity.class);
-            startActivity(intent);
-        } else if (v.getId() == R.id.btn_v) {
-            Intent intent = new Intent(this, PlayerActivity.class);
-            startActivity(intent);
-        } else if (v.getId() == R.id.btn_live) {
-            Intent intent = new Intent(this, PlayerLiveActivity.class);
-            startActivity(intent);
+    @OnClick({R.id.btn_h, R.id.btn_v, R.id.btn_live, R.id.btn_origin})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.btn_h:
+                /**半屏播放器*/
+                startActivity(HPlayerActivity.class);
+                break;
+            case R.id.btn_v:
+                /**竖屏播放器*/
+                startActivity(PlayerActivity.class);
+                break;
+            case R.id.btn_live:
+                /**竖屏直播播放器*/
+                startActivity(PlayerLiveActivity.class);
+                break;
+            case R.id.btn_origin:
+                /**ijkplayer原生的播放器*/
+                startActivity(OriginPlayerActivity.class);
+                break;
         }
+    }
+
+    private void startActivity(Class<?> cls) {
+        Intent intent = new Intent(MainActivity.this, cls);
+        startActivity(intent);
     }
 }

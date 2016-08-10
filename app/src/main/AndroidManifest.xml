@@ -29,9 +29,15 @@
             android:theme="@style/AppTheme"/>
 
         <activity
-            android:name="com.dou361.ijkplayer.activity.PlayerActivity"
+            android:name="com.dou361.jjdxm_ijkplayer.OriginPlayerActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/AppTheme"/>
+
+        <activity
+            android:name="com.dou361.jjdxm_ijkplayer.PlayerActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@style/AppTheme"/>
+
     </application>
 
 </manifest>

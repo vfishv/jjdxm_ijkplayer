@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -15,11 +16,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ImageView;
@@ -27,6 +30,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
 import com.dou361.ijkplayer.adapter.StreamSelectAdapter;
 import com.dou361.ijkplayer.bean.VideoijkBean;
@@ -63,7 +67,6 @@ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
  */
 public class PlayerView {
 
-
     private static final String TAG = PlayerView.class.getSimpleName();
     /**
      * 依附的容器Activity
@@ -73,7 +76,7 @@ public class PlayerView {
      * 全局上下文
      */
     private final Context mContext;
-    private final LayoutQuery layoutQuery;
+    private final Query query;
     private final IjkVideoView videoView;
     private final LinearLayout streamSelectView;
     private final ListView streamSelectListView;
@@ -257,7 +260,7 @@ public class PlayerView {
             Log.e(TAG, "loadLibraries error", e);
         }
         screenWidthPixels = activity.getResources().getDisplayMetrics().widthPixels;
-        layoutQuery = new LayoutQuery(activity);
+        query = new Query(activity);
 
         videoView = (IjkVideoView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "video_view"));
         videoView.setOnInfoListener(new IMediaPlayer.OnInfoListener() {
@@ -299,14 +302,14 @@ public class PlayerView {
         seekBar = (SeekBar) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_seekBar"));
         seekBar.setMax(1000);
         seekBar.setOnSeekBarChangeListener(mSeekListener);
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_play")).clicked(onClickListener);
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_stream")).clicked(onClickListener);
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).clicked(onClickListener);
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie_icon")).clicked(onClickListener);
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "ijk_iv_rotation")).clicked(onClickListener);
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen")).clicked(onClickListener);
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_finish")).clicked(onClickListener);
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay_icon")).clicked(onClickListener);
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_play")).clicked(onClickListener);
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_stream")).clicked(onClickListener);
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).clicked(onClickListener);
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie_icon")).clicked(onClickListener);
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "ijk_iv_rotation")).clicked(onClickListener);
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen")).clicked(onClickListener);
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_finish")).clicked(onClickListener);
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay_icon")).clicked(onClickListener);
 
 
         audioManager = (AudioManager) activity.getSystemService(Context.AUDIO_SERVICE);
@@ -360,7 +363,7 @@ public class PlayerView {
         if (!playerSupport) {
             showStatus(mActivity.getResources().getString(ResourceUtils.getResourceIdByName(mContext, "string", "not_support")));
         } else {
-            layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "ll_bg")).visible();
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "ll_bg")).visible();
         }
     }
 
@@ -370,8 +373,8 @@ public class PlayerView {
      */
     private void showStreamSelectView() {
         this.streamSelectView.setVisibility(View.VISIBLE);
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_top_box")).gone();
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "rl_bottom_bar")).gone();
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_top_box")).gone();
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "rl_bottom_bar")).gone();
         this.streamSelectListView.setItemsCanFocus(true);
     }
 
@@ -456,10 +459,10 @@ public class PlayerView {
         }
         hideAll();
         if (isGNetWork && (getNetworkType() == 4 || getNetworkType() == 5 || getNetworkType() == 6)) {
-            layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie")).visible();
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie")).visible();
         } else {
             if (playerSupport) {
-                layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_loading")).visible();
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_loading")).visible();
                 videoView.start();
             } else {
                 showStatus(mActivity.getResources().getString(ResourceUtils.getResourceIdByName(mContext, "string", "not_support")));
@@ -472,7 +475,7 @@ public class PlayerView {
      * 设置视频名称
      */
     public PlayerView setTitle(String title) {
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_title")).text(title);
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_title")).text(title);
         return this;
     }
 
@@ -481,7 +484,7 @@ public class PlayerView {
      */
     public PlayerView switchStream(int index) {
         if (listVideos.size() > index) {
-            layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_stream")).text(listVideos.get(index).getStream());
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_stream")).text(listVideos.get(index).getStream());
             currentUrl = listVideos.get(index).getUrl();
             listVideos.get(index).setSelect(true);
             isLive();
@@ -627,7 +630,7 @@ public class PlayerView {
      * 隐藏加载框
      */
     public PlayerView hideAllUI() {
-        if (layoutQuery != null) {
+        if (query != null) {
             hideAll();
         }
         return this;
@@ -646,9 +649,9 @@ public class PlayerView {
      */
     public PlayerView hideMenu(boolean isHide) {
         if (isHide) {
-            layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_menu")).gone();
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_menu")).gone();
         } else {
-            layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_menu")).visible();
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_menu")).visible();
         }
         return this;
     }
@@ -658,27 +661,27 @@ public class PlayerView {
      */
     public PlayerView operatorPanl() {
         isShowControlPanl = !isShowControlPanl;
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_stream_container")).gone();
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_stream_container")).gone();
         if (isShowControlPanl) {
             if (!isHideBar) {
-                layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_top_box")).visible();
-                layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "rl_bottom_bar")).visible();
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_top_box")).visible();
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "rl_bottom_bar")).visible();
             }
             if (isLive) {
-                layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_seekBar")).gone();
-                layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime")).gone();
-                layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime")).gone();
-                layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_stream")).gone();
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_seekBar")).gone();
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime")).gone();
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime")).gone();
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_stream")).gone();
             } else {
-                layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_seekBar")).visible();
-                layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime")).visible();
-                layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime")).visible();
-                layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_stream")).visible();
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_seekBar")).visible();
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime")).visible();
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime")).visible();
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_stream")).visible();
             }
             if (fullScreenOnly || isForbidDoulbeUp) {
-                layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen")).gone();
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen")).gone();
             } else {
-                layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen")).visible();
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen")).visible();
             }
             onControlPanelVisibilityChangeListener.change(true);
             /**显示面板的时候再根据状态显示播放按钮*/
@@ -687,20 +690,20 @@ public class PlayerView {
                     || status == PlayStateParams.STATE_BUFFERING_END
                     || status == PlayStateParams.STATE_PAUSED) {
                 if (isLive) {
-                    layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).gone();
+                    query.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).gone();
                 } else {
-                    layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).visible();
+                    query.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).visible();
                 }
             } else {
-                layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).gone();
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).gone();
             }
             updatePausePlay();
             mHandler.sendEmptyMessage(MESSAGE_SHOW_PROGRESS);
             mAutoPlayRunnable.start();
         } else {
-            layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_top_box")).gone();
-            layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "rl_bottom_bar")).gone();
-            layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).gone();
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_top_box")).gone();
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "rl_bottom_bar")).gone();
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).gone();
             mHandler.removeMessages(MESSAGE_SHOW_PROGRESS);
             onControlPanelVisibilityChangeListener.change(false);
             mAutoPlayRunnable.stop();
@@ -751,7 +754,6 @@ public class PlayerView {
                 videoView.seekTo(currentPosition);
             }
             doPauseResume();
-//            videoView.onResume();
         }
         return this;
     }
@@ -816,13 +818,13 @@ public class PlayerView {
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             if (!fromUser)
                 return;
-            layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay")).gone();//移动时隐藏掉状态image
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay")).gone();//移动时隐藏掉状态image
             int newPosition = (int) ((duration * progress * 1.0) / 1000);
             String time = generateTime(newPosition);
             if (instantSeeking) {
                 videoView.seekTo(newPosition);
             }
-            layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime")).text(time);
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime")).text(time);
         }
 
         @Override
@@ -853,9 +855,9 @@ public class PlayerView {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MESSAGE_HIDE_CENTER_BOX:
-                    layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_volume_box")).gone();
-                    layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_brightness_box")).gone();
-                    layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fastForward_box")).gone();
+                    query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_volume_box")).gone();
+                    query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_brightness_box")).gone();
+                    query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fastForward_box")).gone();
                     break;
                 case MESSAGE_SEEK_NEW_POSITION:
                     if (!isLive && newPosition >= 0) {
@@ -984,14 +986,14 @@ public class PlayerView {
             showStatus("播放结束");
         } else if (newStatus == PlayStateParams.STATE_PREPARING || newStatus == PlayStateParams.STATE_BUFFERING_START) {
             hideAll();
-            layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_loading")).visible();
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_loading")).visible();
         } else if (newStatus == PlayStateParams.STATE_PREPARED || newStatus == PlayStateParams.STATE_BUFFERING_END || newStatus == PlayStateParams.STATE_PLAYING || newStatus == PlayStateParams.STATE_PAUSED) {
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     /**延迟一秒隐藏*/
                     hideAll();
-                    layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "ll_bg")).gone();
+                    query.id(ResourceUtils.getResourceIdByName(mContext, "id", "ll_bg")).gone();
                 }
             }, 1000);
         } else if (newStatus == -10000) {
@@ -1025,13 +1027,13 @@ public class PlayerView {
 
 
     private void hideAll() {
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_top_box")).gone();
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "rl_bottom_bar")).gone();
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_stream_container")).gone();
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay")).gone();
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie")).gone();
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_loading")).gone();
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).gone();
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_top_box")).gone();
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "rl_bottom_bar")).gone();
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_stream_container")).gone();
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay")).gone();
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie")).gone();
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_loading")).gone();
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).gone();
         onControlPanelVisibilityChangeListener.change(false);
     }
 
@@ -1042,11 +1044,11 @@ public class PlayerView {
                 public void run() {
                     tryFullScreen(!portrait);
                     if (portrait) {
-                        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_box")).height(initHeight, false);
+                        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_box")).height(initHeight, false);
                     } else {
                         int heightPixels = mActivity.getResources().getDisplayMetrics().heightPixels;
                         int widthPixels = mActivity.getResources().getDisplayMetrics().widthPixels;
-                        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_box")).height(Math.min(heightPixels, widthPixels), false);
+                        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_box")).height(Math.min(heightPixels, widthPixels), false);
                     }
                     updateFullScreenButton();
                 }
@@ -1086,8 +1088,8 @@ public class PlayerView {
     }
 
     private void showStatus(String statusText) {
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay")).visible();
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_status_text")).text(statusText);
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay")).visible();
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_status_text")).text(statusText);
     }
 
     private String generateTime(long time) {
@@ -1174,8 +1176,8 @@ public class PlayerView {
         }
 
         this.duration = duration;
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime")).text(generateTime(position));
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime")).text(generateTime(this.duration));
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime")).text(generateTime(position));
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime")).text(generateTime(this.duration));
         return position;
     }
 
@@ -1203,14 +1205,14 @@ public class PlayerView {
     private void updatePausePlay() {
         if (videoView.isPlaying()) {
             if (isLive) {
-                layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_play")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_stop_white_24dp"));
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_play")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_stop_white_24dp"));
             } else {
-                layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_play")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_icon_media_pause"));
-                layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_center_pause"));
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_play")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_icon_media_pause"));
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_center_pause"));
             }
         } else {
-            layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_play")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_arrow_white_24dp"));
-            layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_center_play"));
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_play")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_arrow_white_24dp"));
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_center_play"));
         }
     }
 
@@ -1219,9 +1221,9 @@ public class PlayerView {
      */
     private void updateFullScreenButton() {
         if (getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-            layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_icon_fullscreen_shrink"));
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_icon_fullscreen_shrink"));
         } else {
-            layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_icon_fullscreen_stretch"));
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_icon_fullscreen_stretch"));
         }
     }
 
@@ -1253,11 +1255,11 @@ public class PlayerView {
             s = "off";
         }
         // 显示
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_volume_icon")).image(i == 0 ? ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_volume_off_white_36dp") : ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_volume_up_white_36dp"));
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_brightness_box")).gone();
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_volume_box")).visible();
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_volume_box")).visible();
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_volume")).text(s).visible();
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_volume_icon")).image(i == 0 ? ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_volume_off_white_36dp") : ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_volume_up_white_36dp"));
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_brightness_box")).gone();
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_volume_box")).visible();
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_volume_box")).visible();
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_volume")).text(s).visible();
     }
 
     /**
@@ -1281,11 +1283,11 @@ public class PlayerView {
         }
         int showDelta = (int) delta / 1000;
         if (showDelta != 0) {
-            layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fastForward_box")).visible();
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fastForward_box")).visible();
             String text = showDelta > 0 ? ("+" + showDelta) : "" + showDelta;
-            layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fastForward")).text(text + "s");
-            layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fastForward_target")).text(generateTime(newPosition) + "/");
-            layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fastForward_all")).text(generateTime(duration));
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fastForward")).text(text + "s");
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fastForward_target")).text(generateTime(newPosition) + "/");
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fastForward_all")).text(generateTime(duration));
         }
     }
 
@@ -1304,7 +1306,7 @@ public class PlayerView {
             }
         }
         Log.d(this.getClass().getSimpleName(), "brightness:" + brightness + ",percent:" + percent);
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_brightness_box")).visible();
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_brightness_box")).visible();
         WindowManager.LayoutParams lpa = mActivity.getWindow().getAttributes();
         lpa.screenBrightness = brightness + percent;
         if (lpa.screenBrightness > 1.0f) {
@@ -1312,7 +1314,7 @@ public class PlayerView {
         } else if (lpa.screenBrightness < 0.01f) {
             lpa.screenBrightness = 0.01f;
         }
-        layoutQuery.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_brightness")).text(((int) (lpa.screenBrightness * 100)) + "%");
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_brightness")).text(((int) (lpa.screenBrightness * 100)) + "%");
         mActivity.getWindow().setAttributes(lpa);
 
     }
@@ -1359,6 +1361,109 @@ public class PlayerView {
         }
     }
 
+
+    class Query {
+        private final Activity activity;
+        private View view;
+
+        public Query(Activity activity) {
+            this.activity = activity;
+        }
+
+        public Query id(int id) {
+            view = activity.findViewById(id);
+            return this;
+        }
+
+        public Query image(int resId) {
+            if (view instanceof ImageView) {
+                ((ImageView) view).setImageResource(resId);
+            }
+            return this;
+        }
+
+        public Query visible() {
+            if (view != null) {
+                view.setVisibility(View.VISIBLE);
+            }
+            return this;
+        }
+
+        public Query gone() {
+            if (view != null) {
+                view.setVisibility(View.GONE);
+            }
+            return this;
+        }
+
+        public Query invisible() {
+            if (view != null) {
+                view.setVisibility(View.INVISIBLE);
+            }
+            return this;
+        }
+
+        public Query clicked(View.OnClickListener handler) {
+            if (view != null) {
+                view.setOnClickListener(handler);
+            }
+            return this;
+        }
+
+        public Query text(CharSequence text) {
+            if (view != null && view instanceof TextView) {
+                ((TextView) view).setText(text);
+            }
+            return this;
+        }
+
+        public Query visibility(int visible) {
+            if (view != null) {
+                view.setVisibility(visible);
+            }
+            return this;
+        }
+
+        private void size(boolean width, int n, boolean dip) {
+
+            if (view != null) {
+
+                ViewGroup.LayoutParams lp = view.getLayoutParams();
+
+
+                if (n > 0 && dip) {
+                    n = dip2pixel(activity, n);
+                }
+
+                if (width) {
+                    lp.width = n;
+                } else {
+                    lp.height = n;
+                }
+
+                view.setLayoutParams(lp);
+
+            }
+
+        }
+
+        public void height(int height, boolean dip) {
+            size(false, height, dip);
+        }
+
+        public int dip2pixel(Context context, float n) {
+            int value = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, n, context.getResources().getDisplayMetrics());
+            return value;
+        }
+
+        public float pixel2dip(Context context, float n) {
+            Resources resources = context.getResources();
+            DisplayMetrics metrics = resources.getDisplayMetrics();
+            float dp = n / (metrics.densityDpi / 160f);
+            return dp;
+
+        }
+    }
 
     public class PlayerGestureListener extends GestureDetector.SimpleOnGestureListener {
         private boolean firstTouch;

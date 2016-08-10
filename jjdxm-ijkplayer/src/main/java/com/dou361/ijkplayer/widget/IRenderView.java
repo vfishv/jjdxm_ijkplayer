@@ -24,7 +24,26 @@ import android.view.SurfaceHolder;
 import android.view.View;
 
 import tv.danmaku.ijk.media.player.IMediaPlayer;
-
+/**
+ * ========================================
+ * <p>
+ * 版 权：dou361.com 版权所有 （C） 2015
+ * <p>
+ * 作 者：陈冠明
+ * <p>
+ * 个人网站：http://www.dou361.com
+ * <p>
+ * 版 本：1.0
+ * <p>
+ * 创建日期：2016/8/10 15:29
+ * <p>
+ * 描 述：视频渲染view
+ * <p>
+ * <p>
+ * 修订历史：
+ * <p>
+ * ========================================
+ */
 public interface IRenderView {
     int AR_ASPECT_FIT_PARENT = 0; // without clip
     int AR_ASPECT_FILL_PARENT = 1; // may clip

@@ -12,10 +12,39 @@ import com.dou361.ijkplayer.utils.ResourceUtils;
 
 import java.util.List;
 
+/**
+ * ========================================
+ * <p>
+ * 版 权：dou361.com 版权所有 （C） 2015
+ * <p>
+ * 作 者：陈冠明
+ * <p>
+ * 个人网站：http://www.dou361.com
+ * <p>
+ * 版 本：1.0
+ * <p>
+ * 创建日期：2016/8/10 15:20
+ * <p>
+ * 描 述：用来适配不同分辨率的流（流畅、标清、高清、720P）
+ * <p>
+ * <p>
+ * 修订历史：
+ * <p>
+ * ========================================
+ */
 public class StreamSelectAdapter extends BaseAdapter {
 
+    /**
+     * 上下文
+     */
     private Context mContext;
+    /**
+     * 布局填充对象
+     */
     private LayoutInflater layoutInflater;
+    /**
+     * 不同分辨率播放地址集合
+     */
     private List<VideoijkBean> listVideos;
 
     public StreamSelectAdapter(Context context, List<VideoijkBean> list) {
