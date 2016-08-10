@@ -47,22 +47,22 @@ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 
 /**
  * ========================================
- * <p>
+ * <p/>
  * 版 权：dou361.com 版权所有 （C） 2015
- * <p>
+ * <p/>
  * 作 者：陈冠明
- * <p>
+ * <p/>
  * 个人网站：http://www.dou361.com
- * <p>
+ * <p/>
  * 版 本：1.0
- * <p>
+ * <p/>
  * 创建日期：2016/4/14
- * <p>
+ * <p/>
  * 描 述：
- * <p>
- * <p>
+ * <p/>
+ * <p/>
  * 修订历史：
- * <p>
+ * <p/>
  * ========================================
  */
 public class PlayerView {
@@ -239,12 +239,16 @@ public class PlayerView {
      * 旋转角度
      */
     public PlayerView setPlayerRotation() {
-        rotation += 90;
-        if (rotation >= 180) {
-            rotation = -90;
+        if (rotation == 0) {
+            rotation = 90;
+        } else if (rotation == 90) {
+            rotation = 270;
+        } else if (rotation == 270) {
+            rotation = 0;
         }
         if (videoView != null) {
             videoView.setPlayerRotation(rotation);
+            videoView.setAspectRatio(PlayStateParams.fitparent);
         }
         return this;
     }

@@ -51,22 +51,22 @@ import tv.danmaku.ijk.media.player.misc.IMediaDataSource;
 
 /**
  * ========================================
- * <p>
+ * <p/>
  * 版 权：dou361.com 版权所有 （C） 2015
- * <p>
+ * <p/>
  * 作 者：陈冠明
- * <p>
+ * <p/>
  * 个人网站：http://www.dou361.com
- * <p>
+ * <p/>
  * 版 本：1.0
- * <p>
+ * <p/>
  * 创建日期：2016/8/10 15:29
- * <p>
+ * <p/>
  * 描 述：视频渲染界面管理
- * <p>
- * <p>
+ * <p/>
+ * <p/>
  * 修订历史：
- * <p>
+ * <p/>
  * ========================================
  */
 public class IjkVideoView extends FrameLayout implements MediaController.MediaPlayerControl {
@@ -455,10 +455,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
 
             // REMOVED: mPendingSubtitleTracks
 
-            // we don't set the target state here either, but preserve the
-            // target state that was there before.
+            // we don't set the target state here either, but preserve the target state that was there before.我们这里不设置目标状态,但保护的目标状态
             mCurrentState = PlayStateParams.STATE_PREPARING;
-//            mTargetState = PlayStateParams.STATE_PREPARING;
             attachMediaController();
         } catch (IOException ex) {
             Log.w(TAG, "Unable to open content: " + mUri, ex);
@@ -514,9 +512,10 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             };
 
     IMediaPlayer.OnPreparedListener mPreparedListener = new IMediaPlayer.OnPreparedListener() {
+
         public void onPrepared(IMediaPlayer mp) {
+            // we don't set the target state here either, but preserve the target state that was there before.我们这里不设置目标状态,但保护的目标状态
             mCurrentState = PlayStateParams.STATE_PREPARED;
-//            mTargetState = PlayStateParams.STATE_PREPARED;
 
             // Get the capabilities of the player for this stream
             // REMOVED: Metadata
@@ -1060,7 +1059,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     }
 
     /**
-     * 视频旋转
+     * 设置播放区域拉伸类型
      */
     public void setAspectRatio(int aspectRatio) {
         for (int i = 0; i < s_allAspectRatio.length; i++) {

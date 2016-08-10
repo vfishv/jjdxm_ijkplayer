@@ -25,27 +25,32 @@ import android.view.View;
 import android.widget.MediaController;
 
 import java.util.ArrayList;
+
 /**
  * ========================================
- * <p>
+ * <p/>
  * 版 权：dou361.com 版权所有 （C） 2015
- * <p>
+ * <p/>
  * 作 者：陈冠明
- * <p>
+ * <p/>
  * 个人网站：http://www.dou361.com
- * <p>
+ * <p/>
  * 版 本：1.0
- * <p>
+ * <p/>
  * 创建日期：2016/8/10 15:29
- * <p>
+ * <p/>
  * 描 述：Android媒体控制器
- * <p>
- * <p>
+ * <p/>
+ * <p/>
  * 修订历史：
- * <p>
+ * <p/>
  * ========================================
  */
 public class AndroidMediaController extends MediaController implements IMediaController {
+
+    /**
+     * actionbar
+     */
     private ActionBar mActionBar;
 
     public AndroidMediaController(Context context, AttributeSet attrs) {
@@ -66,6 +71,9 @@ public class AndroidMediaController extends MediaController implements IMediaCon
     private void initView(Context context) {
     }
 
+    /**
+     * 设置是否支持actionbar
+     */
     public void setSupportActionBar(@Nullable ActionBar actionBar) {
         mActionBar = actionBar;
         if (isShowing()) {
@@ -97,6 +105,7 @@ public class AndroidMediaController extends MediaController implements IMediaCon
     //----------
     private ArrayList<View> mShowOnceArray = new ArrayList<View>();
 
+    @Override
     public void showOnce(@NonNull View view) {
         mShowOnceArray.add(view);
         view.setVisibility(View.VISIBLE);

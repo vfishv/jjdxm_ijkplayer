@@ -18,39 +18,62 @@ package com.dou361.ijkplayer.widget;
 
 import android.view.View;
 import android.widget.MediaController;
+
 /**
  * ========================================
- * <p>
+ * <p/>
  * 版 权：dou361.com 版权所有 （C） 2015
- * <p>
+ * <p/>
  * 作 者：陈冠明
- * <p>
+ * <p/>
  * 个人网站：http://www.dou361.com
- * <p>
+ * <p/>
  * 版 本：1.0
- * <p>
+ * <p/>
  * 创建日期：2016/8/10 15:29
- * <p>
+ * <p/>
  * 描 述：媒体控制器
- * <p>
- * <p>
+ * <p/>
+ * <p/>
  * 修订历史：
- * <p>
+ * <p/>
  * ========================================
  */
 public interface IMediaController {
+
+    /**
+     * 隐藏标题栏
+     */
     void hide();
 
+    /**
+     * 判断是否显示
+     */
     boolean isShowing();
 
+    /**
+     * 设置主播界面
+     */
     void setAnchorView(View view);
 
+    /**
+     * 设置是否可用
+     */
     void setEnabled(boolean enabled);
 
+    /**
+     * 设置媒体播放器
+     */
     void setMediaPlayer(MediaController.MediaPlayerControl player);
 
+    /**
+     * 显示带超时时间
+     */
     void show(int timeout);
 
+    /**
+     * 显示标题栏
+     */
     void show();
 
     //----------
