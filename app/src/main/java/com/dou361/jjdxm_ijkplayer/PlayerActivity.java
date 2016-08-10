@@ -1,22 +1,16 @@
 package com.dou361.jjdxm_ijkplayer;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.PowerManager;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
-import com.dou361.ijkplayer.bean.VideoijkBean;
 import com.dou361.ijkplayer.listener.OnShowThumbnailListener;
 import com.dou361.ijkplayer.widget.PlayStateParams;
 import com.dou361.ijkplayer.widget.PlayerView;
-import com.dou361.jjdxm_ijkplayer.utlis.MediaUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**
@@ -32,40 +26,24 @@ import java.util.List;
  * <p/>
  * 创建日期：2015/11/18 9:40
  * <p/>
- * 描 述：半屏界面
+ * 描 述：点播全屏竖屏场景
  * <p/>
  * <p/>
  * 修订历史：
  * <p/>
  * ========================================
  */
-public class HPlayerActivity extends AppCompatActivity {
+public class PlayerActivity extends Activity {
 
     private PlayerView player;
     private Context mContext;
-    private List<VideoijkBean> list;
-    private PowerManager.WakeLock wakeLock;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.mContext = this;
-        setContentView(R.layout.activity_h);
-        /**常亮*/
-        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        wakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "liveTAG");
-        wakeLock.acquire();
-        list = new ArrayList<VideoijkBean>();
-        String url1 = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f20.mp4";
-        String url2 = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f30.mp4";
-        VideoijkBean m1 = new VideoijkBean();
-        m1.setStream("标清");
-        m1.setUrl(url1);
-        VideoijkBean m2 = new VideoijkBean();
-        m2.setStream("高清");
-        m2.setUrl(url2);
-        list.add(m1);
-        list.add(m2);
+        setContentView(R.layout.simple_player_view_player);
+        String url = "http://9890.vod.myqcloud.com/9890_9c1fa3e2aea011e59fc841df10c92278.f20.mp4";
         player = new PlayerView(this)
                 .setTitle("什么")
                 .setScaleType(PlayStateParams.fitparent)
@@ -81,7 +59,7 @@ public class HPlayerActivity extends AppCompatActivity {
                                 .into(ivThumbnail);
                     }
                 })
-                .setPlaySource(list)
+                .setPlaySource(url)
                 .startPlay();
     }
 
@@ -91,7 +69,6 @@ public class HPlayerActivity extends AppCompatActivity {
         if (player != null) {
             player.onPause();
         }
-        MediaUtils.muteAudioFocus(mContext, true);
     }
 
     @Override
@@ -99,10 +76,6 @@ public class HPlayerActivity extends AppCompatActivity {
         super.onResume();
         if (player != null) {
             player.onResume();
-        }
-        MediaUtils.muteAudioFocus(mContext, false);
-        if (wakeLock != null) {
-            wakeLock.acquire();
         }
     }
 
@@ -128,9 +101,6 @@ public class HPlayerActivity extends AppCompatActivity {
             return;
         }
         super.onBackPressed();
-        if (wakeLock != null) {
-            wakeLock.release();
-        }
     }
 
 }

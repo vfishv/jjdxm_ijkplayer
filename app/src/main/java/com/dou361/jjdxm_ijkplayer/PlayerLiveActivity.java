@@ -8,37 +8,36 @@ import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.widget.ImageView;
 
-import com.dou361.jjdxm_ijkplayer.utlis.MediaUtils;
+import com.bumptech.glide.Glide;
 import com.dou361.ijkplayer.listener.OnShowThumbnailListener;
-import com.dou361.ijkplayer.utils.ResourceUtils;
 import com.dou361.ijkplayer.widget.PlayStateParams;
 import com.dou361.ijkplayer.widget.PlayerView;
+import com.dou361.jjdxm_ijkplayer.utlis.MediaUtils;
 
 
 /**
  * ========================================
- * <p>
+ * <p/>
  * 版 权：深圳市晶网科技控股有限公司 版权所有 （C） 2015
- * <p>
+ * <p/>
  * 作 者：陈冠明
- * <p>
+ * <p/>
  * 个人网站：http://www.dou361.com
- * <p>
+ * <p/>
  * 版 本：1.0
- * <p>
+ * <p/>
  * 创建日期：2015/11/18 9:40
- * <p>
+ * <p/>
  * 描 述：直播全屏竖屏场景
- * <p>
- * <p>
+ * <p/>
+ * <p/>
  * 修订历史：
- * <p>
+ * <p/>
  * ========================================
  */
 public class PlayerLiveActivity extends Activity {
 
     private PlayerView player;
-    private String trumb;
     private Context mContext;
     private PowerManager.WakeLock wakeLock;
 
@@ -52,34 +51,25 @@ public class PlayerLiveActivity extends Activity {
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "liveTAG");
         wakeLock.acquire();
-
-
-        trumb = "http://115.159.45.251/fbei-test/2016/0512/LA5254B58E265011C.jpg";
-//        String url = "http://9890.vod.myqcloud.com/9890_9c1fa3e2aea011e59fc841df10c92278.f20.mp4";
         String url = "rtmp://stream.nodemedia.cn/live/demo";
-        player = new PlayerView(this);
-        player.setTitle("什么");
-        player.setScaleType(PlayStateParams.fitparent);
-        player.forbidTouch(false);
-        player.setForbidDoulbeUp(true);
-        player.setHideBar(true);
-        player.showThumbnail(new OnShowThumbnailListener() {
-            @Override
-            public void onShowThumbnail(ImageView ivThumbnail) {
-                if (trumb != null) {
-//                    Picasso.with(mContext)
-//                            .load(trumb)
-//                            .placeholder(R.mipmap.ic_default)
-//                            .error(R.mipmap.ic_error)
-//                            .into(ivThumbnail);
-                    ivThumbnail.setImageResource(ResourceUtils.getResourceIdByName(mContext, "drawable", "imple_player_circle_outline_white_36dp"));
-                } else {
-                    ivThumbnail.setImageResource(ResourceUtils.getResourceIdByName(mContext, "drawable", "imple_player_circle_outline_white_36dp"));
-                }
-            }
-        });
-        player.setPlaySource(url);
-        player.startPlay();
+        player = new PlayerView(this)
+                .setTitle("什么")
+                .setScaleType(PlayStateParams.fitparent)
+                .forbidTouch(false)
+                .setForbidDoulbeUp(true)
+                .setHideBar(true)
+                .showThumbnail(new OnShowThumbnailListener() {
+                    @Override
+                    public void onShowThumbnail(ImageView ivThumbnail) {
+                        Glide.with(mContext)
+                                .load("http://pic2.nipic.com/20090413/406638_125424003_2.jpg")
+                                .placeholder(R.color.cl_default)
+                                .error(R.color.cl_error)
+                                .into(ivThumbnail);
+                    }
+                })
+                .setPlaySource(url)
+                .startPlay();
 
 
     }
