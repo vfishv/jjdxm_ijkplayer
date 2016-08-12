@@ -26,10 +26,6 @@
 
 [demo apk下载][downapk]
 
-[下载最新版本aar][lastaar]
-
-[下载最新版本jar][lastjar]
-
 Download or grab via Maven:
 
 	<dependency>
@@ -43,24 +39,81 @@ or Gradle:
 	compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:x.x.x'
 
 
+历史版本：
+
+	compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:1.0.3'
+	compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:1.0.2'
+	compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:1.0.1'
+	compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:1.0.0'
+
+
 jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
 
 ## Get Started ##
 
-* `play(url)` //play video
-* `stop()` //stop play
-* `pause()`
-* `start()` 
-* `forward()` // forward or back,example: forward(0.1f) forward(-0.1f)
-* `getCurrentPosition()`
-* `setScaleType()`
-* `toggleAspectRatio()`
-* `seekTo()` //seek to specify position
-* `getDuration()` //get video duration
-* `onInfo()` //callback when have some information
-* `onError()` 
-* `onComplete()`
-* `onControlPanelVisibilityChange()` //callback when control panel visibility
+#### 1.简单的播放器实现 ####
+
+	setContentView(R.layout.simple_player_view_player);
+	String url = "http://9890.vod.myqcloud.com/9890_9c1fa3e2aea011e59fc841df10c92278.f20.mp4";
+    player = new PlayerView(this)
+            .setTitle("什么")
+            .setScaleType(PlayStateParams.fitparent)
+            .hideMenu(true)
+            .forbidTouch(false)
+            .showThumbnail(new OnShowThumbnailListener() {
+                @Override
+                public void onShowThumbnail(ImageView ivThumbnail) {
+                    Glide.with(mContext)
+                            .load("http://pic2.nipic.com/20090413/406638_125424003_2.jpg")
+                            .placeholder(R.color.cl_default)
+                            .error(R.color.cl_error)
+                            .into(ivThumbnail);
+                }
+            })
+            .setPlaySource(url)
+            .startPlay();
+
+#### 2.多种不同的分辨率流的播放器实现 ####
+在布局中使用simple_player_view_player.xml布局
+
+	<include
+        layout="@layout/simple_player_view_player"
+        android:layout_width="match_parent"
+        android:layout_height="180dp"/>
+
+代码中创建一个播放器对象
+
+	/**播放资源*/
+	ist<VideoijkBean> list = new ArrayList<VideoijkBean>();
+	String url1 = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f20.mp4";
+    String url2 = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f30.mp4";
+    VideoijkBean m1 = new VideoijkBean();
+    m1.setStream("标清");
+    m1.setUrl(url1);
+    VideoijkBean m2 = new VideoijkBean();
+    m2.setStream("高清");
+    m2.setUrl(url2);
+    list.add(m1);
+    list.add(m2);
+	/**播放器*/
+	player = new PlayerView(this)
+                .setTitle("什么")
+                .setScaleType(PlayStateParams.fitparent)
+                .hideMenu(true)
+                .forbidTouch(false)
+                .showThumbnail(new OnShowThumbnailListener() {
+                    @Override
+                    public void onShowThumbnail(ImageView ivThumbnail) {
+						/**加载前显示的缩略图*/
+                        Glide.with(mContext)
+                                .load("http://pic2.nipic.com/20090413/406638_125424003_2.jpg")
+                                .placeholder(R.color.cl_default)
+                                .error(R.color.cl_error)
+                                .into(ivThumbnail);
+                    }
+                })
+                .setPlaySource(list)
+                .startPlay();
 
 ## More Actions ##
 

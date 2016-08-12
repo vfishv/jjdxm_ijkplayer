@@ -9,7 +9,7 @@ ext {
     jjdxm_groupId = 'com.dou361.ijkplayer'
     jjdxm_artifactId = 'jjdxm-ijkplayer'
 
-    jjdxm_libraryVersion = '1.0.1'
+    jjdxm_libraryVersion = '1.0.3'
     jjdxm_libraryName = 'jjdxm-ijkplayer'
     jjdxm_libraryDescription = 'this is a ijkplayer library of the application'
 
