@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.dou361.ijkplayer.listener.OnPlayerBackListener;
 import com.dou361.ijkplayer.listener.OnShowThumbnailListener;
 import com.dou361.ijkplayer.widget.PlayStateParams;
 import com.dou361.ijkplayer.widget.PlayerView;
@@ -60,6 +61,12 @@ public class PlayerActivity extends Activity {
                     }
                 })
                 .setPlaySource(url)
+                .setPlayerBackListener(new OnPlayerBackListener() {
+                    @Override
+                    public void onPlayerBack() {
+//                        finish();
+                    }
+                })
                 .startPlay();
     }
 

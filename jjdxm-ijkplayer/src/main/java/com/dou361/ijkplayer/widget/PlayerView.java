@@ -36,6 +36,7 @@ import com.dou361.ijkplayer.adapter.StreamSelectAdapter;
 import com.dou361.ijkplayer.bean.VideoijkBean;
 import com.dou361.ijkplayer.listener.OnControlPanelVisibilityChangeListener;
 import com.dou361.ijkplayer.listener.OnInfoListener;
+import com.dou361.ijkplayer.listener.OnPlayerBackListener;
 import com.dou361.ijkplayer.listener.OnShowThumbnailListener;
 import com.dou361.ijkplayer.utils.ResourceUtils;
 
@@ -183,6 +184,7 @@ public class PlayerView {
     private int currentSelect;
     private boolean isSwitchStream;
     private boolean isHideBar;
+    private OnPlayerBackListener mPlayerBack;
 
 
     /**
@@ -215,6 +217,14 @@ public class PlayerView {
      */
     public PlayerView onInfo(OnInfoListener onInfoListener) {
         this.onInfoListener = onInfoListener;
+        return this;
+    }
+
+    /**
+     * 播放几种状态监听监听
+     */
+    public PlayerView setPlayerBackListener(OnPlayerBackListener listener) {
+        this.mPlayerBack = listener;
         return this;
     }
 
@@ -906,7 +916,11 @@ public class PlayerView {
                 if (!fullScreenOnly && !portrait) {
                     mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 } else {
-                    mActivity.finish();
+                    if (mPlayerBack != null) {
+                        mPlayerBack.onPlayerBack();
+                    } else {
+                        mActivity.finish();
+                    }
                 }
             } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie_icon")) {
                 isGNetWork = false;
