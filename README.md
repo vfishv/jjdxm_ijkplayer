@@ -48,6 +48,28 @@ jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
 
 ## Get Started ##
 
+该项目是基于ijkplayer项目进行的视频UI的二次封装，目前只是默认在：
+
+	compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:1.0.0' 
+
+中加入了以下依赖：
+
+	compile 'tv.danmaku.ijk.media:ijkplayer-java:0.6.0'
+    compile 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.6.0'
+
+如果要支持多种ABI类型的机型，可以根据需要添加以下依赖：
+
+	# required, enough for most devices.
+    compile 'tv.danmaku.ijk.media:ijkplayer-java:0.6.0'
+    compile 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.6.0'
+
+    # Other ABIs: optional
+    compile 'tv.danmaku.ijk.media:ijkplayer-armv5:0.6.0'
+    compile 'tv.danmaku.ijk.media:ijkplayer-arm64:0.6.0'
+    compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.6.0'
+    compile 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.6.0'
+
+
 #### 1.简单的播放器实现 ####
 
 	setContentView(R.layout.simple_player_view_player);
