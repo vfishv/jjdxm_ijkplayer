@@ -70,7 +70,7 @@ jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
 
 根据你的混淆器配置和使用，您可能需要在你的proguard文件内配置以下内容：
 
-	-keep com.dou361.periscope.** {
+	-keep com.dou361.ijkplayer.** {
     *;
 	}
 
