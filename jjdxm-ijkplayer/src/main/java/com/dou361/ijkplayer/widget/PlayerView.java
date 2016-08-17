@@ -610,7 +610,7 @@ public class PlayerView {
     }
 
     /**
-     * 设置是否禁止双击
+     * 设置是否隐藏bar
      */
     public PlayerView setHideBar(boolean flag) {
         this.isHideBar = flag;
