@@ -4,31 +4,24 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.media.AudioManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -38,6 +31,7 @@ import com.dou361.ijkplayer.listener.OnControlPanelVisibilityChangeListener;
 import com.dou361.ijkplayer.listener.OnInfoListener;
 import com.dou361.ijkplayer.listener.OnPlayerBackListener;
 import com.dou361.ijkplayer.listener.OnShowThumbnailListener;
+import com.dou361.ijkplayer.utils.NetworkUtils;
 import com.dou361.ijkplayer.utils.ResourceUtils;
 
 import java.util.ArrayList;
@@ -48,66 +42,133 @@ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 
 /**
  * ========================================
- * <p/>
+ * <p>
  * 版 权：dou361.com 版权所有 （C） 2015
- * <p/>
+ * <p>
  * 作 者：陈冠明
- * <p/>
+ * <p>
  * 个人网站：http://www.dou361.com
- * <p/>
+ * <p>
  * 版 本：1.0
- * <p/>
+ * <p>
  * 创建日期：2016/4/14
- * <p/>
+ * <p>
  * 描 述：
- * <p/>
- * <p/>
+ * <p>
+ * <p>
  * 修订历史：
- * <p/>
+ * <p>
  * ========================================
  */
 public class PlayerView {
 
+    /**
+     * 打印日志的TAG
+     */
     private static final String TAG = PlayerView.class.getSimpleName();
+    /**
+     * 全局上下文
+     */
+    private final Context mContext;
     /**
      * 依附的容器Activity
      */
     private final Activity mActivity;
     /**
-     * 全局上下文
+     * Activity界面的中布局的查询器
      */
-    private final Context mContext;
-    private final Query query;
-    private final IjkVideoView videoView;
-    private final LinearLayout streamSelectView;
-    private final ListView streamSelectListView;
-    private final StreamSelectAdapter streamSelectAdapter;
+    private final LayoutQuery query;
     /**
-     * 第三方so是否支持
+     * 原生的Ijkplayer
      */
-    private boolean playerSupport;
+    private final IjkVideoView videoView;
+    /**
+     * 播放器整个界面
+     */
+    private final View rl_box;
+    /**
+     * 播放器顶部控制bar
+     */
+    private final View ll_topbar;
+    /**
+     * 播放器底部控制bar
+     */
+    private final View rl_bottombar;
+    /**
+     * 播放器封面，播放前的封面或者缩列图
+     */
+    private final ImageView iv_trumb;
+    /**
+     * 视频方向旋转按钮
+     */
+    private final ImageView iv_rotation;
+    /**
+     * 视频返回按钮
+     */
+    private final ImageView iv_back;
+    /**
+     * 视频菜单按钮
+     */
+    private final ImageView iv_menu;
+    /**
+     * 视频bottonbar的播放按钮
+     */
+    private final ImageView iv_bar_player;
+    /**
+     * 视频中间的播放按钮
+     */
+    private final ImageView iv_player;
+    /**
+     * 视频全屏按钮
+     */
+    private final ImageView iv_fullscreen;
+    /**
+     * 视频分辨率按钮
+     */
+    private final TextView tv_steam;
+    /**
+     * 视频播放进度条
+     */
+    private final SeekBar seekBar;
+    /**
+     * 不同分辨率列表的外层布局
+     */
+    private final LinearLayout streamSelectView;
+    /**
+     * 不同分辨率的列表布局
+     */
+    private final ListView streamSelectListView;
+    /**
+     * 不同分辨率的适配器
+     */
+    private final StreamSelectAdapter streamSelectAdapter;
     /**
      * 码流列表
      */
     private List<VideoijkBean> listVideos = new ArrayList<VideoijkBean>();
-    /**
-     * 是否是直播 true为直播false为点播
-     */
-    private boolean isLive;
+
     /**
      * 当前状态
      */
     private int status = PlayStateParams.STATE_IDLE;
-    private static final int MESSAGE_SHOW_PROGRESS = 1;
-    private static final int MESSAGE_SEEK_NEW_POSITION = 3;
-    private static final int MESSAGE_HIDE_CENTER_BOX = 4;
-    private static final int MESSAGE_RESTART_PLAY = 5;
     /**
      * 当前播放位置
      */
     private int currentPosition;
     /**
-     * 总时长
+     * 滑动进度条得到的新位置，和当前播放位置是有区别的
+     */
+    private long newPosition;
+    /**
+     * 视频旋转的角度，默认只有0,90.270分别对应向上、向左、向右三个方向
+     */
+    private int rotation = 0;
+    /**
+     * 视频显示比例,默认保持原视频的大小
+     */
+    private int currentShowType = PlayStateParams.fitparent;
+    /**
+     * 播放总时长
      */
     private long duration;
     /**
@@ -115,153 +176,250 @@ public class PlayerView {
      */
     private int volume;
     /**
-     * 当前亮度大小
+     * 设备最大音量
      */
-    private float brightness;
+    private final int mMaxVolume;
     /**
-     * 是否显示控制面板true为显示false为隐藏
-     */
-    private boolean isShowControlPanl;
-    /**
-     * 禁止触摸
-     */
-    private boolean forbidTouch;
-    /**
-     * 是否可以拖动进度条
-     */
-    private boolean isDragging;
-    /**
-     * 设备宽度
+     * 获取当前设备的宽度
      */
     private final int screenWidthPixels;
     /**
-     * 是否网络提示
+     * 记录播放器竖屏时的高度
      */
-    private boolean isGNetWork = true;
-    private final ImageView iv_trumb;
-    private final ImageView iv_rotation;
-    private final RelativeLayout rl_bottom_bar;
-    private final SeekBar seekBar;
-    private final AudioManager audioManager;
-    private final int mMaxVolume;
-    private final OrientationEventListener orientationEventListener;
-    private boolean portrait;
     private final int initHeight;
+    /**
+     * 当前亮度大小
+     */
+    private float brightness;
     /**
      * 当前播放地址
      */
     private String currentUrl;
     /**
-     * 是否只有全屏
+     * 当前选择的视频流索引
      */
-    private boolean fullScreenOnly;
+    private int currentSelect;
     /**
-     * 是否禁止双击
+     * 第三方so是否支持，默认不支持，true为支持
+     */
+    private boolean playerSupport;
+    /**
+     * 是否是直播 默认为非直播，true为直播false为点播，根据isLive()方法前缀rtmp或者后缀.m3u8判断得出的为直播，比较片面，有好的建议欢迎交流
+     */
+    private boolean isLive;
+    /**
+     * 是否显示控制面板，默认为隐藏，true为显示false为隐藏
+     */
+    private boolean isShowControlPanl;
+    /**
+     * 禁止触摸，默认可以触摸，true为禁止false为可触摸
+     */
+    private boolean isForbidTouch;
+    /**
+     * 禁止收起控制面板，默认可以收起，true为禁止false为可触摸
+     */
+    private boolean isForbidHideControlPanl;
+    /**
+     * 当前是否切换视频流，默认为否，true是切换视频流，false没有切换
+     */
+    private boolean isHasSwitchStream;
+    /**
+     * 是否在拖动进度条中，默认为停止拖动，true为在拖动中，false为停止拖动
+     */
+    private boolean isDragging;
+    /**
+     * 播放的时候是否需要网络提示，默认显示网络提示，true为显示网络提示，false不显示网络提示
+     */
+    private boolean isGNetWork = true;
+    /**
+     * 是否只有全屏，默认非全屏，true为全屏，false为非全屏
+     */
+    private boolean isOnlyFullScreen;
+    /**
+     * 是否禁止双击，默认不禁止，true为禁止，false为不禁止
      */
     private boolean isForbidDoulbeUp;
+    /**
+     * 是否出错停止播放，默认是出错停止播放，true出错停止播放,false为用户点击停止播放
+     */
+    private boolean isErrorStop = true;
+    /**
+     * 是否是竖屏，默认为竖屏，true为竖屏，false为横屏
+     */
+    private boolean isPortrait = true;
+    /**
+     * 音频管理器
+     */
+    private final AudioManager audioManager;
 
-    private OnInfoListener onInfoListener = new OnInfoListener() {
+
+    /**
+     * 同步进度
+     */
+    private static final int MESSAGE_SHOW_PROGRESS = 1;
+    /**
+     * 设置新位置
+     */
+    private static final int MESSAGE_SEEK_NEW_POSITION = 3;
+    /**
+     * 隐藏提示的box
+     */
+    private static final int MESSAGE_HIDE_CENTER_BOX = 4;
+    /**
+     * 重新播放
+     */
+    private static final int MESSAGE_RESTART_PLAY = 5;
+
+
+    /**
+     * 消息处理
+     */
+    @SuppressWarnings("HandlerLeak")
+    private Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
-        public void onInfo(int what, int extra) {
-
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                /**滑动完成，隐藏滑动提示的box*/
+                case MESSAGE_HIDE_CENTER_BOX:
+                    query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_volume_box")).gone();
+                    query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_brightness_box")).gone();
+                    query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fastForward_box")).gone();
+                    break;
+                /**滑动完成，设置播放进度*/
+                case MESSAGE_SEEK_NEW_POSITION:
+                    if (!isLive && newPosition >= 0) {
+                        videoView.seekTo((int) newPosition);
+                        newPosition = -1;
+                    }
+                    break;
+                /**滑动中，同步播放进度*/
+                case MESSAGE_SHOW_PROGRESS:
+                    long pos = syncProgress();
+                    if (!isDragging && isShowControlPanl) {
+                        msg = obtainMessage(MESSAGE_SHOW_PROGRESS);
+                        sendMessageDelayed(msg, 1000 - (pos % 1000));
+                        updatePausePlay();
+                    }
+                    break;
+                /**重新去播放*/
+                case MESSAGE_RESTART_PLAY:
+                    status = PlayStateParams.STATE_ERROR;
+                    doPauseResume();
+                    break;
+            }
         }
     };
 
-    private OnControlPanelVisibilityChangeListener onControlPanelVisibilityChangeListener = new OnControlPanelVisibilityChangeListener() {
-        @Override
-        public void change(boolean isShowing) {
+    /**========================================视频的监听方法==============================================*/
 
-        }
-    };
-
-    private OnShowThumbnailListener mOnShowThumbnailListener = new OnShowThumbnailListener() {
-        @Override
-        public void onShowThumbnail(ImageView ivThumbnail) {
-
-        }
-    };
-    private boolean closePlay;
-    private int currentSelect;
-    private boolean isSwitchStream;
-    private boolean isHideBar;
+    /**
+     * 控制面板收起或者显示的轮询监听
+     */
+    private AutoPlayRunnable mAutoPlayRunnable = new AutoPlayRunnable();
+    /**
+     * Activity界面方向监听
+     */
+    private final OrientationEventListener orientationEventListener;
+    /**
+     * 控制面板显示或隐藏监听
+     */
+    private OnControlPanelVisibilityChangeListener onControlPanelVisibilityChangeListener;
+    /**
+     * 视频封面显示监听
+     */
+    private OnShowThumbnailListener mOnShowThumbnailListener;
+    /**
+     * 视频的返回键监听
+     */
     private OnPlayerBackListener mPlayerBack;
-
+    /**
+     * 视频播放时信息回调
+     */
+    private OnInfoListener onInfoListener;
 
     /**
-     * 自定义bar显示的位置
+     * 点击事件监听
      */
-    public enum BarLocation {
-        /**
-         * 显示顶部
-         */
-        showTop,
-        /**
-         * 显示底部
-         */
-        showBotton;
-    }
-
-    /**
-     * 显示缩略图
-     */
-    public PlayerView showThumbnail(OnShowThumbnailListener onShowThumbnailListener) {
-        this.mOnShowThumbnailListener = onShowThumbnailListener;
-        if (mOnShowThumbnailListener != null && iv_trumb != null) {
-            mOnShowThumbnailListener.onShowThumbnail(iv_trumb);
+    private final View.OnClickListener onClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_stream")) {
+                /**选择分辨率*/
+                showStreamSelectView();
+            } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "ijk_iv_rotation")) {
+                /**旋转视频方向*/
+                setPlayerRotation();
+            } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen")) {
+                /**视频全屏切换*/
+                toggleFullScreen();
+            } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_play") || v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")) {
+                /**视频播放和暂停*/
+                doPauseResume();
+            } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay_icon")) {
+                /**重新播放*/
+                status = PlayStateParams.STATE_ERROR;
+                doPauseResume();
+            } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_finish")) {
+                /**返回*/
+                if (!isOnlyFullScreen && !isPortrait) {
+                    mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                } else {
+                    if (mPlayerBack != null) {
+                        mPlayerBack.onPlayerBack();
+                    } else {
+                        mActivity.finish();
+                    }
+                }
+            } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie_icon")) {
+                /**使用移动网络提示继续播放*/
+                isGNetWork = false;
+                doPauseResume();
+            }
         }
-        return this;
-    }
+    };
 
     /**
-     * 播放几种状态监听监听
+     * 进度条滑动监听
      */
-    public PlayerView onInfo(OnInfoListener onInfoListener) {
-        this.onInfoListener = onInfoListener;
-        return this;
-    }
+    private final SeekBar.OnSeekBarChangeListener mSeekListener = new SeekBar.OnSeekBarChangeListener() {
 
-    /**
-     * 播放几种状态监听监听
-     */
-    public PlayerView setPlayerBackListener(OnPlayerBackListener listener) {
-        this.mPlayerBack = listener;
-        return this;
-    }
-
-    public PlayerView onControlPanelVisibilityChang(OnControlPanelVisibilityChangeListener listener) {
-        this.onControlPanelVisibilityChangeListener = listener;
-        return this;
-    }
-
-    /**
-     * 百分比显示切换
-     */
-    public PlayerView toggleAspectRatio() {
-        if (videoView != null) {
-            videoView.toggleAspectRatio();
+        /**数值的改变*/
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            if (!fromUser) {
+                /**不是用户拖动的，自动播放滑动的情况*/
+                return;
+            } else {
+                long duration = getDuration();
+                int position = (int) ((duration * progress * 1.0) / 1000);
+                String time = generateTime(position);
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime")).text(time);
+            }
         }
-        return this;
-    }
 
-    private int rotation = 0;
+        /**开始拖动*/
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+            isDragging = true;
+            mHandler.removeMessages(MESSAGE_SHOW_PROGRESS);
+        }
+
+        /**停止拖动*/
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            long duration = getDuration();
+            videoView.seekTo((int) ((duration * seekBar.getProgress() * 1.0) / 1000));
+            mHandler.removeMessages(MESSAGE_SHOW_PROGRESS);
+            isDragging = false;
+            mHandler.sendEmptyMessageDelayed(MESSAGE_SHOW_PROGRESS, 1000);
+        }
+    };
+
 
     /**
-     * 旋转角度
+     * ========================================视频的监听方法==============================================
      */
-    public PlayerView setPlayerRotation() {
-        if (rotation == 0) {
-            rotation = 90;
-        } else if (rotation == 90) {
-            rotation = 270;
-        } else if (rotation == 270) {
-            rotation = 0;
-        }
-        if (videoView != null) {
-            videoView.setPlayerRotation(rotation);
-            videoView.setAspectRatio(PlayStateParams.fitparent);
-        }
-        return this;
-    }
+
 
     public PlayerView(Activity activity) {
         this.mActivity = activity;
@@ -274,20 +432,44 @@ public class PlayerView {
             Log.e(TAG, "loadLibraries error", e);
         }
         screenWidthPixels = activity.getResources().getDisplayMetrics().widthPixels;
-        query = new Query(activity);
-
+        audioManager = (AudioManager) activity.getSystemService(Context.AUDIO_SERVICE);
+        mMaxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        query = new LayoutQuery(activity);
+        rl_box = activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_box"));
         videoView = (IjkVideoView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "video_view"));
+        streamSelectView = (LinearLayout) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_stream_container"));
+        streamSelectListView = (ListView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_streams_list"));
+        ll_topbar = activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_top_box"));
+        rl_bottombar = activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "rl_bottom_bar"));
+        iv_trumb = (ImageView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "iv_trumb"));
+        iv_back = (ImageView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_finish"));
+        iv_menu = (ImageView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_menu"));
+        iv_bar_player = (ImageView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_play"));
+        iv_player = (ImageView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon"));
+        iv_rotation = (ImageView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "ijk_iv_rotation"));
+        iv_fullscreen = (ImageView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen"));
+        tv_steam = (TextView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_stream"));
+        seekBar = (SeekBar) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_seekBar"));
+        seekBar.setMax(1000);
+        seekBar.setOnSeekBarChangeListener(mSeekListener);
+        iv_bar_player.setOnClickListener(onClickListener);
+        iv_player.setOnClickListener(onClickListener);
+        iv_fullscreen.setOnClickListener(onClickListener);
+        iv_rotation.setOnClickListener(onClickListener);
+        tv_steam.setOnClickListener(onClickListener);
+        iv_back.setOnClickListener(onClickListener);
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie_icon")).clicked(onClickListener);
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay_icon")).clicked(onClickListener);
         videoView.setOnInfoListener(new IMediaPlayer.OnInfoListener() {
             @Override
-            public boolean onInfo(IMediaPlayer mp, int what, int extra) {
+            public boolean onInfo(IMediaPlayer iMediaPlayer, int what, int extra) {
                 statusChange(what);
-                onInfoListener.onInfo(what, extra);
+                if (onInfoListener != null) {
+                    onInfoListener.onInfo(what, extra);
+                }
                 return true;
             }
         });
-        streamSelectView = (LinearLayout) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_stream_container"));
-        streamSelectListView = (ListView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_streams_list"));
-
         this.streamSelectAdapter = new StreamSelectAdapter(mContext, listVideos);
         this.streamSelectListView.setAdapter(this.streamSelectAdapter);
         this.streamSelectListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -306,49 +488,27 @@ public class PlayerView {
                     }
                 }
                 streamSelectAdapter.notifyDataSetChanged();
+                stopPlay();
                 startPlay();
             }
         });
 
-        iv_trumb = (ImageView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "iv_trumb"));
-        iv_rotation = (ImageView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "ijk_iv_rotation"));
-        rl_bottom_bar = (RelativeLayout) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "rl_bottom_bar"));
-        seekBar = (SeekBar) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_seekBar"));
-        seekBar.setMax(1000);
-        seekBar.setOnSeekBarChangeListener(mSeekListener);
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_play")).clicked(onClickListener);
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_stream")).clicked(onClickListener);
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).clicked(onClickListener);
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie_icon")).clicked(onClickListener);
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "ijk_iv_rotation")).clicked(onClickListener);
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen")).clicked(onClickListener);
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_finish")).clicked(onClickListener);
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay_icon")).clicked(onClickListener);
-
-
-        audioManager = (AudioManager) activity.getSystemService(Context.AUDIO_SERVICE);
-        mMaxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         final GestureDetector gestureDetector = new GestureDetector(activity, new PlayerGestureListener());
-
-
-        View liveBox = activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_box"));
-        if (liveBox != null) {
-            liveBox.setClickable(true);
-            liveBox.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View view, MotionEvent motionEvent) {
-                    if (gestureDetector.onTouchEvent(motionEvent))
-                        return true;
-                    // 处理手势结束
-                    switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
-                        case MotionEvent.ACTION_UP:
-                            endGesture();
-                            break;
-                    }
-                    return false;
+        rl_box.setClickable(true);
+        rl_box.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (gestureDetector.onTouchEvent(motionEvent))
+                    return true;
+                // 处理手势结束
+                switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
+                    case MotionEvent.ACTION_UP:
+                        endGesture();
+                        break;
                 }
-            });
-        }
+                return false;
+            }
+        });
 
 
         orientationEventListener = new OrientationEventListener(activity) {
@@ -356,23 +516,23 @@ public class PlayerView {
             public void onOrientationChanged(int orientation) {
                 if (orientation >= 0 && orientation <= 30 || orientation >= 330 || (orientation >= 150 && orientation <= 210)) {
                     //竖屏
-                    if (portrait) {
+                    if (isPortrait) {
                         mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
                         orientationEventListener.disable();
                     }
                 } else if ((orientation >= 90 && orientation <= 120) || (orientation >= 240 && orientation <= 300)) {
-                    if (!portrait) {
+                    if (!isPortrait) {
                         mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
                         orientationEventListener.disable();
                     }
                 }
             }
         };
-        if (fullScreenOnly) {
+        if (isOnlyFullScreen) {
             activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
-        portrait = getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-        initHeight = activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_box")).getLayoutParams().height;
+        isPortrait = (getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        initHeight = rl_box.getLayoutParams().height;
         hideAll();
         if (!playerSupport) {
             showStatus(mActivity.getResources().getString(ResourceUtils.getResourceIdByName(mContext, "string", "not_support")));
@@ -382,23 +542,176 @@ public class PlayerView {
     }
 
 
+    /**==========================================Activity生命周期方法回调=============================*/
     /**
-     * 显示分辨率列表
+     * @Override protected void onPause() {
+     * super.onPause();
+     * if (player != null) {
+     * player.onPause();
+     * }
+     * }
      */
-    private void showStreamSelectView() {
-        this.streamSelectView.setVisibility(View.VISIBLE);
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_top_box")).gone();
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "rl_bottom_bar")).gone();
-        this.streamSelectListView.setItemsCanFocus(true);
+    public PlayerView onPause() {
+        if (status == PlayStateParams.STATE_PLAYING) {
+            pausePlay();
+        }
+        return this;
     }
 
     /**
-     * 隐藏分辨率列表
+     * @Override protected void onResume() {
+     * super.onResume();
+     * if (player != null) {
+     * player.onResume();
+     * }
+     * }
      */
-    private void hideStreamSelectView() {
-        this.streamSelectView.setVisibility(View.GONE);
+    public PlayerView onResume() {
+        if (status == PlayStateParams.STATE_PLAYING) {
+            if (isLive) {
+                videoView.seekTo(0);
+            } else {
+                videoView.seekTo(currentPosition);
+            }
+            doPauseResume();
+        }
+        return this;
     }
 
+    /**
+     * @Override protected void onDestroy() {
+     * super.onDestroy();
+     * if (player != null) {
+     * player.onDestroy();
+     * }
+     * }
+     */
+    public PlayerView onDestroy() {
+        orientationEventListener.disable();
+        mHandler.removeMessages(MESSAGE_RESTART_PLAY);
+        mHandler.removeMessages(MESSAGE_SEEK_NEW_POSITION);
+        videoView.stopPlayback();
+        return this;
+    }
+
+    /**
+     * @Override public void onConfigurationChanged(Configuration newConfig) {
+     * super.onConfigurationChanged(newConfig);
+     * if (player != null) {
+     * player.onConfigurationChanged(newConfig);
+     * }
+     * }
+     */
+    public PlayerView onConfigurationChanged(final Configuration newConfig) {
+        isPortrait = newConfig.orientation == Configuration.ORIENTATION_PORTRAIT;
+        doOnConfigurationChanged(isPortrait);
+        return this;
+    }
+
+    /**
+     * @Override public void onBackPressed() {
+     * if (player != null && player.onBackPressed()) {
+     * return;
+     * }
+     * super.onBackPressed();
+     * }
+     */
+    public boolean onBackPressed() {
+        if (!isOnlyFullScreen && getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+            mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * ==========================================Activity生命周期方法回调=============================
+     */
+
+    /**
+     * ==========================================对外的方法=============================
+     */
+
+
+    /**
+     * 显示缩略图
+     */
+    public PlayerView showThumbnail(OnShowThumbnailListener onShowThumbnailListener) {
+        this.mOnShowThumbnailListener = onShowThumbnailListener;
+        if (mOnShowThumbnailListener != null && iv_trumb != null) {
+            mOnShowThumbnailListener.onShowThumbnail(iv_trumb);
+        }
+        return this;
+    }
+
+    /**
+     * 设置播放信息监听回调
+     */
+    public PlayerView setOnInfoListener(OnInfoListener onInfoListener) {
+        this.onInfoListener = onInfoListener;
+        return this;
+    }
+
+    /**
+     * 设置播放器中的返回键监听
+     */
+    public PlayerView setPlayerBackListener(OnPlayerBackListener listener) {
+        this.mPlayerBack = listener;
+        return this;
+    }
+
+    /**
+     * 设置控制面板显示隐藏监听
+     */
+    public PlayerView setOnControlPanelVisibilityChangListenter(OnControlPanelVisibilityChangeListener listener) {
+        this.onControlPanelVisibilityChangeListener = listener;
+        return this;
+    }
+
+    /**
+     * 百分比显示切换
+     */
+    public PlayerView toggleAspectRatio() {
+        if (videoView != null) {
+            videoView.toggleAspectRatio();
+        }
+        return this;
+    }
+
+    /**
+     * 设置播放区域拉伸类型
+     */
+    public PlayerView setScaleType(int showType) {
+        currentShowType = showType;
+        videoView.setAspectRatio(currentShowType);
+        return this;
+    }
+
+    /**
+     * 旋转角度
+     */
+    public PlayerView setPlayerRotation() {
+        if (rotation == 0) {
+            rotation = 90;
+        } else if (rotation == 90) {
+            rotation = 270;
+        } else if (rotation == 270) {
+            rotation = 0;
+        }
+        setPlayerRotation(rotation);
+        return this;
+    }
+
+    /**
+     * 旋转指定角度
+     */
+    public PlayerView setPlayerRotation(int rotation) {
+        if (videoView != null) {
+            videoView.setPlayerRotation(rotation);
+            videoView.setAspectRatio(currentShowType);
+        }
+        return this;
+    }
 
     /**
      * 设置播放地址
@@ -465,14 +778,14 @@ public class PlayerView {
             videoView.setVideoPath(currentUrl);
             videoView.seekTo(0);
         } else {
-            if (isSwitchStream) {
+            if (isHasSwitchStream) {
                 videoView.setVideoPath(currentUrl);
                 videoView.seekTo(currentPosition);
-                isSwitchStream = false;
+                isHasSwitchStream = false;
             }
         }
         hideAll();
-        if (isGNetWork && (getNetworkType() == 4 || getNetworkType() == 5 || getNetworkType() == 6)) {
+        if (isGNetWork && (NetworkUtils.getNetworkType(mContext) == 4 || NetworkUtils.getNetworkType(mContext) == 5 || NetworkUtils.getNetworkType(mContext) == 6)) {
             query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie")).visible();
         } else {
             if (playerSupport) {
@@ -498,14 +811,14 @@ public class PlayerView {
      */
     public PlayerView switchStream(int index) {
         if (listVideos.size() > index) {
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_stream")).text(listVideos.get(index).getStream());
+            tv_steam.setText(listVideos.get(index).getStream());
             currentUrl = listVideos.get(index).getUrl();
             listVideos.get(index).setSelect(true);
             isLive();
             if (videoView.isPlaying()) {
                 pausePlay();
             }
-            isSwitchStream = true;
+            isHasSwitchStream = true;
         }
         return this;
     }
@@ -515,9 +828,7 @@ public class PlayerView {
      */
     public PlayerView pausePlay() {
         statusChange(PlayStateParams.STATE_PAUSED);
-        if (!isLive) {
-            currentPosition = videoView.getCurrentPosition();
-        }
+        getCurrentPosition();
         videoView.pause();
         return this;
     }
@@ -527,7 +838,7 @@ public class PlayerView {
      */
     public PlayerView stopPlay() {
         videoView.stopPlayback();
-        closePlay = true;
+        isErrorStop = true;
         if (mHandler != null) {
             mHandler.removeMessages(MESSAGE_RESTART_PLAY);
         }
@@ -546,7 +857,12 @@ public class PlayerView {
      * 获取当前播放位置
      */
     public int getCurrentPosition() {
-        currentPosition = videoView.getCurrentPosition();
+        if (!isLive) {
+            currentPosition = videoView.getCurrentPosition();
+        } else {
+            /**直播*/
+            currentPosition = -1;
+        }
         return currentPosition;
     }
 
@@ -579,21 +895,14 @@ public class PlayerView {
         return this;
     }
 
-    /**
-     * 设置播放区域拉伸类型
-     */
-    public PlayerView setScaleType(int showType) {
-        videoView.setAspectRatio(showType);
-        return this;
-    }
 
     /**
      * 是否仅仅为全屏
      */
-    public PlayerView setFullScreenOnly(boolean isFull) {
-        this.fullScreenOnly = isFull;
-        tryFullScreen(fullScreenOnly);
-        if (fullScreenOnly) {
+    public PlayerView setOnlyFullScreen(boolean isFull) {
+        this.isOnlyFullScreen = isFull;
+        tryFullScreen(isOnlyFullScreen);
+        if (isOnlyFullScreen) {
             mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         } else {
             mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
@@ -610,10 +919,10 @@ public class PlayerView {
     }
 
     /**
-     * 设置是否隐藏bar
+     * 设置是否禁止隐藏bar
      */
-    public PlayerView setHideBar(boolean flag) {
-        this.isHideBar = flag;
+    public PlayerView setForbidHideControlPanl(boolean flag) {
+        this.isForbidHideControlPanl = flag;
         return this;
     }
 
@@ -629,14 +938,7 @@ public class PlayerView {
      * 是否禁止触摸
      */
     public PlayerView forbidTouch(boolean forbidTouch) {
-        this.forbidTouch = forbidTouch;
-        return this;
-    }
-
-    /**
-     * 是否显示拓展栏
-     */
-    public PlayerView showExpandBar(boolean isShow, BarLocation location) {
+        this.isForbidTouch = forbidTouch;
         return this;
     }
 
@@ -651,22 +953,98 @@ public class PlayerView {
     }
 
     /**
+     * 获取顶部控制barview
+     */
+    public View getTopBarView() {
+        return ll_topbar;
+    }
+
+    /**
+     * 获取底部控制barview
+     */
+    public View getBottonBarView() {
+        return rl_bottombar;
+    }
+
+    /**
      * 获取旋转view
      */
     public ImageView getRationView() {
         return iv_rotation;
     }
 
+    /**
+     * 获取返回view
+     */
+    public ImageView getBackView() {
+        return iv_back;
+    }
 
     /**
-     * 隐藏菜单栏
+     * 获取菜单view
+     */
+    public ImageView getMenuView() {
+        return iv_menu;
+    }
+
+    /**
+     * 获取全屏按钮view
+     */
+    public ImageView getFullScreenView() {
+        return iv_fullscreen;
+    }
+
+    /**
+     * 获取底部bar的播放view
+     */
+    public ImageView getBarPlayerView() {
+        return iv_bar_player;
+    }
+
+    /**
+     * 获取中间的播放view
+     */
+    public ImageView getPlayerView() {
+        return iv_player;
+    }
+
+    /**
+     * 隐藏返回键
+     */
+    public PlayerView hideBack(boolean isHide) {
+        iv_back.setVisibility(isHide ? View.GONE : View.VISIBLE);
+        return this;
+    }
+
+    /**
+     * 隐藏菜单键
      */
     public PlayerView hideMenu(boolean isHide) {
-        if (isHide) {
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_menu")).gone();
-        } else {
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_menu")).visible();
-        }
+        iv_menu.setVisibility(isHide ? View.GONE : View.VISIBLE);
+        return this;
+    }
+
+    /**
+     * 隐藏分辨率按钮
+     */
+    public PlayerView hideSteam(boolean isHide) {
+        tv_steam.setVisibility(isHide ? View.GONE : View.VISIBLE);
+        return this;
+    }
+
+    /**
+     * 隐藏旋转按钮
+     */
+    public PlayerView hideRotation(boolean isHide) {
+        iv_rotation.setVisibility(isHide ? View.GONE : View.VISIBLE);
+        return this;
+    }
+
+    /**
+     * 隐藏全屏按钮
+     */
+    public PlayerView hideFullscreen(boolean isHide) {
+        iv_fullscreen.setVisibility(isHide ? View.GONE : View.VISIBLE);
         return this;
     }
 
@@ -677,54 +1055,53 @@ public class PlayerView {
         isShowControlPanl = !isShowControlPanl;
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_stream_container")).gone();
         if (isShowControlPanl) {
-            if (!isHideBar) {
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_top_box")).visible();
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "rl_bottom_bar")).visible();
-            }
+            ll_topbar.setVisibility(View.VISIBLE);
+            rl_bottombar.setVisibility(View.VISIBLE);
             if (isLive) {
                 query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_seekBar")).gone();
                 query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime")).gone();
                 query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime")).gone();
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_stream")).gone();
             } else {
                 query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_seekBar")).visible();
                 query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime")).visible();
                 query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime")).visible();
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_stream")).visible();
             }
-            if (fullScreenOnly || isForbidDoulbeUp) {
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen")).gone();
+            if (isOnlyFullScreen || isForbidDoulbeUp) {
+                iv_fullscreen.setVisibility(View.GONE);
             } else {
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen")).visible();
+                iv_fullscreen.setVisibility(View.VISIBLE);
             }
-            onControlPanelVisibilityChangeListener.change(true);
+            if (onControlPanelVisibilityChangeListener != null) {
+                onControlPanelVisibilityChangeListener.change(true);
+            }
             /**显示面板的时候再根据状态显示播放按钮*/
             if (status == PlayStateParams.STATE_PLAYING
                     || status == PlayStateParams.STATE_PREPARED
                     || status == PlayStateParams.STATE_BUFFERING_END
                     || status == PlayStateParams.STATE_PAUSED) {
-                if (isLive) {
-                    query.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).gone();
-                } else {
-                    query.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).visible();
-                }
+                iv_player.setVisibility(isLive ? View.GONE : View.VISIBLE);
             } else {
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).gone();
+                iv_player.setVisibility(View.GONE);
             }
             updatePausePlay();
             mHandler.sendEmptyMessage(MESSAGE_SHOW_PROGRESS);
             mAutoPlayRunnable.start();
         } else {
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_top_box")).gone();
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "rl_bottom_bar")).gone();
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).gone();
+            ll_topbar.setVisibility(isForbidHideControlPanl ? View.VISIBLE : View.GONE);
+            rl_bottombar.setVisibility(isForbidHideControlPanl ? View.VISIBLE : View.GONE);
+            iv_player.setVisibility(View.GONE);
             mHandler.removeMessages(MESSAGE_SHOW_PROGRESS);
-            onControlPanelVisibilityChangeListener.change(false);
+            if (onControlPanelVisibilityChangeListener != null) {
+                onControlPanelVisibilityChangeListener.change(false);
+            }
             mAutoPlayRunnable.stop();
         }
         return this;
     }
 
+    /**
+     * 全屏切换
+     */
     public PlayerView toggleFullScreen() {
         if (getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
             mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -735,292 +1112,45 @@ public class PlayerView {
         return this;
     }
 
-
-    /**==========================================Activity生命周期方法回调=============================*/
     /**
-     * @Override protected void onPause() {
-     * super.onPause();
-     * if (player != null) {
-     * player.onPause();
-     * }
-     * }
-     */
-    public PlayerView onPause() {
-        if (status == PlayStateParams.STATE_PLAYING) {
-            pausePlay();
-        }
-        return this;
-    }
-
-    /**
-     * @Override protected void onResume() {
-     * super.onResume();
-     * if (player != null) {
-     * player.onResume();
-     * }
-     * }
-     */
-    public PlayerView onResume() {
-        if (status == PlayStateParams.STATE_PLAYING) {
-            if (isLive) {
-                videoView.seekTo(0);
-            } else {
-                videoView.seekTo(currentPosition);
-            }
-            doPauseResume();
-        }
-        return this;
-    }
-
-    /**
-     * @Override protected void onDestroy() {
-     * super.onDestroy();
-     * if (player != null) {
-     * player.onDestroy();
-     * }
-     * }
-     */
-    public PlayerView onDestroy() {
-        orientationEventListener.disable();
-        mHandler.removeMessages(MESSAGE_RESTART_PLAY);
-        mHandler.removeMessages(MESSAGE_SEEK_NEW_POSITION);
-        videoView.stopPlayback();
-        return this;
-    }
-
-    /**
-     * @Override public void onConfigurationChanged(Configuration newConfig) {
-     * super.onConfigurationChanged(newConfig);
-     * if (player != null) {
-     * player.onConfigurationChanged(newConfig);
-     * }
-     * }
-     */
-    public PlayerView onConfigurationChanged(final Configuration newConfig) {
-        portrait = newConfig.orientation == Configuration.ORIENTATION_PORTRAIT;
-        doOnConfigurationChanged(portrait);
-        return this;
-    }
-
-    /**
-     * @Override public void onBackPressed() {
-     * if (player != null && player.onBackPressed()) {
-     * return;
-     * }
-     * super.onBackPressed();
-     * }
-     */
-    public boolean onBackPressed() {
-        if (!fullScreenOnly && getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-            mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * ==========================================Activity生命周期方法回调=============================
+     * ==========================================对外的方法=============================
      */
 
-
-    /**
-     * ==========================================内部方法=============================
-     */
-    private boolean instantSeeking;
-    private final SeekBar.OnSeekBarChangeListener mSeekListener = new SeekBar.OnSeekBarChangeListener() {
-        @Override
-        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-            if (!fromUser)
-                return;
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay")).gone();//移动时隐藏掉状态image
-            int newPosition = (int) ((duration * progress * 1.0) / 1000);
-            String time = generateTime(newPosition);
-            if (instantSeeking) {
-                videoView.seekTo(newPosition);
-            }
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime")).text(time);
-        }
-
-        @Override
-        public void onStartTrackingTouch(SeekBar seekBar) {
-            isDragging = true;
-            mHandler.removeMessages(MESSAGE_SHOW_PROGRESS);
-            if (instantSeeking) {
-                audioManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
-            }
-        }
-
-        @Override
-        public void onStopTrackingTouch(SeekBar seekBar) {
-            if (!instantSeeking) {
-                videoView.seekTo((int) ((duration * seekBar.getProgress() * 1.0) / 1000));
-            }
-            mHandler.removeMessages(MESSAGE_SHOW_PROGRESS);
-            audioManager.setStreamMute(AudioManager.STREAM_MUSIC, false);
-            isDragging = false;
-            mHandler.sendEmptyMessageDelayed(MESSAGE_SHOW_PROGRESS, 1000);
-        }
-    };
-
-    private long newPosition;
-    @SuppressWarnings("HandlerLeak")
-    private Handler mHandler = new Handler(Looper.getMainLooper()) {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MESSAGE_HIDE_CENTER_BOX:
-                    query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_volume_box")).gone();
-                    query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_brightness_box")).gone();
-                    query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fastForward_box")).gone();
-                    break;
-                case MESSAGE_SEEK_NEW_POSITION:
-                    if (!isLive && newPosition >= 0) {
-                        videoView.seekTo((int) newPosition);
-                        newPosition = -1;
-                    }
-                    break;
-                case MESSAGE_SHOW_PROGRESS:
-                    long pos = setProgress();
-                    if (!isDragging && isShowControlPanl) {
-                        msg = obtainMessage(MESSAGE_SHOW_PROGRESS);
-                        sendMessageDelayed(msg, 1000 - (pos % 1000));
-                        updatePausePlay();
-                    }
-                    break;
-                case MESSAGE_RESTART_PLAY:
-                    status = PlayStateParams.STATE_ERROR;
-                    doPauseResume();
-                    break;
-            }
-        }
-    };
-
-
-    private final View.OnClickListener onClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_stream")) {
-                if (!isLive) {
-                    showStreamSelectView();
-                }
-            } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "ijk_iv_rotation")) {
-                setPlayerRotation();
-            } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen")) {
-                toggleFullScreen();
-            } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_play") || v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")) {
-                doPauseResume();
-            } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay_icon")) {
-                status = PlayStateParams.STATE_ERROR;
-                doPauseResume();
-            } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_finish")) {
-                if (!fullScreenOnly && !portrait) {
-                    mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                } else {
-                    if (mPlayerBack != null) {
-                        mPlayerBack.onPlayerBack();
-                    } else {
-                        mActivity.finish();
-                    }
-                }
-            } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie_icon")) {
-                isGNetWork = false;
-                doPauseResume();
-            }
-        }
-    };
-
-
-    /**
-     * 判断当前网络类型-1为未知网络0为没有网络连接1网络断开或关闭2为以太网3为WiFi4为2G5为3G6为4G
-     */
-    private int getNetworkType() {
-        ConnectivityManager connectMgr = (ConnectivityManager) mContext
-                .getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        NetworkInfo networkInfo = connectMgr.getActiveNetworkInfo();
-        if (networkInfo == null) {
-            /** 没有任何网络 */
-            return 0;
-        }
-        if (!networkInfo.isConnected()) {
-            /** 网络断开或关闭 */
-            return 1;
-        }
-        if (networkInfo.getType() == ConnectivityManager.TYPE_ETHERNET) {
-            /** 以太网网络 */
-            return 2;
-        } else if (networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
-            /** wifi网络，当激活时，默认情况下，所有的数据流量将使用此连接 */
-            return 3;
-        } else if (networkInfo.getType() == ConnectivityManager.TYPE_MOBILE) {
-            /** 移动数据连接,不能与连接共存,如果wifi打开，则自动关闭 */
-            switch (networkInfo.getSubtype()) {
-                case TelephonyManager.NETWORK_TYPE_GPRS:
-                case TelephonyManager.NETWORK_TYPE_EDGE:
-                case TelephonyManager.NETWORK_TYPE_CDMA:
-                case TelephonyManager.NETWORK_TYPE_1xRTT:
-                case TelephonyManager.NETWORK_TYPE_IDEN:
-                    /** 2G网络 */
-                    return 4;
-                case TelephonyManager.NETWORK_TYPE_UMTS:
-                case TelephonyManager.NETWORK_TYPE_EVDO_0:
-                case TelephonyManager.NETWORK_TYPE_EVDO_A:
-                case TelephonyManager.NETWORK_TYPE_HSDPA:
-                case TelephonyManager.NETWORK_TYPE_HSUPA:
-                case TelephonyManager.NETWORK_TYPE_HSPA:
-                case TelephonyManager.NETWORK_TYPE_EVDO_B:
-                case TelephonyManager.NETWORK_TYPE_EHRPD:
-                case TelephonyManager.NETWORK_TYPE_HSPAP:
-                    /** 3G网络 */
-                    return 5;
-                case TelephonyManager.NETWORK_TYPE_LTE:
-                    /** 4G网络 */
-                    return 6;
-            }
-        }
-        /** 未知网络 */
-        return -1;
-    }
-
-    /**
-     * 手势结束
-     */
-    private void endGesture() {
-        volume = -1;
-        brightness = -1f;
-        if (newPosition >= 0) {
-            mHandler.removeMessages(MESSAGE_SEEK_NEW_POSITION);
-            mHandler.sendEmptyMessage(MESSAGE_SEEK_NEW_POSITION);
-        }
-        mHandler.removeMessages(MESSAGE_HIDE_CENTER_BOX);
-        mHandler.sendEmptyMessageDelayed(MESSAGE_HIDE_CENTER_BOX, 500);
-
-    }
 
     private void statusChange(int newStatus) {
         status = newStatus;
         if (!isLive && newStatus == PlayStateParams.STATE_COMPLETED) {
+            /**非直播播放结束*/
             hideAll();
             showStatus("播放结束");
-        } else if (newStatus == PlayStateParams.STATE_PREPARING || newStatus == PlayStateParams.STATE_BUFFERING_START) {
+        } else if (newStatus == PlayStateParams.STATE_PREPARING
+                || newStatus == PlayStateParams.STATE_BUFFERING_START) {
+            /**视频缓冲*/
             hideAll();
             query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_loading")).visible();
-        } else if (newStatus == PlayStateParams.STATE_PREPARED || newStatus == PlayStateParams.STATE_BUFFERING_END || newStatus == PlayStateParams.STATE_PLAYING || newStatus == PlayStateParams.STATE_PAUSED) {
+        } else if (newStatus == PlayStateParams.STATE_PREPARED
+                || newStatus == PlayStateParams.STATE_BUFFERING_END
+                || newStatus == PlayStateParams.STATE_PLAYING
+                || newStatus == PlayStateParams.STATE_PAUSED) {
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    /**延迟一秒隐藏*/
+                    /**延迟0.5秒隐藏*/
                     hideAll();
+                    /**视频封面隐藏*/
                     query.id(ResourceUtils.getResourceIdByName(mContext, "id", "ll_bg")).gone();
                 }
-            }, 1000);
+            }, 500);
         } else if (newStatus == -10000) {
-            if (!(isGNetWork && (getNetworkType() == 4 || getNetworkType() == 5 || getNetworkType() == 6))) {
+            if (!(isGNetWork &&
+                    (NetworkUtils.getNetworkType(mContext) == 4
+                            || NetworkUtils.getNetworkType(mContext) == 5
+                            || NetworkUtils.getNetworkType(mContext) == 6))) {
                 hideAll();
                 if (isLive) {
                     showStatus("获取不到直播源");
                     /**5秒尝试重连*/
-                    if (!closePlay) {
+                    if (!isErrorStop) {
                         mHandler.sendEmptyMessageDelayed(MESSAGE_RESTART_PLAY, 10000);
                     }
                 } else {
@@ -1029,11 +1159,12 @@ public class PlayerView {
             }
 
         } else if (newStatus == PlayStateParams.STATE_ERROR) {
-            if (!(isGNetWork && (getNetworkType() == 4 || getNetworkType() == 5 || getNetworkType() == 6))) {
+            if (!(isGNetWork && (NetworkUtils.getNetworkType(mContext) == 4 || NetworkUtils.getNetworkType(mContext) == 5 || NetworkUtils.getNetworkType(mContext) == 6))) {
                 hideAll();
                 if (isLive) {
                     showStatus(mActivity.getResources().getString(ResourceUtils.getResourceIdByName(mContext, "string", "small_problem")));
-                    /**5秒尝试重连*/if (!closePlay) {
+                    /**5秒尝试重连*/
+                    if (!isErrorStop) {
                         mHandler.sendEmptyMessageDelayed(MESSAGE_RESTART_PLAY, 10000);
                     }
                 } else {
@@ -1043,20 +1174,42 @@ public class PlayerView {
         }
     }
 
-
-    private void hideAll() {
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_top_box")).gone();
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "rl_bottom_bar")).gone();
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_stream_container")).gone();
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay")).gone();
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie")).gone();
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_loading")).gone();
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).gone();
-        onControlPanelVisibilityChangeListener.change(false);
+    private void doPauseResume() {
+        if (status == PlayStateParams.STATE_COMPLETED) {
+            /**直播是没有进入的*/
+            currentPosition = 0;
+            videoView.seekTo(currentPosition);
+            startPlay();
+        } else if (videoView.isPlaying()) {
+            if (isLive) {
+                videoView.stopPlayback();
+            } else {
+                pausePlay();
+            }
+        } else {
+            startPlay();
+        }
+        updatePausePlay();
     }
 
+
+    /**
+     * ==========================================内部方法=============================
+     */
+
+    /**
+     * 显示视频播放状态提示
+     */
+    private void showStatus(String statusText) {
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay")).visible();
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_status_text")).text(statusText);
+    }
+
+    /**
+     * 界面方向改变是刷新界面
+     */
     private void doOnConfigurationChanged(final boolean portrait) {
-        if (videoView != null && !fullScreenOnly) {
+        if (videoView != null && !isOnlyFullScreen) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -1075,6 +1228,9 @@ public class PlayerView {
         }
     }
 
+    /**
+     * 设置界面方向带隐藏actionbar
+     */
     private void tryFullScreen(boolean fullScreen) {
         if (mActivity instanceof AppCompatActivity) {
             ActionBar supportActionBar = ((AppCompatActivity) mActivity).getSupportActionBar();
@@ -1089,6 +1245,9 @@ public class PlayerView {
         setFullScreen(fullScreen);
     }
 
+    /**
+     * 设置界面方向
+     */
     private void setFullScreen(boolean fullScreen) {
         if (mActivity != null) {
             WindowManager.LayoutParams attrs = mActivity.getWindow().getAttributes();
@@ -1105,19 +1264,60 @@ public class PlayerView {
 
     }
 
-    private void showStatus(String statusText) {
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay")).visible();
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_status_text")).text(statusText);
+    /**
+     * 隐藏所有界面
+     */
+    private void hideAll() {
+        ll_topbar.setVisibility(View.GONE);
+        rl_bottombar.setVisibility(View.GONE);
+        iv_player.setVisibility(View.GONE);
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_stream_container")).gone();
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay")).gone();
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie")).gone();
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_loading")).gone();
+        if (onControlPanelVisibilityChangeListener != null) {
+            onControlPanelVisibilityChangeListener.change(false);
+        }
     }
 
-    private String generateTime(long time) {
-        int totalSeconds = (int) (time / 1000);
-        int seconds = totalSeconds % 60;
-        int minutes = (totalSeconds / 60) % 60;
-        int hours = totalSeconds / 3600;
-        return hours > 0 ? String.format("%02d:%02d:%02d", hours, minutes, seconds) : String.format("%02d:%02d", minutes, seconds);
+    /**
+     * 显示分辨率列表
+     */
+    private void showStreamSelectView() {
+        this.streamSelectView.setVisibility(View.VISIBLE);
+        ll_topbar.setVisibility(View.GONE);
+        rl_bottombar.setVisibility(View.GONE);
+        this.streamSelectListView.setItemsCanFocus(true);
     }
 
+    /**
+     * 隐藏分辨率列表
+     */
+    private void hideStreamSelectView() {
+        this.streamSelectView.setVisibility(View.GONE);
+    }
+
+
+    /**
+     * 手势结束
+     */
+    private void endGesture() {
+        volume = -1;
+        brightness = -1f;
+        if (newPosition >= 0) {
+            mHandler.removeMessages(MESSAGE_SEEK_NEW_POSITION);
+            mHandler.sendEmptyMessage(MESSAGE_SEEK_NEW_POSITION);
+        } else {
+            /**什么都不做(do nothing)*/
+        }
+        mHandler.removeMessages(MESSAGE_HIDE_CENTER_BOX);
+        mHandler.sendEmptyMessageDelayed(MESSAGE_HIDE_CENTER_BOX, 500);
+
+    }
+
+    /**
+     * 获取界面方向
+     */
     private int getScreenOrientation() {
         int rotation = mActivity.getWindowManager().getDefaultDisplay().getRotation();
         DisplayMetrics dm = new DisplayMetrics();
@@ -1177,13 +1377,15 @@ public class PlayerView {
         return orientation;
     }
 
-
-    private long setProgress() {
+    /**
+     * 同步进度
+     */
+    private long syncProgress() {
         if (isDragging) {
             return 0;
         }
-        long position = videoView.getCurrentPosition();
-        long duration = videoView.getDuration();
+        long position = getCurrentPosition();
+        long duration = getDuration();
         if (seekBar != null) {
             if (duration > 0) {
                 long pos = 1000L * position / duration;
@@ -1192,29 +1394,20 @@ public class PlayerView {
             int percent = videoView.getBufferPercentage();
             seekBar.setSecondaryProgress(percent * 10);
         }
-
-        this.duration = duration;
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime")).text(generateTime(position));
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime")).text(generateTime(this.duration));
         return position;
     }
 
-    private void doPauseResume() {
-        if (status == PlayStateParams.STATE_COMPLETED) {
-            /**直播是没有进入的*/
-            currentPosition = 0;
-            videoView.seekTo(currentPosition);
-            startPlay();
-        } else if (videoView.isPlaying()) {
-            if (isLive) {
-                videoView.stopPlayback();
-            } else {
-                pausePlay();
-            }
-        } else {
-            startPlay();
-        }
-        updatePausePlay();
+    /**
+     * 时长格式化显示
+     */
+    private String generateTime(long time) {
+        int totalSeconds = (int) (time / 1000);
+        int seconds = totalSeconds % 60;
+        int minutes = (totalSeconds / 60) % 60;
+        int hours = totalSeconds / 3600;
+        return hours > 0 ? String.format("%02d:%02d:%02d", hours, minutes, seconds) : String.format("%02d:%02d", minutes, seconds);
     }
 
     /**
@@ -1223,14 +1416,14 @@ public class PlayerView {
     private void updatePausePlay() {
         if (videoView.isPlaying()) {
             if (isLive) {
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_play")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_stop_white_24dp"));
+                iv_bar_player.setImageResource(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_stop_white_24dp"));
             } else {
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_play")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_icon_media_pause"));
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_center_pause"));
+                iv_bar_player.setImageResource(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_icon_media_pause"));
+                iv_player.setImageResource(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_center_pause"));
             }
         } else {
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_play")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_arrow_white_24dp"));
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_center_play"));
+            iv_bar_player.setImageResource(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_arrow_white_24dp"));
+            iv_player.setImageResource(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_center_play"));
         }
     }
 
@@ -1239,9 +1432,9 @@ public class PlayerView {
      */
     private void updateFullScreenButton() {
         if (getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_icon_fullscreen_shrink"));
+            iv_fullscreen.setImageResource(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_icon_fullscreen_shrink"));
         } else {
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen")).image(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_icon_fullscreen_stretch"));
+            iv_fullscreen.setImageResource(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_icon_fullscreen_stretch"));
         }
     }
 
@@ -1256,7 +1449,6 @@ public class PlayerView {
             if (volume < 0)
                 volume = 0;
         }
-
         int index = (int) (percent * mMaxVolume) + volume;
         if (index > mMaxVolume)
             index = mMaxVolume;
@@ -1286,12 +1478,10 @@ public class PlayerView {
      * @param percent
      */
     private void onProgressSlide(float percent) {
-        long position = videoView.getCurrentPosition();
-        long duration = videoView.getDuration();
+        int position = getCurrentPosition();
+        long duration = getDuration();
         long deltaMax = Math.min(100 * 1000, duration - position);
         long delta = (long) (deltaMax * percent);
-
-
         newPosition = delta + position;
         if (newPosition > duration) {
             newPosition = duration;
@@ -1334,15 +1524,20 @@ public class PlayerView {
         }
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_brightness")).text(((int) (lpa.screenBrightness * 100)) + "%");
         mActivity.getWindow().setAttributes(lpa);
-
     }
 
     /**
      * ==========================================内部方法=============================
      */
 
-    private AutoPlayRunnable mAutoPlayRunnable = new AutoPlayRunnable();
 
+    /**
+     * ==========================================内部类=============================
+     */
+
+    /**
+     * 收起控制面板轮询，默认5秒无操作，收起控制面板，
+     */
     private class AutoPlayRunnable implements Runnable {
         private int AUTO_PLAY_INTERVAL = 5000;
         private boolean mShouldAutoPlay;
@@ -1379,114 +1574,23 @@ public class PlayerView {
         }
     }
 
-
-    class Query {
-        private final Activity activity;
-        private View view;
-
-        public Query(Activity activity) {
-            this.activity = activity;
-        }
-
-        public Query id(int id) {
-            view = activity.findViewById(id);
-            return this;
-        }
-
-        public Query image(int resId) {
-            if (view instanceof ImageView) {
-                ((ImageView) view).setImageResource(resId);
-            }
-            return this;
-        }
-
-        public Query visible() {
-            if (view != null) {
-                view.setVisibility(View.VISIBLE);
-            }
-            return this;
-        }
-
-        public Query gone() {
-            if (view != null) {
-                view.setVisibility(View.GONE);
-            }
-            return this;
-        }
-
-        public Query invisible() {
-            if (view != null) {
-                view.setVisibility(View.INVISIBLE);
-            }
-            return this;
-        }
-
-        public Query clicked(View.OnClickListener handler) {
-            if (view != null) {
-                view.setOnClickListener(handler);
-            }
-            return this;
-        }
-
-        public Query text(CharSequence text) {
-            if (view != null && view instanceof TextView) {
-                ((TextView) view).setText(text);
-            }
-            return this;
-        }
-
-        public Query visibility(int visible) {
-            if (view != null) {
-                view.setVisibility(visible);
-            }
-            return this;
-        }
-
-        private void size(boolean width, int n, boolean dip) {
-
-            if (view != null) {
-
-                ViewGroup.LayoutParams lp = view.getLayoutParams();
-
-
-                if (n > 0 && dip) {
-                    n = dip2pixel(activity, n);
-                }
-
-                if (width) {
-                    lp.width = n;
-                } else {
-                    lp.height = n;
-                }
-
-                view.setLayoutParams(lp);
-
-            }
-
-        }
-
-        public void height(int height, boolean dip) {
-            size(false, height, dip);
-        }
-
-        public int dip2pixel(Context context, float n) {
-            int value = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, n, context.getResources().getDisplayMetrics());
-            return value;
-        }
-
-        public float pixel2dip(Context context, float n) {
-            Resources resources = context.getResources();
-            DisplayMetrics metrics = resources.getDisplayMetrics();
-            float dp = n / (metrics.densityDpi / 160f);
-            return dp;
-
-        }
-    }
-
+    /**
+     * 播放器的手势监听
+     */
     public class PlayerGestureListener extends GestureDetector.SimpleOnGestureListener {
-        private boolean firstTouch;
-        private boolean volumeControl;
-        private boolean toSeek;
+
+        /**
+         * 是否是按下的标识，默认为其他动作，true为按下标识，false为其他动作
+         */
+        private boolean isDownTouch;
+        /**
+         * 是否声音控制,默认为亮度控制，true为声音控制，false为亮度控制
+         */
+        private boolean isVolume;
+        /**
+         * 是否横向滑动，默认为纵向滑动，true为横向滑动，false为纵向滑动
+         */
+        private boolean isLandscape;
 
         /**
          * 双击
@@ -1494,15 +1598,18 @@ public class PlayerView {
         @Override
         public boolean onDoubleTap(MotionEvent e) {
             /**视频视窗双击事件*/
-            if (!forbidTouch && !fullScreenOnly && !isForbidDoulbeUp) {
+            if (!isForbidTouch && !isOnlyFullScreen && !isForbidDoulbeUp) {
                 toggleFullScreen();
             }
             return true;
         }
 
+        /**
+         * 按下
+         */
         @Override
         public boolean onDown(MotionEvent e) {
-            firstTouch = true;
+            isDownTouch = true;
             return super.onDown(e);
 
         }
@@ -1513,24 +1620,24 @@ public class PlayerView {
          */
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            if (!forbidTouch) {
+            if (!isForbidTouch) {
                 float mOldX = e1.getX(), mOldY = e1.getY();
                 float deltaY = mOldY - e2.getY();
                 float deltaX = mOldX - e2.getX();
-                if (firstTouch) {
-                    toSeek = Math.abs(distanceX) >= Math.abs(distanceY);
-                    volumeControl = mOldX > screenWidthPixels * 0.5f;
-                    firstTouch = false;
+                if (isDownTouch) {
+                    isLandscape = Math.abs(distanceX) >= Math.abs(distanceY);
+                    isVolume = mOldX > screenWidthPixels * 0.5f;
+                    isDownTouch = false;
                 }
 
-                if (toSeek) {
+                if (isLandscape) {
                     if (!isLive) {
                         /**进度设置*/
                         onProgressSlide(-deltaX / videoView.getWidth());
                     }
                 } else {
                     float percent = deltaY / videoView.getHeight();
-                    if (volumeControl) {
+                    if (isVolume) {
                         /**声音设置*/
                         onVolumeSlide(percent);
                     } else {
@@ -1544,14 +1651,20 @@ public class PlayerView {
             return super.onScroll(e1, e2, distanceX, distanceY);
         }
 
+        /**
+         * 单击
+         */
         @Override
         public boolean onSingleTapUp(MotionEvent e) {
             /**视频视窗单击事件*/
-            if (!forbidTouch) {
+            if (!isForbidTouch) {
                 operatorPanl();
             }
             return true;
         }
     }
+    /**
+     * ==========================================内部方法=============================
+     */
 
 }

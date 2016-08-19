@@ -57,7 +57,7 @@ public class PlayerLiveActivity extends Activity {
                 .setScaleType(PlayStateParams.fitparent)
                 .forbidTouch(false)
                 .setForbidDoulbeUp(true)
-                .setHideBar(true)
+                .setForbidHideControlPanl(true)
                 .showThumbnail(new OnShowThumbnailListener() {
                     @Override
                     public void onShowThumbnail(ImageView ivThumbnail) {

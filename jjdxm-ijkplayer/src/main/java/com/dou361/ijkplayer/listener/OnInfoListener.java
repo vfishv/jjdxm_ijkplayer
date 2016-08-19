@@ -20,5 +20,7 @@ package com.dou361.ijkplayer.listener;
  * ========================================
  */
 public interface OnInfoListener {
+
+    /**这里融合了ijkplayer原生播放器的几个监听OnPreparedListener、OnCompletionListener、OnErrorListener、OnInfoListener*/
     void onInfo(int what, int extra);
 }

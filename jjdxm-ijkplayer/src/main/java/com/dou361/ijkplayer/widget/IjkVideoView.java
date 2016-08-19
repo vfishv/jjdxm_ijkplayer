@@ -51,22 +51,22 @@ import tv.danmaku.ijk.media.player.misc.IMediaDataSource;
 
 /**
  * ========================================
- * <p/>
+ * <p>
  * 版 权：dou361.com 版权所有 （C） 2015
- * <p/>
+ * <p>
  * 作 者：陈冠明
- * <p/>
+ * <p>
  * 个人网站：http://www.dou361.com
- * <p/>
+ * <p>
  * 版 本：1.0
- * <p/>
+ * <p>
  * 创建日期：2016/8/10 15:29
- * <p/>
+ * <p>
  * 描 述：视频渲染界面管理
- * <p/>
- * <p/>
+ * <p>
+ * <p>
  * 修订历史：
- * <p/>
+ * <p>
  * ========================================
  */
 public class IjkVideoView extends FrameLayout implements MediaController.MediaPlayerControl {
@@ -75,6 +75,9 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
      * settable by the client  播放地址通过客户端可设置
      */
     private Uri mUri;
+    /**
+     * 播放器的一些基本配置
+     */
     private Map<String, String> mHeaders;
 
     /**
@@ -114,7 +117,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     /**
      * 媒体播放器
      */
-    private IMediaPlayer mMediaPlayer = null;
+    private IMediaPlayer mMediaPlayer;
     /**
      * 媒体控制器
      */
@@ -893,6 +896,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         if (isInPlaybackState()) {
             mMediaPlayer.start();
             mCurrentState = PlayStateParams.STATE_PLAYING;
+        } else {
         }
         mTargetState = PlayStateParams.STATE_PLAYING;
     }

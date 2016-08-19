@@ -22,7 +22,7 @@ import android.widget.TextView;
  * <p>
  * 创建日期：2016/8/10 15:29
  * <p>
- * 描 述：通过Acitvity去查询对应的view
+ * 描 述：通过Acitvity去查询界面布局中对应的view
  * <p>
  * <p>
  * 修订历史：
