@@ -59,6 +59,7 @@ or Gradle:
 
 历史版本：
 
+	compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:1.0.1'
 	compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:1.0.0'
 
 
@@ -330,7 +331,7 @@ jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
 	//显示缩略图
 	PlayerView showThumbnail(OnShowThumbnailListener onShowThumbnailListener)
 	//设置播放信息监听回调
-	PlayerView setOnInfoListener(OnInfoListener onInfoListener)
+	PlayerView setOnInfoListener(IMediaPlayer.OnInfoListener onInfoListener)
 	//设置播放器中的返回键监听
 	PlayerView setPlayerBackListener(OnPlayerBackListener listener)
 	//设置控制面板显示隐藏监听
@@ -416,13 +417,44 @@ jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
 	//全屏切换
 	PlayerView toggleFullScreen()
 
+3.ijkplayer封装的视频播放信息返回码监听，可以通过setOnInfoListener去监听
 
+
+	/*
+     * Do not change these values without updating their counterparts in native
+     */
+    int MEDIA_INFO_UNKNOWN = 1;//未知信息
+    int MEDIA_INFO_STARTED_AS_NEXT = 2;//播放下一条
+    int MEDIA_INFO_VIDEO_RENDERING_START = 3;//视频开始整备中
+    int MEDIA_INFO_VIDEO_TRACK_LAGGING = 700;//视频日志跟踪
+    int MEDIA_INFO_BUFFERING_START = 701;//开始缓冲中
+    int MEDIA_INFO_BUFFERING_END = 702;//缓冲结束
+    int MEDIA_INFO_NETWORK_BANDWIDTH = 703;//网络带宽，网速方面
+    int MEDIA_INFO_BAD_INTERLEAVING = 800;//
+    int MEDIA_INFO_NOT_SEEKABLE = 801;//不可设置播放位置，直播方面
+    int MEDIA_INFO_METADATA_UPDATE = 802;//
+    int MEDIA_INFO_TIMED_TEXT_ERROR = 900;
+    int MEDIA_INFO_UNSUPPORTED_SUBTITLE = 901;//不支持字幕
+    int MEDIA_INFO_SUBTITLE_TIMED_OUT = 902;//字幕超时
+
+    int MEDIA_INFO_VIDEO_INTERRUPT= -10000;//数据连接中断
+    int MEDIA_INFO_VIDEO_ROTATION_CHANGED = 10001;//视频方向改变
+    int MEDIA_INFO_AUDIO_RENDERING_START = 10002;//音频开始整备中
+
+    int MEDIA_ERROR_UNKNOWN = 1;//未知错误
+    int MEDIA_ERROR_SERVER_DIED = 100;//服务挂掉
+    int MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK = 200;//数据错误没有有效的回收
+    int MEDIA_ERROR_IO = -1004;//IO错误
+    int MEDIA_ERROR_MALFORMED = -1007;
+    int MEDIA_ERROR_UNSUPPORTED = -1010;//数据不支持
+    int MEDIA_ERROR_TIMED_OUT = -110;//数据超时
 
 
 
 
 ## ChangeLog ##
 
+2016.08.20 修复视频进入后台继续播放，切换视频源是画面卡住等问题
 2016.08.20 修复点击播放、点击暂停、再点击播放时，加载进度条一直显示问题；修复第一次打开播放器，触摸视频界面，视频重新播放问题；恢复视频拖动条默认样式，修复显示不完整问题；添加对外操作的view，可通过getxxxView()方法获得；添加了PlayerView对象的方法及说明，可链式开发。
 
 ## About Author ##
