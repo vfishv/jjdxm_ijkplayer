@@ -42,22 +42,22 @@ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 
 /**
  * ========================================
- * <p/>
+ * <p>
  * 版 权：dou361.com 版权所有 （C） 2015
- * <p/>
+ * <p>
  * 作 者：陈冠明
- * <p/>
+ * <p>
  * 个人网站：http://www.dou361.com
- * <p/>
+ * <p>
  * 版 本：1.0
- * <p/>
+ * <p>
  * 创建日期：2016/4/14
- * <p/>
+ * <p>
  * 描 述：
- * <p/>
- * <p/>
+ * <p>
+ * <p>
  * 修订历史：
- * <p/>
+ * <p>
  * ========================================
  */
 public class PlayerView {
@@ -199,6 +199,10 @@ public class PlayerView {
      * 当前选择的视频流索引
      */
     private int currentSelect;
+    /**
+     * 记录进行后台时的播放状态0为播放，1为暂停
+     */
+    private int bgState;
     /**
      * 第三方so是否支持，默认不支持，true为支持
      */
@@ -555,9 +559,8 @@ public class PlayerView {
      * }
      */
     public PlayerView onPause() {
-        if (status == PlayStateParams.STATE_PLAYING) {
-            pausePlay();
-        }
+        bgState = (videoView.isPlaying() ? 0 : 1);
+        pausePlay();
         return this;
     }
 
@@ -570,7 +573,7 @@ public class PlayerView {
      * }
      */
     public PlayerView onResume() {
-        if (status == PlayStateParams.STATE_PLAYING) {
+        if (bgState == 0) {
             if (isLive) {
                 videoView.seekTo(0);
             } else {
