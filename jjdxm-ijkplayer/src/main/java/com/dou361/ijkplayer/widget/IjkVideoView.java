@@ -528,6 +528,9 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             if (mMediaController != null) {
                 mMediaController.setEnabled(true);
             }
+            if (mOnInfoListener != null) {
+                mOnInfoListener.onInfo(mMediaPlayer, mCurrentState, 0);
+            }
             mVideoWidth = mp.getVideoWidth();
             mVideoHeight = mp.getVideoHeight();
 

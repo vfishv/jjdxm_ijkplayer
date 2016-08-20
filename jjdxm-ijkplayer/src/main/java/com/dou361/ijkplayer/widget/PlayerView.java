@@ -28,7 +28,6 @@ import android.widget.TextView;
 import com.dou361.ijkplayer.adapter.StreamSelectAdapter;
 import com.dou361.ijkplayer.bean.VideoijkBean;
 import com.dou361.ijkplayer.listener.OnControlPanelVisibilityChangeListener;
-import com.dou361.ijkplayer.listener.OnInfoListener;
 import com.dou361.ijkplayer.listener.OnPlayerBackListener;
 import com.dou361.ijkplayer.listener.OnShowThumbnailListener;
 import com.dou361.ijkplayer.utils.NetworkUtils;
@@ -312,7 +311,8 @@ public class PlayerView {
                 /**重新去播放*/
                 case MESSAGE_RESTART_PLAY:
                     status = PlayStateParams.STATE_ERROR;
-                    doPauseResume();
+                    startPlay();
+                    updatePausePlay();
                     break;
             }
         }
@@ -343,7 +343,7 @@ public class PlayerView {
     /**
      * 视频播放时信息回调
      */
-    private OnInfoListener onInfoListener;
+    private IMediaPlayer.OnInfoListener onInfoListener;
 
     /**
      * 点击事件监听
@@ -362,11 +362,21 @@ public class PlayerView {
                 toggleFullScreen();
             } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_play") || v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")) {
                 /**视频播放和暂停*/
-                doPauseResume();
+                if (videoView.isPlaying()) {
+                    if (isLive) {
+                        videoView.stopPlayback();
+                    } else {
+                        pausePlay();
+                    }
+                } else {
+                    startPlay();
+                }
+                updatePausePlay();
             } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay_icon")) {
                 /**重新播放*/
                 status = PlayStateParams.STATE_ERROR;
-                doPauseResume();
+                startPlay();
+                updatePausePlay();
             } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_finish")) {
                 /**返回*/
                 if (!isOnlyFullScreen && !isPortrait) {
@@ -381,7 +391,8 @@ public class PlayerView {
             } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie_icon")) {
                 /**使用移动网络提示继续播放*/
                 isGNetWork = false;
-                doPauseResume();
+                startPlay();
+                updatePausePlay();
             }
         }
     };
@@ -470,10 +481,10 @@ public class PlayerView {
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay_icon")).clicked(onClickListener);
         videoView.setOnInfoListener(new IMediaPlayer.OnInfoListener() {
             @Override
-            public boolean onInfo(IMediaPlayer iMediaPlayer, int what, int extra) {
+            public boolean onInfo(IMediaPlayer mp, int what, int extra) {
                 statusChange(what);
                 if (onInfoListener != null) {
-                    onInfoListener.onInfo(what, extra);
+                    onInfoListener.onInfo(mp, what, extra);
                 }
                 return true;
             }
@@ -488,6 +499,8 @@ public class PlayerView {
                 }
                 currentSelect = position;
                 switchStream(position);
+                //换源之后声音可播，画面卡住，主要是渲染问题，目前只是提供了软解方式，后期提供设置方式
+                videoView.setRender(videoView.RENDER_TEXTURE_VIEW);
                 for (int i = 0; i < listVideos.size(); i++) {
                     if (i == position) {
                         listVideos.get(i).setSelect(true);
@@ -560,7 +573,8 @@ public class PlayerView {
      */
     public PlayerView onPause() {
         bgState = (videoView.isPlaying() ? 0 : 1);
-        pausePlay();
+        getCurrentPosition();
+        videoView.onPause();
         return this;
     }
 
@@ -573,13 +587,16 @@ public class PlayerView {
      * }
      */
     public PlayerView onResume() {
+        videoView.onResume();
+        if (isLive) {
+            videoView.seekTo(0);
+        } else {
+            videoView.seekTo(currentPosition);
+        }
         if (bgState == 0) {
-            if (isLive) {
-                videoView.seekTo(0);
-            } else {
-                videoView.seekTo(currentPosition);
-            }
-            doPauseResume();
+
+        } else {
+            pausePlay();
         }
         return this;
     }
@@ -653,7 +670,7 @@ public class PlayerView {
     /**
      * 设置播放信息监听回调
      */
-    public PlayerView setOnInfoListener(OnInfoListener onInfoListener) {
+    public PlayerView setOnInfoListener(IMediaPlayer.OnInfoListener onInfoListener) {
         this.onInfoListener = onInfoListener;
         return this;
     }
@@ -786,7 +803,6 @@ public class PlayerView {
             videoView.seekTo(0);
         } else {
             if (isHasSwitchStream) {
-                videoView.stopPlayback();
                 videoView.setVideoPath(currentUrl);
                 videoView.seekTo(currentPosition);
                 isHasSwitchStream = false;
@@ -822,7 +838,8 @@ public class PlayerView {
             listVideos.get(index).setSelect(true);
             isLive();
             if (videoView.isPlaying()) {
-                pausePlay();
+                getCurrentPosition();
+                videoView.release(false);
             }
             isHasSwitchStream = true;
         }
@@ -833,7 +850,7 @@ public class PlayerView {
      * 暂停播放
      */
     public PlayerView pausePlay() {
-        statusChange(PlayStateParams.STATE_PAUSED);
+        status = PlayStateParams.STATE_PAUSED;
         getCurrentPosition();
         videoView.pause();
         return this;
@@ -1094,8 +1111,7 @@ public class PlayerView {
             /**显示面板的时候再根据状态显示播放按钮*/
             if (status == PlayStateParams.STATE_PLAYING
                     || status == PlayStateParams.STATE_PREPARED
-                    || status == PlayStateParams.STATE_BUFFERING_END
-                    || status == PlayStateParams.STATE_RENDERING_START
+                    || status == PlayStateParams.STATE_PREPARING
                     || status == PlayStateParams.STATE_PAUSED) {
                 if (isHideCenterPlayer) {
                     iv_player.setVisibility(View.GONE);
@@ -1147,22 +1163,30 @@ public class PlayerView {
      * ==========================================对外的方法=============================
      */
 
+    /**
+     * ==========================================内部方法=============================
+     */
 
+    /**
+     * 状态改变同步UI
+     */
     private void statusChange(int newStatus) {
-        status = newStatus;
-        if (!isLive && newStatus == PlayStateParams.STATE_COMPLETED) {
-            /**非直播播放结束*/
-            hideAll();
-            showStatus("播放结束");
+        if (newStatus == PlayStateParams.STATE_COMPLETED) {
+            status = PlayStateParams.STATE_COMPLETED;
+            if (!isLive) {
+                /**非直播播放结束*/
+                hideAll();
+                showStatus("播放结束");
+            }
         } else if (newStatus == PlayStateParams.STATE_PREPARING
-                || newStatus == PlayStateParams.STATE_BUFFERING_START) {
+                || newStatus == 701) {
+            status = PlayStateParams.STATE_PREPARING;
             /**视频缓冲*/
             hideStatusUI();
             query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_loading")).visible();
-        } else if (newStatus == PlayStateParams.STATE_PREPARED
-                || newStatus == PlayStateParams.STATE_BUFFERING_END
-                || newStatus == PlayStateParams.STATE_PLAYING
-                || newStatus == PlayStateParams.STATE_PAUSED) {
+        } else if (newStatus == 3 || newStatus == 702) {
+            status = PlayStateParams.STATE_PLAYING;
+            /**视频缓冲结束后隐藏缩列图*/
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -1175,6 +1199,8 @@ public class PlayerView {
                 }
             }, 500);
         } else if (newStatus == -10000) {
+            /**直播停止推流*/
+            status = PlayStateParams.STATE_ERROR;
             if (!(isGNetWork &&
                     (NetworkUtils.getNetworkType(mContext) == 4
                             || NetworkUtils.getNetworkType(mContext) == 5
@@ -1182,16 +1208,19 @@ public class PlayerView {
                 hideAll();
                 if (isLive) {
                     showStatus("获取不到直播源");
-                    /**5秒尝试重连*/
-                    if (!isErrorStop) {
-                        mHandler.sendEmptyMessageDelayed(MESSAGE_RESTART_PLAY, 10000);
-                    }
                 } else {
                     showStatus(mActivity.getResources().getString(ResourceUtils.getResourceIdByName(mContext, "string", "small_problem")));
                 }
             }
 
-        } else if (newStatus == PlayStateParams.STATE_ERROR) {
+        } else if (newStatus == PlayStateParams.STATE_ERROR
+                || newStatus == 1
+                || newStatus == -1004
+                || newStatus == -1007
+                || newStatus == -1010
+                || newStatus == -110
+                || newStatus == 100) {
+            status = PlayStateParams.STATE_ERROR;
             if (!(isGNetWork && (NetworkUtils.getNetworkType(mContext) == 4 || NetworkUtils.getNetworkType(mContext) == 5 || NetworkUtils.getNetworkType(mContext) == 6))) {
                 hideStatusUI();
                 if (isLive) {
@@ -1206,29 +1235,6 @@ public class PlayerView {
             }
         }
     }
-
-    private void doPauseResume() {
-        if (status == PlayStateParams.STATE_COMPLETED) {
-            /**直播是没有进入的*/
-            currentPosition = 0;
-            videoView.seekTo(currentPosition);
-            startPlay();
-        } else if (videoView.isPlaying()) {
-            if (isLive) {
-                videoView.stopPlayback();
-            } else {
-                pausePlay();
-            }
-        } else {
-            startPlay();
-        }
-        updatePausePlay();
-    }
-
-
-    /**
-     * ==========================================内部方法=============================
-     */
 
     /**
      * 显示视频播放状态提示
@@ -1428,8 +1434,8 @@ public class PlayerView {
         if (isDragging) {
             return 0;
         }
-        long position = getCurrentPosition();
-        long duration = getDuration();
+        long position = videoView.getCurrentPosition();
+        long duration = videoView.getDuration();
         if (seekBar != null) {
             if (duration > 0) {
                 long pos = 1000L * position / duration;
@@ -1522,8 +1528,8 @@ public class PlayerView {
      * @param percent
      */
     private void onProgressSlide(float percent) {
-        int position = getCurrentPosition();
-        long duration = getDuration();
+        int position = videoView.getCurrentPosition();
+        long duration = videoView.getDuration();
         long deltaMax = Math.min(100 * 1000, duration - position);
         long delta = (long) (deltaMax * percent);
         newPosition = delta + position;
