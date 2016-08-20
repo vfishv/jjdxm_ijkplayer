@@ -66,6 +66,7 @@ public class PlayStateParams {
      */
     public static final int STATE_PREPARED = 2;
     public static final int STATE_BUFFERING_END = 702;
+    public static final int STATE_RENDERING_START = 10002;
     /**
      * 播放中
      */

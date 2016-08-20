@@ -48,8 +48,8 @@ public class PlayerActivity extends Activity {
         player = new PlayerView(this)
                 .setTitle("什么")
                 .setScaleType(PlayStateParams.fitparent)
-                .hideMenu(true)
                 .forbidTouch(false)
+                .hideMenu(true)
                 .showThumbnail(new OnShowThumbnailListener() {
                     @Override
                     public void onShowThumbnail(ImageView ivThumbnail) {

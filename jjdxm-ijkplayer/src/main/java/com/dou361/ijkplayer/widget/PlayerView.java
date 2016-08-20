@@ -42,22 +42,22 @@ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 
 /**
  * ========================================
- * <p>
+ * <p/>
  * 版 权：dou361.com 版权所有 （C） 2015
- * <p>
+ * <p/>
  * 作 者：陈冠明
- * <p>
+ * <p/>
  * 个人网站：http://www.dou361.com
- * <p>
+ * <p/>
  * 版 本：1.0
- * <p>
+ * <p/>
  * 创建日期：2016/4/14
- * <p>
+ * <p/>
  * 描 述：
- * <p>
- * <p>
+ * <p/>
+ * <p/>
  * 修订历史：
- * <p>
+ * <p/>
  * ========================================
  */
 public class PlayerView {
@@ -93,7 +93,7 @@ public class PlayerView {
     /**
      * 播放器底部控制bar
      */
-    private final View rl_bottombar;
+    private final View ll_bottombar;
     /**
      * 播放器封面，播放前的封面或者缩列图
      */
@@ -156,9 +156,9 @@ public class PlayerView {
      */
     private int currentPosition;
     /**
-     * 滑动进度条得到的新位置，和当前播放位置是有区别的
+     * 滑动进度条得到的新位置，和当前播放位置是有区别的,newPosition =0也会调用设置的，故初始化值为-1
      */
-    private long newPosition;
+    private long newPosition = -1;
     /**
      * 视频旋转的角度，默认只有0,90.270分别对应向上、向左、向右三个方向
      */
@@ -247,6 +247,10 @@ public class PlayerView {
      * 是否是竖屏，默认为竖屏，true为竖屏，false为横屏
      */
     private boolean isPortrait = true;
+    /**
+     * 是否隐藏中间播放按钮，默认不隐藏，true为隐藏，false为不隐藏
+     */
+    private boolean isHideCenterPlayer;
     /**
      * 音频管理器
      */
@@ -440,7 +444,7 @@ public class PlayerView {
         streamSelectView = (LinearLayout) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_stream_container"));
         streamSelectListView = (ListView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_streams_list"));
         ll_topbar = activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_top_box"));
-        rl_bottombar = activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "rl_bottom_bar"));
+        ll_bottombar = activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "ll_bottom_bar"));
         iv_trumb = (ImageView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "iv_trumb"));
         iv_back = (ImageView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_finish"));
         iv_menu = (ImageView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_menu"));
@@ -488,7 +492,6 @@ public class PlayerView {
                     }
                 }
                 streamSelectAdapter.notifyDataSetChanged();
-                stopPlay();
                 startPlay();
             }
         });
@@ -729,7 +732,7 @@ public class PlayerView {
 
     /**
      * 设置播放地址
-     * 单个视频地址时
+     * 单个视频VideoijkBean
      */
     public PlayerView setPlaySource(VideoijkBean videoijkBean) {
         listVideos.clear();
@@ -743,6 +746,7 @@ public class PlayerView {
     /**
      * 设置播放地址
      * 单个视频地址时
+     * 带流名称
      */
     public PlayerView setPlaySource(String stream, String url) {
         VideoijkBean mVideoijkBean = new VideoijkBean();
@@ -779,17 +783,16 @@ public class PlayerView {
             videoView.seekTo(0);
         } else {
             if (isHasSwitchStream) {
+                videoView.stopPlayback();
                 videoView.setVideoPath(currentUrl);
                 videoView.seekTo(currentPosition);
                 isHasSwitchStream = false;
             }
         }
-        hideAll();
         if (isGNetWork && (NetworkUtils.getNetworkType(mContext) == 4 || NetworkUtils.getNetworkType(mContext) == 5 || NetworkUtils.getNetworkType(mContext) == 6)) {
             query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie")).visible();
         } else {
             if (playerSupport) {
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_loading")).visible();
                 videoView.start();
             } else {
                 showStatus(mActivity.getResources().getString(ResourceUtils.getResourceIdByName(mContext, "string", "not_support")));
@@ -834,7 +837,7 @@ public class PlayerView {
     }
 
     /**
-     * 暂停播放
+     * 停止播放
      */
     public PlayerView stopPlay() {
         videoView.stopPlayback();
@@ -943,7 +946,7 @@ public class PlayerView {
     }
 
     /**
-     * 隐藏加载框
+     * 隐藏所有状态界面
      */
     public PlayerView hideAllUI() {
         if (query != null) {
@@ -963,7 +966,7 @@ public class PlayerView {
      * 获取底部控制barview
      */
     public View getBottonBarView() {
-        return rl_bottombar;
+        return ll_bottombar;
     }
 
     /**
@@ -1009,7 +1012,7 @@ public class PlayerView {
     }
 
     /**
-     * 隐藏返回键
+     * 隐藏返回键，true隐藏，false为显示
      */
     public PlayerView hideBack(boolean isHide) {
         iv_back.setVisibility(isHide ? View.GONE : View.VISIBLE);
@@ -1017,7 +1020,7 @@ public class PlayerView {
     }
 
     /**
-     * 隐藏菜单键
+     * 隐藏菜单键，true隐藏，false为显示
      */
     public PlayerView hideMenu(boolean isHide) {
         iv_menu.setVisibility(isHide ? View.GONE : View.VISIBLE);
@@ -1025,7 +1028,7 @@ public class PlayerView {
     }
 
     /**
-     * 隐藏分辨率按钮
+     * 隐藏分辨率按钮，true隐藏，false为显示
      */
     public PlayerView hideSteam(boolean isHide) {
         tv_steam.setVisibility(isHide ? View.GONE : View.VISIBLE);
@@ -1033,7 +1036,7 @@ public class PlayerView {
     }
 
     /**
-     * 隐藏旋转按钮
+     * 隐藏旋转按钮，true隐藏，false为显示
      */
     public PlayerView hideRotation(boolean isHide) {
         iv_rotation.setVisibility(isHide ? View.GONE : View.VISIBLE);
@@ -1041,7 +1044,7 @@ public class PlayerView {
     }
 
     /**
-     * 隐藏全屏按钮
+     * 隐藏全屏按钮，true隐藏，false为显示
      */
     public PlayerView hideFullscreen(boolean isHide) {
         iv_fullscreen.setVisibility(isHide ? View.GONE : View.VISIBLE);
@@ -1049,21 +1052,32 @@ public class PlayerView {
     }
 
     /**
-     * 显示操作面板
+     * 隐藏中间播放按钮,ture为隐藏，false为不做隐藏处理，但不是显示
+     */
+    public PlayerView hideCenterPlayer(boolean isHide) {
+        isHideCenterPlayer = isHide;
+        iv_player.setVisibility(isHideCenterPlayer ? View.GONE : View.VISIBLE);
+        return this;
+    }
+
+    /**
+     * 显示或隐藏操作面板
      */
     public PlayerView operatorPanl() {
         isShowControlPanl = !isShowControlPanl;
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_stream_container")).gone();
         if (isShowControlPanl) {
             ll_topbar.setVisibility(View.VISIBLE);
-            rl_bottombar.setVisibility(View.VISIBLE);
+            ll_bottombar.setVisibility(View.VISIBLE);
             if (isLive) {
                 query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_seekBar")).gone();
                 query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime")).gone();
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_split")).gone();
                 query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime")).gone();
             } else {
                 query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_seekBar")).visible();
                 query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime")).visible();
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_split")).visible();
                 query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime")).visible();
             }
             if (isOnlyFullScreen || isForbidDoulbeUp) {
@@ -1078,8 +1092,13 @@ public class PlayerView {
             if (status == PlayStateParams.STATE_PLAYING
                     || status == PlayStateParams.STATE_PREPARED
                     || status == PlayStateParams.STATE_BUFFERING_END
+                    || status == PlayStateParams.STATE_RENDERING_START
                     || status == PlayStateParams.STATE_PAUSED) {
-                iv_player.setVisibility(isLive ? View.GONE : View.VISIBLE);
+                if (isHideCenterPlayer) {
+                    iv_player.setVisibility(View.GONE);
+                } else {
+                    iv_player.setVisibility(isLive ? View.GONE : View.VISIBLE);
+                }
             } else {
                 iv_player.setVisibility(View.GONE);
             }
@@ -1088,8 +1107,17 @@ public class PlayerView {
             mAutoPlayRunnable.start();
         } else {
             ll_topbar.setVisibility(isForbidHideControlPanl ? View.VISIBLE : View.GONE);
-            rl_bottombar.setVisibility(isForbidHideControlPanl ? View.VISIBLE : View.GONE);
-            iv_player.setVisibility(View.GONE);
+            ll_bottombar.setVisibility(isForbidHideControlPanl ? View.VISIBLE : View.GONE);
+            if (!isLive && status == PlayStateParams.STATE_PAUSED && !videoView.isPlaying()) {
+                if (isHideCenterPlayer) {
+                    iv_player.setVisibility(View.GONE);
+                } else {
+                    /**暂停时一直显示按钮*/
+                    iv_player.setVisibility(View.VISIBLE);
+                }
+            } else {
+                iv_player.setVisibility(View.GONE);
+            }
             mHandler.removeMessages(MESSAGE_SHOW_PROGRESS);
             if (onControlPanelVisibilityChangeListener != null) {
                 onControlPanelVisibilityChangeListener.change(false);
@@ -1126,7 +1154,7 @@ public class PlayerView {
         } else if (newStatus == PlayStateParams.STATE_PREPARING
                 || newStatus == PlayStateParams.STATE_BUFFERING_START) {
             /**视频缓冲*/
-            hideAll();
+            hideStatusUI();
             query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_loading")).visible();
         } else if (newStatus == PlayStateParams.STATE_PREPARED
                 || newStatus == PlayStateParams.STATE_BUFFERING_END
@@ -1135,9 +1163,11 @@ public class PlayerView {
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    /**延迟0.5秒隐藏*/
-                    hideAll();
-                    /**视频封面隐藏*/
+                    hideStatusUI();
+                    /**显示控制bar*/
+                    isShowControlPanl = false;
+                    operatorPanl();
+                    /**延迟0.5秒隐藏视频封面隐藏*/
                     query.id(ResourceUtils.getResourceIdByName(mContext, "id", "ll_bg")).gone();
                 }
             }, 500);
@@ -1160,7 +1190,7 @@ public class PlayerView {
 
         } else if (newStatus == PlayStateParams.STATE_ERROR) {
             if (!(isGNetWork && (NetworkUtils.getNetworkType(mContext) == 4 || NetworkUtils.getNetworkType(mContext) == 5 || NetworkUtils.getNetworkType(mContext) == 6))) {
-                hideAll();
+                hideStatusUI();
                 if (isLive) {
                     showStatus(mActivity.getResources().getString(ResourceUtils.getResourceIdByName(mContext, "string", "small_problem")));
                     /**5秒尝试重连*/
@@ -1265,11 +1295,9 @@ public class PlayerView {
     }
 
     /**
-     * 隐藏所有界面
+     * 隐藏状态界面
      */
-    private void hideAll() {
-        ll_topbar.setVisibility(View.GONE);
-        rl_bottombar.setVisibility(View.GONE);
+    private void hideStatusUI() {
         iv_player.setVisibility(View.GONE);
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_stream_container")).gone();
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay")).gone();
@@ -1281,12 +1309,25 @@ public class PlayerView {
     }
 
     /**
+     * 隐藏所有界面
+     */
+    private void hideAll() {
+        if (!isForbidHideControlPanl) {
+            ll_topbar.setVisibility(View.GONE);
+            ll_bottombar.setVisibility(View.GONE);
+        }
+        hideStatusUI();
+    }
+
+    /**
      * 显示分辨率列表
      */
     private void showStreamSelectView() {
         this.streamSelectView.setVisibility(View.VISIBLE);
-        ll_topbar.setVisibility(View.GONE);
-        rl_bottombar.setVisibility(View.GONE);
+        if (!isForbidHideControlPanl) {
+            ll_topbar.setVisibility(View.GONE);
+            ll_bottombar.setVisibility(View.GONE);
+        }
         this.streamSelectListView.setItemsCanFocus(true);
     }
 

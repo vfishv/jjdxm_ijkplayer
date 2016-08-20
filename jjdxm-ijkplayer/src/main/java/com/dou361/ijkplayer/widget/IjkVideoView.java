@@ -428,16 +428,15 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             // REMOVED: mAudioSession
             /**视频准备播放监听*/
             mMediaPlayer.setOnPreparedListener(mPreparedListener);
-            /**视频缓冲监听*/
-            mMediaPlayer.setOnBufferingUpdateListener(mBufferingUpdateListener);
             /**视频播放完成监听*/
             mMediaPlayer.setOnCompletionListener(mCompletionListener);
-            /**视频界面大小监听*/
-            mMediaPlayer.setOnVideoSizeChangedListener(mSizeChangedListener);
             /**视频错误监听*/
             mMediaPlayer.setOnErrorListener(mErrorListener);
             /**视频其他信息监听*/
             mMediaPlayer.setOnInfoListener(mInfoListener);
+            /**视频界面大小改变监听*/
+            mMediaPlayer.setOnVideoSizeChangedListener(mSizeChangedListener);
+            /**视频缓冲监听*/
             mMediaPlayer.setOnBufferingUpdateListener(mBufferingUpdateListener);
             mCurrentBufferPercentage = 0;
             String scheme = mUri.getScheme();

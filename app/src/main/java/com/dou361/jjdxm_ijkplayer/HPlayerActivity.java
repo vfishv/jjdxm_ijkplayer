@@ -69,8 +69,9 @@ public class HPlayerActivity extends AppCompatActivity {
         player = new PlayerView(this)
                 .setTitle("什么")
                 .setScaleType(PlayStateParams.fitparent)
-                .hideMenu(true)
                 .forbidTouch(false)
+                .hideMenu(true)
+                .hideCenterPlayer(true)
                 .showThumbnail(new OnShowThumbnailListener() {
                     @Override
                     public void onShowThumbnail(ImageView ivThumbnail) {

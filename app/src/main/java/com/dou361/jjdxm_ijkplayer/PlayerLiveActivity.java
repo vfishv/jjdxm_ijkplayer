@@ -56,6 +56,8 @@ public class PlayerLiveActivity extends Activity {
                 .setTitle("什么")
                 .setScaleType(PlayStateParams.fitparent)
                 .forbidTouch(false)
+                .hideMenu(true)
+                .hideSteam(true)
                 .setForbidDoulbeUp(true)
                 .setForbidHideControlPanl(true)
                 .showThumbnail(new OnShowThumbnailListener() {

@@ -167,7 +167,263 @@ jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
 
 ## More Actions ##
 
+1.自定义视频界面，可以复制以下布局内容到自己的项目中，注意已有的id不能修改或删除，可以增加view，可以对以下布局内容调整显示位置或者自行隐藏
+
+
+	<?xml version="1.0" encoding="utf-8"?>
+	<RelativeLayout
+	    android:id="@+id/app_video_box"
+	    xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:background="@android:color/black"
+	    android:orientation="vertical">
+	
+	
+	    <com.dou361.ijkplayer.widget.IjkVideoView
+	        android:id="@+id/video_view"
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"/>
+	
+	    <LinearLayout
+	        android:id="@+id/ll_bg"
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        android:background="@android:color/black"
+	        android:orientation="vertical">
+	
+	        <!-- 封面显示-->
+	        <ImageView
+	            android:id="@+id/iv_trumb"
+	            android:layout_width="match_parent"
+	            android:layout_height="match_parent"
+	            android:scaleType="fitXY"
+	            android:visibility="visible"/>
+	    </LinearLayout>
+	
+	    <!--重新播放-->
+	    <LinearLayout
+	        android:id="@+id/app_video_replay"
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        android:background="#33000000"
+	        android:gravity="center"
+	        android:orientation="vertical"
+	        android:visibility="gone">
+	        <!-- 播放状态-->
+	        <TextView
+	            android:id="@+id/app_video_status_text"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:text="@string/small_problem"
+	            android:textColor="@android:color/white"
+	            android:textSize="14dp"/>
+	
+	        <ImageView
+	            android:id="@+id/app_video_replay_icon"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_centerHorizontal="true"
+	            android:layout_marginTop="8dp"
+	            android:src="@drawable/simple_player_circle_outline_white_36dp"/>
+	    </LinearLayout>
+	    <!-- 网络提示-->
+	    <LinearLayout
+	        android:id="@+id/app_video_netTie"
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        android:background="#33000000"
+	        android:gravity="center"
+	        android:orientation="vertical"
+	        android:visibility="gone">
+	
+	        <TextView
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_marginBottom="8dp"
+	            android:gravity="center"
+	            android:paddingLeft="8dp"
+	            android:paddingRight="8dp"
+	            android:text="您正在使用移动网络播放视频\n可能产生较高流量费用"
+	            android:textColor="@android:color/white"/>
+	
+	        <TextView
+	            android:id="@+id/app_video_netTie_icon"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:background="@drawable/simple_player_btn"
+	            android:gravity="center"
+	            android:paddingLeft="8dp"
+	            android:paddingRight="8dp"
+	            android:text="继续"
+	            android:textColor="@android:color/white"/>
+	    </LinearLayout>
+	
+	    <!--加载中-->
+	    <LinearLayout
+	        android:id="@+id/app_video_loading"
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        android:gravity="center"
+	        android:orientation="vertical"
+	        android:visibility="gone">
+	
+	        <ProgressBar
+	            android:layout_width="50dp"
+	            android:layout_height="50dp"
+	            android:indeterminateBehavior="repeat"
+	            android:indeterminateOnly="true"/>
+	    </LinearLayout>
+	
+	    <!-- 中间触摸提示-->
+	    <include
+	        layout="@layout/simple_player_touch_gestures"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_centerInParent="true"/>
+	
+	    <!-- 顶部栏-->
+	    <include layout="@layout/simple_player_topbar"/>
+	    <!-- 底部栏-->
+	    <include
+	        layout="@layout/simple_player_controlbar"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentBottom="true"/>
+	
+	    <ImageView
+	        android:id="@+id/play_icon"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_centerInParent="true"
+	        android:layout_marginTop="8dp"
+	        android:src="@drawable/simple_player_center_play"/>
+	
+	    <!--分辨率选择-->
+	    <LinearLayout
+	        android:id="@+id/simple_player_select_stream_container"
+	        android:layout_width="150dp"
+	        android:layout_height="match_parent"
+	        android:layout_alignParentRight="true"
+	        android:background="#80000000"
+	        android:gravity="center_vertical"
+	        android:visibility="gone">
+	
+	        <ListView
+	            android:id="@+id/simple_player_select_streams_list"
+	            android:layout_width="150dp"
+	            android:layout_height="wrap_content"/>
+	    </LinearLayout>
+	
+	</RelativeLayout>
+
+2.播放器PlayerView对象的方法如下：
+
+	PlayerView(Activity activity)
+
+	//生命周期方法回调
+	PlayerView onPause()
+	PlayerView onResume()
+	PlayerView onDestroy()
+	PlayerView onConfigurationChanged(final Configuration newConfig)
+	boolean onBackPressed()
+	//显示缩略图
+	PlayerView showThumbnail(OnShowThumbnailListener onShowThumbnailListener)
+	//设置播放信息监听回调
+	PlayerView setOnInfoListener(OnInfoListener onInfoListener)
+	//设置播放器中的返回键监听
+	PlayerView setPlayerBackListener(OnPlayerBackListener listener)
+	//设置控制面板显示隐藏监听
+	PlayerView setOnControlPanelVisibilityChangListenter(OnControlPanelVisibilityChangeListener listener)
+	//百分比显示切换
+	PlayerView toggleAspectRatio()
+	//设置播放区域拉伸类型
+	PlayerView setScaleType(int showType)
+	//旋转角度
+	PlayerView setPlayerRotation()
+	//旋转指定角度
+	PlayerView setPlayerRotation(int rotation)
+	//设置播放地址包括视频清晰度列表对应地址列表
+	PlayerView setPlaySource(List<VideoijkBean> list)
+	//设置播放地址单个视频VideoijkBean
+	PlayerView setPlaySource(VideoijkBean videoijkBean)
+	//设置播放地址单个视频地址时带流名称
+	PlayerView setPlaySource(String stream, String url)
+	//设置播放地址单个视频地址时
+	PlayerView setPlaySource(String url)
+	//自动播放
+	PlayerView autoPlay(String path)
+	//开始播放
+	PlayerView startPlay()
+	//设置视频名称
+	PlayerView setTitle(String title)
+	//选择要播放的流
+	PlayerView switchStream(int index)
+	//暂停播放
+	PlayerView pausePlay()
+	//停止播放
+	PlayerView stopPlay()
+	//设置播放位置
+	PlayerView seekTo(int playtime)
+	//获取当前播放位置
+	int getCurrentPosition()
+	//获取视频播放总时长
+	long getDuration()
+	//设置2/3/4/5G和WiFi网络类型提示 true为进行2/3/4/5G网络类型提示 false 不进行网络类型提示
+	PlayerView setNetWorkTypeTie(boolean isGNetWork)
+	//是否仅仅为全屏
+	PlayerView setOnlyFullScreen(boolean isFull)
+	//设置是否禁止双击
+	PlayerView setForbidDoulbeUp(boolean flag)
+	//设置是否禁止隐藏bar
+	PlayerView setForbidHideControlPanl(boolean flag)
+	//当前播放的是否是直播
+	boolean isLive()
+	//是否禁止触摸
+	PlayerView forbidTouch(boolean forbidTouch)
+	//隐藏所有状态界面
+	PlayerView hideAllUI()
+	获取顶部控制barview
+	View getTopBarView()
+	//获取底部控制barview
+	etBottonBarView()
+	//获取旋转view
+	ImageView getRationView()
+	//获取返回view
+	ImageView getBackView()
+	//获取菜单view
+	ImageView getMenuView()
+	//获取全屏按钮view
+	ImageView getFullScreenView()
+	//获取底部bar的播放view
+	ImageView getBarPlayerView()
+	//获取中间的播放view
+	ImageView getPlayerView()
+	//隐藏返回键，true隐藏，false为显示
+	PlayerView hideBack(boolean isHide)
+	//隐藏菜单键，true隐藏，false为显示
+	PlayerView hideMenu(boolean isHide)
+	//隐藏分辨率按钮，true隐藏，false为显示
+	PlayerView hideSteam(boolean isHide)
+	//隐藏旋转按钮，true隐藏，false为显示
+	PlayerView hideRotation(boolean isHide)
+	//隐藏全屏按钮，true隐藏，false为显示
+	PlayerView hideFullscreen(boolean isHide)
+	//隐藏中间播放按钮,ture为隐藏，false为不做隐藏处理，但不是显示
+	PlayerView hideCenterPlayer(boolean isHide)
+	//显示或隐藏操作面板
+	PlayerView operatorPanl()
+	//全屏切换
+	PlayerView toggleFullScreen()
+
+
+
+
+
+
 ## ChangeLog ##
+
+2016.08.20 修复点击播放、点击暂停、再点击播放时，加载进度条一直显示问题；修复第一次打开播放器，触摸视频界面，视频重新播放问题；恢复视频拖动条默认样式，修复显示不完整问题；添加对外操作的view，可通过getxxxView()方法获得；添加了PlayerView对象的方法及说明，可链式开发。
 
 ## About Author ##
 
