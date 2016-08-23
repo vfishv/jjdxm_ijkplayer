@@ -66,7 +66,12 @@ public class HPlayerActivity extends AppCompatActivity {
         m2.setUrl(url2);
         list.add(m1);
         list.add(m2);
-        player = new PlayerView(this)
+        player = new PlayerView(this){
+            @Override
+            public PlayerView setPlayerRotation() {
+                return super.setPlayerRotation();
+            }
+        }
                 .setTitle("什么")
                 .setScaleType(PlayStateParams.fitparent)
                 .forbidTouch(false)

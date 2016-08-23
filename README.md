@@ -63,6 +63,7 @@ or Gradle:
 
 历史版本：
 
+	compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:1.0.2'
 	compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:1.0.1'
 	compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:1.0.0'
 
@@ -420,6 +421,8 @@ jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
 	PlayerView operatorPanl()
 	//全屏切换
 	PlayerView toggleFullScreen()
+	//设置自动重连的模式或者重连时间，isAuto true 出错重连，false出错不重连，connectTime重连的时间
+	setAutoReConnect(boolean isAuto, int connectTime)
 
 3.ijkplayer封装的视频播放信息返回码监听，可以通过setOnInfoListener去监听
 
@@ -457,8 +460,10 @@ jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
 
 
 ## ChangeLog ##
+2016.08.24 修复播放出错点击没有反应，这是修改旋转视频方向是造成的bug,当前默认为5秒无操作自动重试，修改加载进度条的显示时间，之前是加载回调整备中才显示，改为点击加载立即显示，新增修改自动重试的方式和重试的时间
 
 2016.08.20 修复视频进入后台继续播放，切换视频源是画面卡住等问题
+
 2016.08.20 修复点击播放、点击暂停、再点击播放时，加载进度条一直显示问题；修复第一次打开播放器，触摸视频界面，视频重新播放问题；恢复视频拖动条默认样式，修复显示不完整问题；添加对外操作的view，可通过getxxxView()方法获得；添加了PlayerView对象的方法及说明，可链式开发。
 
 ## About Author ##

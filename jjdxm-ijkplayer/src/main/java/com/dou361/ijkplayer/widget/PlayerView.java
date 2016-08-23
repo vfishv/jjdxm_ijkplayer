@@ -41,22 +41,22 @@ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 
 /**
  * ========================================
- * <p>
+ * <p/>
  * 版 权：dou361.com 版权所有 （C） 2015
- * <p>
+ * <p/>
  * 作 者：陈冠明
- * <p>
+ * <p/>
  * 个人网站：http://www.dou361.com
- * <p>
+ * <p/>
  * 版 本：1.0
- * <p>
+ * <p/>
  * 创建日期：2016/4/14
- * <p>
+ * <p/>
  * 描 述：
- * <p>
- * <p>
+ * <p/>
+ * <p/>
  * 修订历史：
- * <p>
+ * <p/>
  * ========================================
  */
 public class PlayerView {
@@ -203,6 +203,10 @@ public class PlayerView {
      */
     private int bgState;
     /**
+     * 自动重连的时间
+     */
+    private int autoConnectTime = 5000;
+    /**
      * 第三方so是否支持，默认不支持，true为支持
      */
     private boolean playerSupport;
@@ -254,6 +258,10 @@ public class PlayerView {
      * 是否隐藏中间播放按钮，默认不隐藏，true为隐藏，false为不隐藏
      */
     private boolean isHideCenterPlayer;
+    /**
+     * 是否自动重连，默认5秒重连，true为重连，false为不重连
+     */
+    private boolean isAutoReConnect = true;
     /**
      * 音频管理器
      */
@@ -370,12 +378,12 @@ public class PlayerView {
                     }
                 } else {
                     startPlay();
+                    if(videoView.isPlaying()){
+                        /**ijkplayer内部的监听没有回调，只能手动修改状态*/
+                        status = PlayStateParams.STATE_PREPARING;
+                        hideStatusUI();
+                    }
                 }
-                updatePausePlay();
-            } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay_icon")) {
-                /**重新播放*/
-                status = PlayStateParams.STATE_ERROR;
-                startPlay();
                 updatePausePlay();
             } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_finish")) {
                 /**返回*/
@@ -391,6 +399,13 @@ public class PlayerView {
             } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie_icon")) {
                 /**使用移动网络提示继续播放*/
                 isGNetWork = false;
+                hideStatusUI();
+                startPlay();
+                updatePausePlay();
+            } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay_icon")) {
+                /**重新播放*/
+                status = PlayStateParams.STATE_ERROR;
+                hideStatusUI();
                 startPlay();
                 updatePausePlay();
             }
@@ -499,8 +514,6 @@ public class PlayerView {
                 }
                 currentSelect = position;
                 switchStream(position);
-                //换源之后声音可播，画面卡住，主要是渲染问题，目前只是提供了软解方式，后期提供设置方式
-                videoView.setRender(videoView.RENDER_TEXTURE_VIEW);
                 for (int i = 0; i < listVideos.size(); i++) {
                     if (i == position) {
                         listVideos.get(i).setSelect(true);
@@ -802,16 +815,20 @@ public class PlayerView {
             videoView.setVideoPath(currentUrl);
             videoView.seekTo(0);
         } else {
-            if (isHasSwitchStream) {
+            if (isHasSwitchStream || status == PlayStateParams.STATE_ERROR) {
+                //换源之后声音可播，画面卡住，主要是渲染问题，目前只是提供了软解方式，后期提供设置方式
+                videoView.setRender(videoView.RENDER_TEXTURE_VIEW);
                 videoView.setVideoPath(currentUrl);
                 videoView.seekTo(currentPosition);
                 isHasSwitchStream = false;
             }
         }
+        hideStatusUI();
         if (isGNetWork && (NetworkUtils.getNetworkType(mContext) == 4 || NetworkUtils.getNetworkType(mContext) == 5 || NetworkUtils.getNetworkType(mContext) == 6)) {
             query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie")).visible();
         } else {
             if (playerSupport) {
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_loading")).visible();
                 videoView.start();
             } else {
                 showStatus(mActivity.getResources().getString(ResourceUtils.getResourceIdByName(mContext, "string", "not_support")));
@@ -1081,6 +1098,15 @@ public class PlayerView {
     }
 
     /**
+     * 设置自动重连的模式或者重连时间，isAuto true 出错重连，false出错不重连，connectTime重连的时间
+     */
+    public PlayerView setAutoReConnect(boolean isAuto, int connectTime) {
+        this.isAutoReConnect = isAuto;
+        this.autoConnectTime = connectTime;
+        return this;
+    }
+
+    /**
      * 显示或隐藏操作面板
      */
     public PlayerView operatorPanl() {
@@ -1167,25 +1193,32 @@ public class PlayerView {
      * ==========================================内部方法=============================
      */
 
+
     /**
      * 状态改变同步UI
      */
     private void statusChange(int newStatus) {
         if (newStatus == PlayStateParams.STATE_COMPLETED) {
             status = PlayStateParams.STATE_COMPLETED;
-            if (!isLive) {
-                /**非直播播放结束*/
-                hideAll();
-                showStatus("播放结束");
-            }
+            currentPosition = 0;
+            hideAll();
+            showStatus("播放结束");
         } else if (newStatus == PlayStateParams.STATE_PREPARING
-                || newStatus == 701) {
+                || newStatus == PlayStateParams.MEDIA_INFO_BUFFERING_START) {
             status = PlayStateParams.STATE_PREPARING;
             /**视频缓冲*/
             hideStatusUI();
             query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_loading")).visible();
-        } else if (newStatus == 3 || newStatus == 702) {
-            status = PlayStateParams.STATE_PLAYING;
+        } else if (newStatus == PlayStateParams.MEDIA_INFO_VIDEO_RENDERING_START
+                || newStatus == PlayStateParams.STATE_PLAYING
+                || newStatus == PlayStateParams.STATE_PREPARED
+                || newStatus == PlayStateParams.MEDIA_INFO_BUFFERING_END
+                || newStatus == PlayStateParams.STATE_PAUSED) {
+            if (status == PlayStateParams.STATE_PAUSED) {
+                status = PlayStateParams.STATE_PAUSED;
+            } else {
+                status = PlayStateParams.STATE_PLAYING;
+            }
             /**视频缓冲结束后隐藏缩列图*/
             mHandler.postDelayed(new Runnable() {
                 @Override
@@ -1198,7 +1231,7 @@ public class PlayerView {
                     query.id(ResourceUtils.getResourceIdByName(mContext, "id", "ll_bg")).gone();
                 }
             }, 500);
-        } else if (newStatus == -10000) {
+        } else if (newStatus == PlayStateParams.MEDIA_INFO_VIDEO_INTERRUPT) {
             /**直播停止推流*/
             status = PlayStateParams.STATE_ERROR;
             if (!(isGNetWork &&
@@ -1211,27 +1244,35 @@ public class PlayerView {
                 } else {
                     showStatus(mActivity.getResources().getString(ResourceUtils.getResourceIdByName(mContext, "string", "small_problem")));
                 }
+                /**5秒尝试重连*/
+                if (!isErrorStop && isAutoReConnect) {
+                    mHandler.sendEmptyMessageDelayed(MESSAGE_RESTART_PLAY, autoConnectTime);
+                }
+            } else {
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie")).visible();
             }
 
         } else if (newStatus == PlayStateParams.STATE_ERROR
-                || newStatus == 1
-                || newStatus == -1004
-                || newStatus == -1007
-                || newStatus == -1010
-                || newStatus == -110
-                || newStatus == 100) {
+                || newStatus == PlayStateParams.MEDIA_INFO_UNKNOWN
+                || newStatus == PlayStateParams.MEDIA_ERROR_IO
+                || newStatus == PlayStateParams.MEDIA_ERROR_MALFORMED
+                || newStatus == PlayStateParams.MEDIA_ERROR_UNSUPPORTED
+                || newStatus == PlayStateParams.MEDIA_ERROR_TIMED_OUT
+                || newStatus == PlayStateParams.MEDIA_ERROR_SERVER_DIED) {
             status = PlayStateParams.STATE_ERROR;
             if (!(isGNetWork && (NetworkUtils.getNetworkType(mContext) == 4 || NetworkUtils.getNetworkType(mContext) == 5 || NetworkUtils.getNetworkType(mContext) == 6))) {
                 hideStatusUI();
                 if (isLive) {
                     showStatus(mActivity.getResources().getString(ResourceUtils.getResourceIdByName(mContext, "string", "small_problem")));
-                    /**5秒尝试重连*/
-                    if (!isErrorStop) {
-                        mHandler.sendEmptyMessageDelayed(MESSAGE_RESTART_PLAY, 10000);
-                    }
                 } else {
                     showStatus(mActivity.getResources().getString(ResourceUtils.getResourceIdByName(mContext, "string", "small_problem")));
                 }
+                /**5秒尝试重连*/
+                if (!isErrorStop && isAutoReConnect) {
+                    mHandler.sendEmptyMessageDelayed(MESSAGE_RESTART_PLAY, autoConnectTime);
+                }
+            } else {
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie")).visible();
             }
         }
     }
