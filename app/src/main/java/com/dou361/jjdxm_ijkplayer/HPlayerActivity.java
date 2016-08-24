@@ -1,6 +1,7 @@
 package com.dou361.jjdxm_ijkplayer;
 
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.PowerManager;
@@ -21,22 +22,22 @@ import java.util.List;
 
 /**
  * ========================================
- * <p/>
+ * <p>
  * 版 权：深圳市晶网科技控股有限公司 版权所有 （C） 2015
- * <p/>
+ * <p>
  * 作 者：陈冠明
- * <p/>
+ * <p>
  * 个人网站：http://www.dou361.com
- * <p/>
+ * <p>
  * 版 本：1.0
- * <p/>
+ * <p>
  * 创建日期：2015/11/18 9:40
- * <p/>
+ * <p>
  * 描 述：半屏界面
- * <p/>
- * <p/>
+ * <p>
+ * <p>
  * 修订历史：
- * <p/>
+ * <p>
  * ========================================
  */
 public class HPlayerActivity extends AppCompatActivity {
@@ -66,17 +67,12 @@ public class HPlayerActivity extends AppCompatActivity {
         m2.setUrl(url2);
         list.add(m1);
         list.add(m2);
-        player = new PlayerView(this){
-            @Override
-            public PlayerView setPlayerRotation() {
-                return super.setPlayerRotation();
-            }
-        }
+        player = new PlayerView(this)
                 .setTitle("什么")
                 .setScaleType(PlayStateParams.fitparent)
                 .forbidTouch(false)
-                .hideMenu(true)
                 .hideCenterPlayer(true)
+                .setShowSpeed(true)
                 .showThumbnail(new OnShowThumbnailListener() {
                     @Override
                     public void onShowThumbnail(ImageView ivThumbnail) {

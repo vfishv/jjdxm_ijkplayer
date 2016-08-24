@@ -423,6 +423,92 @@ jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
 	PlayerView toggleFullScreen()
 	//设置自动重连的模式或者重连时间，isAuto true 出错重连，false出错不重连，connectTime重连的时间
 	setAutoReConnect(boolean isAuto, int connectTime)
+	//进度条和时长显示的方向切换
+	PlayerView toggleProcessDurationOrientation()
+	//设置进度条和时长显示的方向，默认为上下显示，true为上下显示false为左右显示
+	setProcessDurationOrientation(boolean portrait)
+	//显示菜单设置
+	showMenu()
+	//获取界面方向
+	int getScreenOrientation()
+	//显示加载网速
+	PlayerView setShowSpeed(boolean isShow)
+
+
+
+
+#### 关于定制 ####
+
+#### 加载时显示网速 ####
+默认加载时不显示网速，可以通过setShowSpeed(boolean isShow)设置加载时是否需要显示，true为显示，false为不显示
+
+#### 播放器底部bar播放进度条样式定制 ####
+默认的进度样式是竖屏为上下样式，即进度条在播放时长的上面，横屏为左右样式，即进度条在播放时长的中间。样式定制主要是两个方法搭配使用toggleProcessDurationOrientation方法和setProcessDurationOrientation方法
+
+1.横竖屏都为上下样式
+
+	player = new PlayerView(this) {
+            @Override
+            public PlayerView toggleProcessDurationOrientation() {
+                return setProcessDurationOrientation(true);
+            }
+        }
+                .setTitle("什么")
+                .setProcessDurationOrientation(true)
+                .setScaleType(PlayStateParams.fitparent)
+                .forbidTouch(false)
+                .hideCenterPlayer(true)
+                .setPlaySource(list)
+                .startPlay();
+
+2.横竖屏都为左右样式
+
+	player = new PlayerView(this) {
+            @Override
+            public PlayerView toggleProcessDurationOrientation() {
+                return setProcessDurationOrientation(false);
+            }
+        }
+                .setTitle("什么")
+                .setProcessDurationOrientation(false)
+                .setScaleType(PlayStateParams.fitparent)
+                .forbidTouch(false)
+                .hideCenterPlayer(true)
+                .setPlaySource(list)
+                .startPlay();
+
+3.横屏为上下样式竖屏为左右样式
+
+	player = new PlayerView(this) {
+            @Override
+            public PlayerView toggleProcessDurationOrientation() {
+                return setProcessDurationOrientation(getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            }
+        }
+                .setTitle("什么")
+                .setProcessDurationOrientation(false)
+                .setScaleType(PlayStateParams.fitparent)
+                .forbidTouch(false)
+                .hideCenterPlayer(true)
+                .setPlaySource(list)
+                .startPlay();
+
+4.横屏为左右样式竖屏为上下样式
+
+	player = new PlayerView(this) {
+            @Override
+            public PlayerView toggleProcessDurationOrientation() {
+                return setProcessDurationOrientation(getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            }
+        }
+                .setTitle("什么")
+                .setProcessDurationOrientation(true)
+                .setScaleType(PlayStateParams.fitparent)
+                .forbidTouch(false)
+                .hideCenterPlayer(true)
+                .setPlaySource(list)
+                .startPlay();
+
 
 3.ijkplayer封装的视频播放信息返回码监听，可以通过setOnInfoListener去监听
 

@@ -8,6 +8,7 @@ import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.provider.Settings;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
@@ -41,22 +42,22 @@ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 
 /**
  * ========================================
- * <p/>
+ * <p>
  * 版 权：dou361.com 版权所有 （C） 2015
- * <p/>
+ * <p>
  * 作 者：陈冠明
- * <p/>
+ * <p>
  * 个人网站：http://www.dou361.com
- * <p/>
+ * <p>
  * 版 本：1.0
- * <p/>
+ * <p>
  * 创建日期：2016/4/14
- * <p/>
+ * <p>
  * 描 述：
- * <p/>
- * <p/>
+ * <p>
+ * <p>
  * 修订历史：
- * <p/>
+ * <p>
  * ========================================
  */
 public class PlayerView {
@@ -122,9 +123,33 @@ public class PlayerView {
      */
     private final ImageView iv_fullscreen;
     /**
+     * 菜单面板
+     */
+    private final View settingsContainer;
+    /**
+     * 声音面板
+     */
+    private final View volumeControllerContainer;
+    /**
+     * 亮度面板
+     */
+    private final View brightnessControllerContainer;
+    /**
+     * 声音进度
+     */
+    private final SeekBar volumeController;
+    /**
+     * 亮度进度
+     */
+    private final SeekBar brightnessController;
+    /**
      * 视频分辨率按钮
      */
     private final TextView tv_steam;
+    /**
+     * 视频加载速度
+     */
+    private final TextView tv_speed;
     /**
      * 视频播放进度条
      */
@@ -359,7 +384,10 @@ public class PlayerView {
     private final View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_stream")) {
+            if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_menu")) {
+                /**菜单*/
+                showMenu();
+            } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_stream")) {
                 /**选择分辨率*/
                 showStreamSelectView();
             } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "ijk_iv_rotation")) {
@@ -378,7 +406,7 @@ public class PlayerView {
                     }
                 } else {
                     startPlay();
-                    if(videoView.isPlaying()){
+                    if (videoView.isPlaying()) {
                         /**ijkplayer内部的监听没有回调，只能手动修改状态*/
                         status = PlayStateParams.STATE_PREPARING;
                         hideStatusUI();
@@ -428,6 +456,7 @@ public class PlayerView {
                 int position = (int) ((duration * progress * 1.0) / 1000);
                 String time = generateTime(position);
                 query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime")).text(time);
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime_full")).text(time);
             }
         }
 
@@ -446,6 +475,78 @@ public class PlayerView {
             mHandler.removeMessages(MESSAGE_SHOW_PROGRESS);
             isDragging = false;
             mHandler.sendEmptyMessageDelayed(MESSAGE_SHOW_PROGRESS, 1000);
+        }
+    };
+
+    /**
+     * 亮度进度条滑动监听
+     */
+    private final SeekBar.OnSeekBarChangeListener onBrightnessControllerChangeListener = new SeekBar.OnSeekBarChangeListener() {
+        /**数值的改变*/
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            setBrightness(progress);
+        }
+
+        /**开始拖动*/
+        public void onStartTrackingTouch(SeekBar seekBar) {
+        }
+
+        /**停止拖动*/
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            brightness = -1;
+        }
+    };
+
+    public void setBrightness(int value) {
+        android.view.WindowManager.LayoutParams layout = this.mActivity.getWindow().getAttributes();
+        if (brightness < 0) {
+            brightness = mActivity.getWindow().getAttributes().screenBrightness;
+            if (brightness <= 0.00f) {
+                brightness = 0.50f;
+            } else if (brightness < 0.01f) {
+                brightness = 0.01f;
+            }
+        }
+        if (value < 1) {
+            value = 1;
+        }
+        if (value > 100) {
+            value = 100;
+        }
+        layout.screenBrightness = 1.0F * (float) value / 100.0F;
+        if (layout.screenBrightness > 1.0f) {
+            layout.screenBrightness = 1.0f;
+        } else if (layout.screenBrightness < 0.01f) {
+            layout.screenBrightness = 0.01f;
+        }
+        this.mActivity.getWindow().setAttributes(layout);
+    }
+
+
+    /**
+     * 声音进度条滑动监听
+     */
+    private final SeekBar.OnSeekBarChangeListener onVolumeControllerChangeListener = new SeekBar.OnSeekBarChangeListener() {
+
+        /**数值的改变*/
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+            int index = (int) (mMaxVolume * progress * 0.01);
+            if (index > mMaxVolume)
+                index = mMaxVolume;
+            else if (index < 0)
+                index = 0;
+            // 变更声音
+            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, index, 0);
+        }
+
+        /**开始拖动*/
+        public void onStartTrackingTouch(SeekBar seekBar) {
+        }
+
+        /**停止拖动*/
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            volume = -1;
         }
     };
 
@@ -471,6 +572,28 @@ public class PlayerView {
         query = new LayoutQuery(activity);
         rl_box = activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_box"));
         videoView = (IjkVideoView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "video_view"));
+        settingsContainer = activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_settings_container"));
+        settingsContainer.setVisibility(View.GONE);
+        volumeControllerContainer = activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_volume_controller_container"));
+        /**声音进度*/
+        volumeController = (SeekBar) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_volume_controller"));
+        volumeController.setMax(100);
+        volumeController.setOnSeekBarChangeListener(this.onVolumeControllerChangeListener);
+        /**亮度进度*/
+        brightnessControllerContainer = activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_brightness_controller_container"));
+        brightnessController = (SeekBar) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_brightness_controller"));
+        brightnessController.setMax(100);
+        try {
+            int e = Settings.System.getInt(this.mContext.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS);
+            float progress = 1.0F * (float) e / 255.0F;
+            android.view.WindowManager.LayoutParams layout = this.mActivity.getWindow().getAttributes();
+            layout.screenBrightness = progress;
+            mActivity.getWindow().setAttributes(layout);
+        } catch (Settings.SettingNotFoundException var7) {
+            var7.printStackTrace();
+        }
+        brightnessController.setOnSeekBarChangeListener(this.onBrightnessControllerChangeListener);
+
         streamSelectView = (LinearLayout) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_stream_container"));
         streamSelectListView = (ListView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_streams_list"));
         ll_topbar = activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_top_box"));
@@ -483,6 +606,7 @@ public class PlayerView {
         iv_rotation = (ImageView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "ijk_iv_rotation"));
         iv_fullscreen = (ImageView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen"));
         tv_steam = (TextView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_stream"));
+        tv_speed = (TextView) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_speed"));
         seekBar = (SeekBar) activity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_seekBar"));
         seekBar.setMax(1000);
         seekBar.setOnSeekBarChangeListener(mSeekListener);
@@ -492,11 +616,17 @@ public class PlayerView {
         iv_rotation.setOnClickListener(onClickListener);
         tv_steam.setOnClickListener(onClickListener);
         iv_back.setOnClickListener(onClickListener);
+        iv_menu.setOnClickListener(onClickListener);
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie_icon")).clicked(onClickListener);
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay_icon")).clicked(onClickListener);
         videoView.setOnInfoListener(new IMediaPlayer.OnInfoListener() {
             @Override
             public boolean onInfo(IMediaPlayer mp, int what, int extra) {
+                if(what == PlayStateParams.MEDIA_INFO_NETWORK_BANDWIDTH){
+                    Log.e("dou361","====extra======="+extra);
+                    if(tv_speed!=null){
+                    tv_speed.setText(getFormatSize(extra));}
+                }
                 statusChange(what);
                 if (onInfoListener != null) {
                     onInfoListener.onInfo(mp, what, extra);
@@ -573,7 +703,6 @@ public class PlayerView {
             query.id(ResourceUtils.getResourceIdByName(mContext, "id", "ll_bg")).visible();
         }
     }
-
 
     /**==========================================Activity生命周期方法回调=============================*/
     /**
@@ -1111,20 +1240,15 @@ public class PlayerView {
      */
     public PlayerView operatorPanl() {
         isShowControlPanl = !isShowControlPanl;
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_settings_container")).gone();
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_stream_container")).gone();
         if (isShowControlPanl) {
             ll_topbar.setVisibility(View.VISIBLE);
             ll_bottombar.setVisibility(View.VISIBLE);
             if (isLive) {
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_seekBar")).gone();
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime")).gone();
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_split")).gone();
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime")).gone();
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_process_panl")).invisible();
             } else {
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_seekBar")).visible();
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime")).visible();
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_split")).visible();
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime")).visible();
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_process_panl")).visible();
             }
             if (isOnlyFullScreen || isForbidDoulbeUp) {
                 iv_fullscreen.setVisibility(View.GONE);
@@ -1181,8 +1305,118 @@ public class PlayerView {
         } else {
             mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
+        toggleProcessDurationOrientation();
         updateFullScreenButton();
         return this;
+    }
+
+    /**
+     * 显示菜单设置
+     */
+    public PlayerView showMenu() {
+        volumeController.setProgress(audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) * 100 / mMaxVolume);
+        brightnessController.setProgress((int) (mActivity.getWindow().getAttributes().screenBrightness * 100));
+        settingsContainer.setVisibility(View.VISIBLE);
+        if (!isForbidHideControlPanl) {
+            ll_topbar.setVisibility(View.GONE);
+            ll_bottombar.setVisibility(View.GONE);
+        }
+        return this;
+    }
+
+    /**
+     * 进度条和时长显示的方向切换
+     */
+    public PlayerView toggleProcessDurationOrientation() {
+        setProcessDurationOrientation(getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        return this;
+    }
+
+    /**
+     * 设置显示加载网速或者隐藏
+     */
+    public PlayerView setShowSpeed(boolean isShow) {
+        tv_speed.setVisibility(isShow?View.VISIBLE:View.GONE);
+        return this;
+    }
+
+    /**
+     * 设置进度条和时长显示的方向，默认为上下显示，true为上下显示false为左右显示
+     */
+    public PlayerView setProcessDurationOrientation(boolean portrait) {
+        if (portrait) {
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime_full")).gone();
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime_full")).gone();
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_center")).visible();
+        } else {
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime_full")).visible();
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime_full")).visible();
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_center")).gone();
+        }
+        return this;
+    }
+
+
+    /**
+     * 获取界面方向
+     */
+    public int getScreenOrientation() {
+        int rotation = mActivity.getWindowManager().getDefaultDisplay().getRotation();
+        DisplayMetrics dm = new DisplayMetrics();
+        mActivity.getWindowManager().getDefaultDisplay().getMetrics(dm);
+        int width = dm.widthPixels;
+        int height = dm.heightPixels;
+        int orientation;
+        // if the device's natural orientation is portrait:
+        if ((rotation == Surface.ROTATION_0
+                || rotation == Surface.ROTATION_180) && height > width ||
+                (rotation == Surface.ROTATION_90
+                        || rotation == Surface.ROTATION_270) && width > height) {
+            switch (rotation) {
+                case Surface.ROTATION_0:
+                    orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+                    break;
+                case Surface.ROTATION_90:
+                    orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+                    break;
+                case Surface.ROTATION_180:
+                    orientation =
+                            ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
+                    break;
+                case Surface.ROTATION_270:
+                    orientation =
+                            ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+                    break;
+                default:
+                    orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+                    break;
+            }
+        }
+        // if the device's natural orientation is landscape or if the device
+        // is square:
+        else {
+            switch (rotation) {
+                case Surface.ROTATION_0:
+                    orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+                    break;
+                case Surface.ROTATION_90:
+                    orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+                    break;
+                case Surface.ROTATION_180:
+                    orientation =
+                            ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+                    break;
+                case Surface.ROTATION_270:
+                    orientation =
+                            ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
+                    break;
+                default:
+                    orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+                    break;
+            }
+        }
+
+        return orientation;
     }
 
     /**
@@ -1349,6 +1583,7 @@ public class PlayerView {
      */
     private void hideStatusUI() {
         iv_player.setVisibility(View.GONE);
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_settings_container")).gone();
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_stream_container")).gone();
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay")).gone();
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie")).gone();
@@ -1407,68 +1642,6 @@ public class PlayerView {
     }
 
     /**
-     * 获取界面方向
-     */
-    private int getScreenOrientation() {
-        int rotation = mActivity.getWindowManager().getDefaultDisplay().getRotation();
-        DisplayMetrics dm = new DisplayMetrics();
-        mActivity.getWindowManager().getDefaultDisplay().getMetrics(dm);
-        int width = dm.widthPixels;
-        int height = dm.heightPixels;
-        int orientation;
-        // if the device's natural orientation is portrait:
-        if ((rotation == Surface.ROTATION_0
-                || rotation == Surface.ROTATION_180) && height > width ||
-                (rotation == Surface.ROTATION_90
-                        || rotation == Surface.ROTATION_270) && width > height) {
-            switch (rotation) {
-                case Surface.ROTATION_0:
-                    orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-                    break;
-                case Surface.ROTATION_90:
-                    orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-                    break;
-                case Surface.ROTATION_180:
-                    orientation =
-                            ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
-                    break;
-                case Surface.ROTATION_270:
-                    orientation =
-                            ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
-                    break;
-                default:
-                    orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-                    break;
-            }
-        }
-        // if the device's natural orientation is landscape or if the device
-        // is square:
-        else {
-            switch (rotation) {
-                case Surface.ROTATION_0:
-                    orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-                    break;
-                case Surface.ROTATION_90:
-                    orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-                    break;
-                case Surface.ROTATION_180:
-                    orientation =
-                            ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
-                    break;
-                case Surface.ROTATION_270:
-                    orientation =
-                            ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
-                    break;
-                default:
-                    orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-                    break;
-            }
-        }
-
-        return orientation;
-    }
-
-    /**
      * 同步进度
      */
     private long syncProgress() {
@@ -1486,7 +1659,9 @@ public class PlayerView {
             seekBar.setSecondaryProgress(percent * 10);
         }
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime")).text(generateTime(position));
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime_full")).text(generateTime(position));
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime")).text(generateTime(this.duration));
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime_full")).text(generateTime(this.duration));
         return position;
     }
 
@@ -1500,6 +1675,23 @@ public class PlayerView {
         int hours = totalSeconds / 3600;
         return hours > 0 ? String.format("%02d:%02d:%02d", hours, minutes, seconds) : String.format("%02d:%02d", minutes, seconds);
     }
+
+    /**
+     * 下载速度格式化显示
+     */
+    private String getFormatSize(int size) {
+        long fileSize = (long) size;
+        String showSize = "";
+        if (fileSize >= 0 && fileSize < 1024) {
+            showSize = fileSize + "Kb/s";
+        } else if (fileSize >= 1024 && fileSize < (1024 * 1024)) {
+            showSize = Long.toString(fileSize / 1024) + "KB/s";
+        } else if (fileSize >= (1024 * 1024) && fileSize < (1024 * 1024 * 1024)) {
+            showSize = Long.toString(fileSize / (1024 * 1024)) + "MB/s";
+        }
+        return showSize;
+    }
+
 
     /**
      * 更新播放、暂停和停止按钮
@@ -1564,7 +1756,7 @@ public class PlayerView {
     }
 
     /**
-     * 滑动改变进度
+     * 快进或者快退滑动改变进度
      *
      * @param percent
      */
@@ -1591,7 +1783,7 @@ public class PlayerView {
     }
 
     /**
-     * 滑动改变亮度
+     * 亮度滑动改变亮度
      *
      * @param percent
      */
