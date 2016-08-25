@@ -63,6 +63,7 @@ or Gradle:
 
 历史版本：
 
+	compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:1.0.3'
 	compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:1.0.2'
 	compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:1.0.1'
 	compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:1.0.0'
@@ -571,6 +572,9 @@ jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
 
 
 ## ChangeLog ##
+
+2016.08.25 添加视频播放进度条样式，添加菜单设置
+
 2016.08.24 修复播放出错点击没有反应，这是修改旋转视频方向是造成的bug,当前默认为5秒无操作自动重试，修改加载进度条的显示时间，之前是加载回调整备中才显示，改为点击加载立即显示，新增修改自动重试的方式和重试的时间
 
 2016.08.20 修复视频进入后台继续播放，切换视频源是画面卡住等问题
