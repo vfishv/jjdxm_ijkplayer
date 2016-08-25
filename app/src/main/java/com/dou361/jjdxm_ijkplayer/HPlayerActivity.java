@@ -70,13 +70,15 @@ public class HPlayerActivity extends AppCompatActivity {
         player = new PlayerView(this) {
             @Override
             public PlayerView toggleProcessDurationOrientation() {
-                return setProcessDurationOrientation(getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT ? PlayStateParams.PROCESS_PORTRAIT : PlayStateParams.PROCESS_LANDSCAPE);
+                hideSteam(getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                return setProcessDurationOrientation(getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT ? PlayStateParams.PROCESS_CENTER : PlayStateParams.PROCESS_LANDSCAPE);
             }
         }
                 .setTitle("什么")
-                .setProcessDurationOrientation(PlayStateParams.PROCESS_PORTRAIT)
+                .setProcessDurationOrientation(PlayStateParams.PROCESS_CENTER)
                 .setScaleType(PlayStateParams.fitparent)
                 .forbidTouch(false)
+                .hideSteam(true)
                 .hideCenterPlayer(true)
                 .showThumbnail(new OnShowThumbnailListener() {
                     @Override
@@ -98,6 +100,7 @@ public class HPlayerActivity extends AppCompatActivity {
         if (player != null) {
             player.onPause();
         }
+        /**demo的内容，恢复系统其它媒体的状态*/
         MediaUtils.muteAudioFocus(mContext, true);
     }
 
@@ -107,7 +110,9 @@ public class HPlayerActivity extends AppCompatActivity {
         if (player != null) {
             player.onResume();
         }
+        /**demo的内容，暂停系统其它媒体的状态*/
         MediaUtils.muteAudioFocus(mContext, false);
+        /**demo的内容，激活设备常亮状态*/
         if (wakeLock != null) {
             wakeLock.acquire();
         }
@@ -135,6 +140,7 @@ public class HPlayerActivity extends AppCompatActivity {
             return;
         }
         super.onBackPressed();
+        /**demo的内容，恢复设备亮度状态*/
         if (wakeLock != null) {
             wakeLock.release();
         }

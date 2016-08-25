@@ -21,19 +21,12 @@
 
 ## Features ##
 
-1. base on ijkplayer,support RTMP , HLS (http & https) , MP4,M4A etc.
-2. gestures for volume control
-3. gestures for brightness control
-4. gestures for forward or backward
-5. fullscreen by manual or sensor
-6. try to replay when error(only for live video)
-7. set video scale type (double click video will switch the scale types in app,you can find the difference)
-    1. fitParent:可能会剪裁,保持原视频的大小，显示在中心,当原视频的大小超过view的大小超过部分裁剪处理
-    2. fillParent:可能会剪裁,等比例放大视频，直到填满View为止,超过View的部分作裁剪处理
-    3. wrapContent:将视频的内容完整居中显示，如果视频大于view,则按比例缩视频直到完全显示在view中
-    4. fitXY:不剪裁,非等比例拉伸画面填满整个View
-    5. 16:9:不剪裁,非等比例拉伸画面到16:9,并完全显示在View中
-    6. 4:3:不剪裁,非等比例拉伸画面到4:3,并完全显示在View中
+1. 基于ijkplayer封装的视频播放器界面,支持 RTMP , HLS (http & https) , MP4,M4A 等；
+2. 可根据需求去定制部分界面样式；
+3. 常用的手势操作左边上下亮度，右边上下声音，左右滑动播放进度调整；
+4. 支持多种分辨率流的切换播放；
+5. 播放出错尝试重连；
+6. 界面裁剪显示样式；
 
 ## Screenshots ##
 
@@ -86,6 +79,9 @@ jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
 
 ## Get Started ##
 
+#### step1: ####
+依赖本项目类库
+
 该项目是基于ijkplayer项目进行的视频UI的二次封装，目前只是默认在：
 
 	compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:1.0.0' 
@@ -107,6 +103,9 @@ jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
     compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.6.0'
     compile 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.6.0'
 
+#### step2: ####
+
+多种分辨率流切换的案例，例如播放器的标清、高清、超清、720P等。
 
 #### 1.简单的播放器实现 ####
 
@@ -172,7 +171,73 @@ jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
                 .setPlaySource(list)
                 .startPlay();
 
+#### step3: ####
+
+配置生命周期方法,为了让播放器同步Activity生命周期，建议以下方法都去配置，注释的代码，主要作用是播放时屏幕常亮和暂停其它媒体的播放。
+
+	 @Override
+    protected void onPause() {
+        super.onPause();
+        if (player != null) {
+            player.onPause();
+        }
+        /**demo的内容，恢复系统其它媒体的状态*/
+        //MediaUtils.muteAudioFocus(mContext, true);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (player != null) {
+            player.onResume();
+        }
+        /**demo的内容，暂停系统其它媒体的状态*/
+        MediaUtils.muteAudioFocus(mContext, false);
+        /**demo的内容，激活设备常亮状态*/
+        //if (wakeLock != null) {
+        //    wakeLock.acquire();
+        //}
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (player != null) {
+            player.onDestroy();
+        }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (player != null) {
+            player.onConfigurationChanged(newConfig);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (player != null && player.onBackPressed()) {
+            return;
+        }
+        super.onBackPressed();
+        /**demo的内容，恢复设备亮度状态*/
+        //if (wakeLock != null) {
+        //    wakeLock.release();
+        //}
+    }
+
+
 ## More Actions ##
+
+1.视频界面裁剪设置，可通过方法setScaleType(int type)去设置
+
+	1. PlayStateParams.fitParent:可能会剪裁,保持原视频的大小，显示在中心,当原视频的大小超过view的大小超过部分裁剪处理
+    2. PlayStateParams.fillParent:可能会剪裁,等比例放大视频，直到填满View为止,超过View的部分作裁剪处理
+    3. PlayStateParams.wrapcontent:将视频的内容完整居中显示，如果视频大于view,则按比例缩视频直到完全显示在view中
+    4. PlayStateParams.fitXY:不剪裁,非等比例拉伸画面填满整个View
+    5. PlayStateParams.f16_9:不剪裁,非等比例拉伸画面到16:9,并完全显示在View中
+    6. PlayStateParams.f4_3:不剪裁,非等比例拉伸画面到4:3,并完全显示在View中
 
 1.自定义视频界面，可以复制以下布局内容到自己的项目中，注意已有的id不能修改或删除，可以增加view，可以对以下布局内容调整显示位置或者自行隐藏
 
@@ -393,7 +458,7 @@ jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
 	获取顶部控制barview
 	View getTopBarView()
 	//获取底部控制barview
-	etBottonBarView()
+	View getBottonBarView()
 	//获取旋转view
 	ImageView getRationView()
 	//获取返回view
@@ -439,6 +504,22 @@ jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
 
 
 #### 关于定制 ####
+
+#### 隐藏部分不想要的界面 ####
+
+	//隐藏返回键，true隐藏，false为显示
+	PlayerView hideBack(boolean isHide)
+	//隐藏菜单键，true隐藏，false为显示
+	PlayerView hideMenu(boolean isHide)
+	//隐藏分辨率按钮，true隐藏，false为显示
+	PlayerView hideSteam(boolean isHide)
+	//隐藏旋转按钮，true隐藏，false为显示
+	PlayerView hideRotation(boolean isHide)
+	//隐藏全屏按钮，true隐藏，false为显示
+	PlayerView hideFullscreen(boolean isHide)
+	//隐藏中间播放按钮,ture为隐藏，false为不做隐藏处理，但不是显示
+	PlayerView hideCenterPlayer(boolean isHide)
+
 
 #### 加载时显示网速 ####
 默认加载时不显示网速，可以通过setShowSpeed(boolean isShow)设置加载时是否需要显示，true为显示，false为不显示
