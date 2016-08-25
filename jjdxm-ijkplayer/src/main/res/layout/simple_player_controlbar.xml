@@ -28,9 +28,43 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:text="06:21"
-            android:visibility="gone"
             android:textColor="@android:color/white"
-            android:textSize="12dp"/>
+            android:textSize="12dp"
+            android:visibility="gone"/>
+
+        <LinearLayout
+            android:id="@+id/app_video_lift"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="2dp"
+            android:layout_marginRight="2dp"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/app_video_currentTime_left"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="06:21"
+                android:textColor="@android:color/white"
+                android:textSize="12dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="/"
+                android:textColor="@android:color/white"
+                android:textSize="12dp"/>
+
+            <TextView
+                android:id="@+id/app_video_endTime_left"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="10:10"
+                android:textColor="@android:color/white"
+                android:textSize="12dp"/>
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="0dp"
@@ -61,7 +95,6 @@
                     android:textSize="12dp"/>
 
                 <TextView
-                    android:id="@+id/app_video_split"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="/"
@@ -85,9 +118,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:text="10:10"
-            android:visibility="gone"
             android:textColor="@android:color/white"
-            android:textSize="12dp"/>
+            android:textSize="12dp"
+            android:visibility="gone"/>
     </LinearLayout>
 
     <TextView

@@ -42,22 +42,22 @@ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 
 /**
  * ========================================
- * <p>
+ * <p/>
  * 版 权：dou361.com 版权所有 （C） 2015
- * <p>
+ * <p/>
  * 作 者：陈冠明
- * <p>
+ * <p/>
  * 个人网站：http://www.dou361.com
- * <p>
+ * <p/>
  * 版 本：1.0
- * <p>
+ * <p/>
  * 创建日期：2016/4/14
- * <p>
+ * <p/>
  * 描 述：
- * <p>
- * <p>
+ * <p/>
+ * <p/>
  * 修订历史：
- * <p>
+ * <p/>
  * ========================================
  */
 public class PlayerView {
@@ -457,6 +457,7 @@ public class PlayerView {
                 String time = generateTime(position);
                 query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime")).text(time);
                 query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime_full")).text(time);
+                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime_left")).text(time);
             }
         }
 
@@ -622,10 +623,11 @@ public class PlayerView {
         videoView.setOnInfoListener(new IMediaPlayer.OnInfoListener() {
             @Override
             public boolean onInfo(IMediaPlayer mp, int what, int extra) {
-                if(what == PlayStateParams.MEDIA_INFO_NETWORK_BANDWIDTH){
-                    Log.e("dou361","====extra======="+extra);
-                    if(tv_speed!=null){
-                    tv_speed.setText(getFormatSize(extra));}
+                if (what == PlayStateParams.MEDIA_INFO_NETWORK_BANDWIDTH) {
+                    Log.e("dou361", "====extra=======" + extra);
+                    if (tv_speed != null) {
+                        tv_speed.setText(getFormatSize(extra));
+                    }
                 }
                 statusChange(what);
                 if (onInfoListener != null) {
@@ -1328,7 +1330,7 @@ public class PlayerView {
      * 进度条和时长显示的方向切换
      */
     public PlayerView toggleProcessDurationOrientation() {
-        setProcessDurationOrientation(getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        setProcessDurationOrientation(PlayStateParams.PROCESS_PORTRAIT);
         return this;
     }
 
@@ -1336,22 +1338,29 @@ public class PlayerView {
      * 设置显示加载网速或者隐藏
      */
     public PlayerView setShowSpeed(boolean isShow) {
-        tv_speed.setVisibility(isShow?View.VISIBLE:View.GONE);
+        tv_speed.setVisibility(isShow ? View.VISIBLE : View.GONE);
         return this;
     }
 
     /**
      * 设置进度条和时长显示的方向，默认为上下显示，true为上下显示false为左右显示
      */
-    public PlayerView setProcessDurationOrientation(boolean portrait) {
-        if (portrait) {
+    public PlayerView setProcessDurationOrientation(int portrait) {
+        if (portrait == PlayStateParams.PROCESS_CENTER) {
             query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime_full")).gone();
             query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime_full")).gone();
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_center")).visible();
-        } else {
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_center")).gone();
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_lift")).visible();
+        } else if (portrait == PlayStateParams.PROCESS_LANDSCAPE) {
             query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime_full")).visible();
             query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime_full")).visible();
             query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_center")).gone();
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_lift")).gone();
+        } else {
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime_full")).gone();
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime_full")).gone();
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_center")).visible();
+            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_lift")).gone();
         }
         return this;
     }
@@ -1660,8 +1669,10 @@ public class PlayerView {
         }
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime")).text(generateTime(position));
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime_full")).text(generateTime(position));
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime_left")).text(generateTime(position));
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime")).text(generateTime(this.duration));
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime_full")).text(generateTime(this.duration));
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime_left")).text(generateTime(this.duration));
         return position;
     }
 

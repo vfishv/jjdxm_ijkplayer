@@ -51,6 +51,17 @@ public class PlayStateParams {
     public static final int f4_3 = 5;
     /**====================视频裁剪比例 结束=================================*/
 
+    /**====================进度条显示样式 开始=================================*/
+
+    /**上下样式*/
+    public static final int PROCESS_PORTRAIT = 0;
+    /**左右样式*/
+    public static final int PROCESS_LANDSCAPE = 1;
+    /**中间两边样式*/
+    public static final int PROCESS_CENTER = 2;
+
+    /**====================进度条显示样式 结束=================================*/
+
 
     /**====================播放器中使用的播放状态 开始=================================*/
     /**

@@ -425,8 +425,8 @@ jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
 	setAutoReConnect(boolean isAuto, int connectTime)
 	//进度条和时长显示的方向切换
 	PlayerView toggleProcessDurationOrientation()
-	//设置进度条和时长显示的方向，默认为上下显示，true为上下显示false为左右显示
-	setProcessDurationOrientation(boolean portrait)
+	//设置进度条和时长显示的方向，默认为上下显示，PlayStateParams.PROCESS_PORTRAIT为上下显示PlayStateParams.PROCESS_LANDSCAPE为左右显示PlayStateParams.PROCESS_CENTER为中间两边样式
+	setProcessDurationOrientation(int portrait)
 	//显示菜单设置
 	showMenu()
 	//获取界面方向
@@ -443,18 +443,27 @@ jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
 默认加载时不显示网速，可以通过setShowSpeed(boolean isShow)设置加载时是否需要显示，true为显示，false为不显示
 
 #### 播放器底部bar播放进度条样式定制 ####
-默认的进度样式是竖屏为上下样式，即进度条在播放时长的上面，横屏为左右样式，即进度条在播放时长的中间。样式定制主要是两个方法搭配使用toggleProcessDurationOrientation方法和setProcessDurationOrientation方法
+默认的进度样式是竖屏为上下样式，即进度条在播放时长的上面，横屏为左右样式，即进度条在播放时长的中间。样式定制主要是两个方法搭配使用toggleProcessDurationOrientation方法和setProcessDurationOrientation方法，横竖屏切换2中情况，和3种进度条样式
+
+	/**上下样式*/
+    PlayStateParams.PROCESS_PORTRAIT
+    /**左右样式*/
+    PlayStateParams.PROCESS_LANDSCAPE
+    /**中间两边样式*/
+    PlayStateParams.PROCESS_CENTER
+
+总共有2的3次方中样式，下面只罗列几种样式
 
 1.横竖屏都为上下样式
 
 	player = new PlayerView(this) {
             @Override
             public PlayerView toggleProcessDurationOrientation() {
-                return setProcessDurationOrientation(true);
+                return setProcessDurationOrientation(PlayStateParams.PROCESS_PORTRAIT);
             }
         }
                 .setTitle("什么")
-                .setProcessDurationOrientation(true)
+                .setProcessDurationOrientation(PlayStateParams.PROCESS_PORTRAIT)
                 .setScaleType(PlayStateParams.fitparent)
                 .forbidTouch(false)
                 .hideCenterPlayer(true)
@@ -466,11 +475,11 @@ jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
 	player = new PlayerView(this) {
             @Override
             public PlayerView toggleProcessDurationOrientation() {
-                return setProcessDurationOrientation(false);
+                return setProcessDurationOrientation(PlayStateParams.PROCESS_LANDSCAPE);
             }
         }
                 .setTitle("什么")
-                .setProcessDurationOrientation(false)
+                .setProcessDurationOrientation(PlayStateParams.PROCESS_LANDSCAPE)
                 .setScaleType(PlayStateParams.fitparent)
                 .forbidTouch(false)
                 .hideCenterPlayer(true)
@@ -482,11 +491,11 @@ jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
 	player = new PlayerView(this) {
             @Override
             public PlayerView toggleProcessDurationOrientation() {
-                return setProcessDurationOrientation(getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                return setProcessDurationOrientation(getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE?PlayStateParams.PROCESS_LANDSCAPE:PlayStateParams.PROCESS_PORTRAIT);
             }
         }
                 .setTitle("什么")
-                .setProcessDurationOrientation(false)
+                .setProcessDurationOrientation(PlayStateParams.PROCESS_LANDSCAPE)
                 .setScaleType(PlayStateParams.fitparent)
                 .forbidTouch(false)
                 .hideCenterPlayer(true)
@@ -498,11 +507,27 @@ jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
 	player = new PlayerView(this) {
             @Override
             public PlayerView toggleProcessDurationOrientation() {
-                return setProcessDurationOrientation(getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                return setProcessDurationOrientation(getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT?PlayStateParams.PROCESS_PORTRAIT:PlayStateParams.PROCESS_LANDSCAPE);
             }
         }
                 .setTitle("什么")
-                .setProcessDurationOrientation(true)
+                .setProcessDurationOrientation(PlayStateParams.PROCESS_CENTER)
+                .setScaleType(PlayStateParams.fitparent)
+                .forbidTouch(false)
+                .hideCenterPlayer(true)
+                .setPlaySource(list)
+                .startPlay();
+
+5.横屏为左右样式竖屏为中间两边样式
+
+	player = new PlayerView(this) {
+            @Override
+            public PlayerView toggleProcessDurationOrientation() {
+                return setProcessDurationOrientation(getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT?PlayStateParams.PROCESS_CENTER:PlayStateParams.PROCESS_LANDSCAPE);
+            }
+        }
+                .setTitle("什么")
+                .setProcessDurationOrientation(PlayStateParams.PROCESS_CENTER)
                 .setScaleType(PlayStateParams.fitparent)
                 .forbidTouch(false)
                 .hideCenterPlayer(true)
