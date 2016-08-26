@@ -56,6 +56,7 @@ or Gradle:
 
 历史版本：
 
+	compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:1.0.5'
 	compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:1.0.4'
 	compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:1.0.3'
 	compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:1.0.2'
@@ -448,8 +449,6 @@ jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
 	PlayerView setOnlyFullScreen(boolean isFull)
 	//设置是否禁止双击
 	PlayerView setForbidDoulbeUp(boolean flag)
-	//设置是否禁止隐藏bar
-	PlayerView setForbidHideControlPanl(boolean flag)
 	//当前播放的是否是直播
 	boolean isLive()
 	//是否禁止触摸
@@ -500,6 +499,14 @@ jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
 	int getScreenOrientation()
 	//显示加载网速
 	PlayerView setShowSpeed(boolean isShow)
+	//是否隐藏topbar，true为隐藏，false为不隐藏，但不一定是显示
+	PlayerView hideHideTopBar(boolean isHide)
+	//是否隐藏bottonbar，true为隐藏，false为不隐藏，但不一定是显示
+	PlayerView hideBottonBar(boolean isHide)
+	//是否隐藏上下bar，true为隐藏，false为不隐藏，但不一定是显示
+	PlayerView hideControlPanl(boolean isHide)
+	//设置是否禁止隐藏bar,优先级低于hideControlPanl
+	PlayerView setForbidHideControlPanl(boolean flag)
 
 
 
@@ -654,6 +661,8 @@ jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
 
 
 ## ChangeLog ##
+
+2016.08.26 1.0.5添加上下操作工具栏的隐藏定制，主要是hideControlPanl，hideHideTopBar和hideBottonBar方法控制
 
 2016.08.26 1.0.4打包修复播放进度样式点击返回键不起效
 

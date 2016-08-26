@@ -56,6 +56,7 @@ public class OriginPlayerActivity extends AppCompatActivity {
                 .setScaleType(PlayStateParams.fitparent)
                 .hideMenu(true)
                 .forbidTouch(false)
+                .setForbidHideControlPanl(true)
                 .showThumbnail(new OnShowThumbnailListener() {
                     @Override
                     public void onShowThumbnail(ImageView ivThumbnail) {

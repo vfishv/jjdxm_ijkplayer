@@ -17,22 +17,22 @@ import com.dou361.jjdxm_ijkplayer.utlis.MediaUtils;
 
 /**
  * ========================================
- * <p>
+ * <p/>
  * 版 权：深圳市晶网科技控股有限公司 版权所有 （C） 2015
- * <p>
+ * <p/>
  * 作 者：陈冠明
- * <p>
+ * <p/>
  * 个人网站：http://www.dou361.com
- * <p>
+ * <p/>
  * 版 本：1.0
- * <p>
+ * <p/>
  * 创建日期：2015/11/18 9:40
- * <p>
+ * <p/>
  * 描 述：直播全屏竖屏场景
- * <p>
- * <p>
+ * <p/>
+ * <p/>
  * 修订历史：
- * <p>
+ * <p/>
  * ========================================
  */
 public class PlayerLiveActivity extends Activity {
@@ -51,15 +51,15 @@ public class PlayerLiveActivity extends Activity {
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "liveTAG");
         wakeLock.acquire();
-        String url = "rtmp://stream.nodemedia.cn/live/demo";
+//        String url = "rtmp://stream.nodemedia.cn/live/demo";
+        String url = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f30.mp4";
         player = new PlayerView(this)
                 .setTitle("什么")
                 .setScaleType(PlayStateParams.fitparent)
-                .forbidTouch(false)
                 .hideMenu(true)
                 .hideSteam(true)
                 .setForbidDoulbeUp(true)
-                .setForbidHideControlPanl(true)
+                .hideControlPanl(true)
                 .showThumbnail(new OnShowThumbnailListener() {
                     @Override
                     public void onShowThumbnail(ImageView ivThumbnail) {

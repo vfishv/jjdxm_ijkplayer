@@ -42,22 +42,22 @@ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 
 /**
  * ========================================
- * <p>
+ * <p/>
  * 版 权：dou361.com 版权所有 （C） 2015
- * <p>
+ * <p/>
  * 作 者：陈冠明
- * <p>
+ * <p/>
  * 个人网站：http://www.dou361.com
- * <p>
+ * <p/>
  * 版 本：1.0
- * <p>
+ * <p/>
  * 创建日期：2016/4/14
- * <p>
+ * <p/>
  * 描 述：
- * <p>
- * <p>
+ * <p/>
+ * <p/>
  * 修订历史：
- * <p>
+ * <p/>
  * ========================================
  */
 public class PlayerView {
@@ -287,6 +287,14 @@ public class PlayerView {
      * 是否自动重连，默认5秒重连，true为重连，false为不重连
      */
     private boolean isAutoReConnect = true;
+    /**
+     * 是否隐藏topbar，true为隐藏，false为不隐藏
+     */
+    private boolean isHideTopBar;
+    /**
+     * 是否隐藏bottonbar，true为隐藏，false为不隐藏
+     */
+    private boolean isHideBottonBar;
     /**
      * 音频管理器
      */
@@ -1229,6 +1237,33 @@ public class PlayerView {
     }
 
     /**
+     * 是否隐藏topbar，true为隐藏，false为不隐藏，但不一定是显示
+     */
+    public PlayerView hideHideTopBar(boolean isHide) {
+        isHideTopBar = isHide;
+        ll_topbar.setVisibility(isHideTopBar ? View.GONE : View.VISIBLE);
+        return this;
+    }
+
+    /**
+     * 是否隐藏bottonbar，true为隐藏，false为不隐藏，但不一定是显示
+     */
+    public PlayerView hideBottonBar(boolean isHide) {
+        isHideBottonBar = isHide;
+        ll_bottombar.setVisibility(isHideBottonBar ? View.GONE : View.VISIBLE);
+        return this;
+    }
+
+    /**
+     * 是否隐藏上下bar，true为隐藏，false为不隐藏，但不一定是显示
+     */
+    public PlayerView hideControlPanl(boolean isHide) {
+        hideBottonBar(isHide);
+        hideHideTopBar(isHide);
+        return this;
+    }
+
+    /**
      * 设置自动重连的模式或者重连时间，isAuto true 出错重连，false出错不重连，connectTime重连的时间
      */
     public PlayerView setAutoReConnect(boolean isAuto, int connectTime) {
@@ -1245,8 +1280,8 @@ public class PlayerView {
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_settings_container")).gone();
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_stream_container")).gone();
         if (isShowControlPanl) {
-            ll_topbar.setVisibility(View.VISIBLE);
-            ll_bottombar.setVisibility(View.VISIBLE);
+            ll_topbar.setVisibility(isHideTopBar ? View.GONE : View.VISIBLE);
+            ll_bottombar.setVisibility(isHideBottonBar ? View.GONE : View.VISIBLE);
             if (isLive) {
                 query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_process_panl")).invisible();
             } else {
@@ -1277,8 +1312,18 @@ public class PlayerView {
             mHandler.sendEmptyMessage(MESSAGE_SHOW_PROGRESS);
             mAutoPlayRunnable.start();
         } else {
-            ll_topbar.setVisibility(isForbidHideControlPanl ? View.VISIBLE : View.GONE);
-            ll_bottombar.setVisibility(isForbidHideControlPanl ? View.VISIBLE : View.GONE);
+            if (isHideTopBar) {
+                ll_topbar.setVisibility(View.GONE);
+            } else {
+                ll_topbar.setVisibility(isForbidHideControlPanl ? View.VISIBLE : View.GONE);
+
+            }
+            if (isHideBottonBar) {
+                ll_bottombar.setVisibility(View.GONE);
+            } else {
+                ll_bottombar.setVisibility(isForbidHideControlPanl ? View.VISIBLE : View.GONE);
+
+            }
             if (!isLive && status == PlayStateParams.STATE_PAUSED && !videoView.isPlaying()) {
                 if (isHideCenterPlayer) {
                     iv_player.setVisibility(View.GONE);
@@ -1468,7 +1513,9 @@ public class PlayerView {
                     hideStatusUI();
                     /**显示控制bar*/
                     isShowControlPanl = false;
-                    operatorPanl();
+                    if (!isForbidTouch) {
+                        operatorPanl();
+                    }
                     /**延迟0.5秒隐藏视频封面隐藏*/
                     query.id(ResourceUtils.getResourceIdByName(mContext, "id", "ll_bg")).gone();
                 }
@@ -1863,7 +1910,9 @@ public class PlayerView {
         public void run() {
             if (mShouldAutoPlay) {
                 mHandler.removeCallbacks(this);
-                operatorPanl();
+                if (!isForbidTouch) {
+                    operatorPanl();
+                }
                 stop();
             }
         }
