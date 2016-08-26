@@ -71,11 +71,11 @@ public class HPlayerActivity extends AppCompatActivity {
             @Override
             public PlayerView toggleProcessDurationOrientation() {
                 hideSteam(getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                return setProcessDurationOrientation(getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT ? PlayStateParams.PROCESS_CENTER : PlayStateParams.PROCESS_LANDSCAPE);
+                return setProcessDurationOrientation(getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT ? PlayStateParams.PROCESS_PORTRAIT : PlayStateParams.PROCESS_LANDSCAPE);
             }
         }
                 .setTitle("什么")
-                .setProcessDurationOrientation(PlayStateParams.PROCESS_CENTER)
+                .setProcessDurationOrientation(PlayStateParams.PROCESS_PORTRAIT)
                 .setScaleType(PlayStateParams.fitparent)
                 .forbidTouch(false)
                 .hideSteam(true)
