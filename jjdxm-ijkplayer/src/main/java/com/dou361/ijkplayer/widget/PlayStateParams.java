@@ -104,6 +104,7 @@ public class PlayStateParams {
     public static final int MEDIA_INFO_VIDEO_TRACK_LAGGING = 700;//视频日志跟踪
     public static final int MEDIA_INFO_BUFFERING_START = 701;//开始缓冲中
     public static final int MEDIA_INFO_BUFFERING_END = 702;//缓冲结束
+    public static final int MEDIA_INFO_BUFFERING_BYTES_UPDATE = 503;//网速方面
     public static final int MEDIA_INFO_NETWORK_BANDWIDTH = 703;//网络带宽，网速方面
     public static final int MEDIA_INFO_BAD_INTERLEAVING = 800;//
     public static final int MEDIA_INFO_NOT_SEEKABLE = 801;//不可设置播放位置，直播方面

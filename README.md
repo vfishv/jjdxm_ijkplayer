@@ -86,7 +86,7 @@ jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
 
 该项目是基于ijkplayer项目进行的视频UI的二次封装，目前只是默认在：
 
-	compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:1.0.0' 
+	compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:1.0.5' 
 
 中加入了以下依赖：
 
@@ -101,9 +101,11 @@ jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
 
     # Other ABIs: optional
     compile 'tv.danmaku.ijk.media:ijkplayer-armv5:0.6.0'
-    compile 'tv.danmaku.ijk.media:ijkplayer-arm64:0.6.0'
+    compile 'tv.danmaku.ijk.media:ijkplayer-arm64:0.6.0'  //最小版本21
     compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.6.0'
-    compile 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.6.0'
+    compile 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.6.0'  //最小版本21
+
+ijkplayer打包不同的ABI后，应该是对EXO支持才把部分ABI的最小版本设置为21，考虑到部分机型需要64的支持，然而项目最小版本又不行改到21，当前在项目中加入x86、x86_64、arm64文件，后期会提供最小版本为9的compile依赖出来
 
 #### step2: ####
 

@@ -44,7 +44,7 @@ public class PlayerActivity extends Activity {
         super.onCreate(savedInstanceState);
         this.mContext = this;
         setContentView(R.layout.simple_player_view_player);
-        String url = "http://9890.vod.myqcloud.com/9890_9c1fa3e2aea011e59fc841df10c92278.f20.mp4";
+        String url = "http://krtv.qiniudn.com/150522nextapp";
         player = new PlayerView(this)
                 .setTitle("什么")
                 .setScaleType(PlayStateParams.fitparent)

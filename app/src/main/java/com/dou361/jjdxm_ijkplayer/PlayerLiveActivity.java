@@ -51,14 +51,14 @@ public class PlayerLiveActivity extends Activity {
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "liveTAG");
         wakeLock.acquire();
-//        String url = "rtmp://stream.nodemedia.cn/live/demo";
-        String url = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f30.mp4";
+        String url = "http://hdl.9158.com/live/52eb5c47899c63e549cdff08beec889f.flv";
         player = new PlayerView(this)
                 .setTitle("什么")
                 .setScaleType(PlayStateParams.fitparent)
                 .hideMenu(true)
                 .hideSteam(true)
                 .setForbidDoulbeUp(true)
+                .hideCenterPlayer(true)
                 .hideControlPanl(true)
                 .showThumbnail(new OnShowThumbnailListener() {
                     @Override

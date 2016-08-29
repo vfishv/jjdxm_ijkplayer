@@ -631,7 +631,7 @@ public class PlayerView {
         videoView.setOnInfoListener(new IMediaPlayer.OnInfoListener() {
             @Override
             public boolean onInfo(IMediaPlayer mp, int what, int extra) {
-                if (what == PlayStateParams.MEDIA_INFO_NETWORK_BANDWIDTH) {
+                if (what == PlayStateParams.MEDIA_INFO_NETWORK_BANDWIDTH||what == PlayStateParams.MEDIA_INFO_BUFFERING_BYTES_UPDATE) {
                     Log.e("dou361", "====extra=======" + extra);
                     if (tv_speed != null) {
                         tv_speed.setText(getFormatSize(extra));
