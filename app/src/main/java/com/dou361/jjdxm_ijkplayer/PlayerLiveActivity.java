@@ -51,7 +51,7 @@ public class PlayerLiveActivity extends Activity {
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "liveTAG");
         wakeLock.acquire();
-        String url = "http://hdl.9158.com/live/52eb5c47899c63e549cdff08beec889f.flv";
+        String url = "http://hdl.9158.com/live/744961b29380de63b4ff129ca6b95849.flv";
         player = new PlayerView(this)
                 .setTitle("什么")
                 .setScaleType(PlayStateParams.fitparent)

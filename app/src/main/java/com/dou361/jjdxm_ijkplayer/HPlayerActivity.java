@@ -73,10 +73,15 @@ public class HPlayerActivity extends AppCompatActivity {
                 hideSteam(getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 return setProcessDurationOrientation(getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT ? PlayStateParams.PROCESS_PORTRAIT : PlayStateParams.PROCESS_LANDSCAPE);
             }
+
+            @Override
+            public PlayerView setPlaySource(List<VideoijkBean> list) {
+                return super.setPlaySource(list);
+            }
         }
                 .setTitle("什么")
                 .setProcessDurationOrientation(PlayStateParams.PROCESS_PORTRAIT)
-                .setScaleType(PlayStateParams.fitparent)
+                .setScaleType(PlayStateParams.fillparent)
                 .forbidTouch(false)
                 .hideSteam(true)
                 .hideCenterPlayer(true)
