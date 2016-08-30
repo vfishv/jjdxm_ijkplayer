@@ -50,7 +50,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile 'tv.danmaku.ijk.media:ijkplayer-java:0.6.0'
-    compile 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.6.0'
+//    compile 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.6.0'
 
     // Other ABIs: optional
 //    compile 'tv.danmaku.ijk.media:ijkplayer-armv5:0.6.0'

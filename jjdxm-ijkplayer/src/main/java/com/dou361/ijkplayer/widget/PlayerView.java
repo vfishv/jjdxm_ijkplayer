@@ -467,6 +467,7 @@ public class PlayerView {
                 query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime_full")).text(time);
                 query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime_left")).text(time);
             }
+
         }
 
         /**开始拖动*/
@@ -631,7 +632,7 @@ public class PlayerView {
         videoView.setOnInfoListener(new IMediaPlayer.OnInfoListener() {
             @Override
             public boolean onInfo(IMediaPlayer mp, int what, int extra) {
-                if (what == PlayStateParams.MEDIA_INFO_NETWORK_BANDWIDTH||what == PlayStateParams.MEDIA_INFO_BUFFERING_BYTES_UPDATE) {
+                if (what == PlayStateParams.MEDIA_INFO_NETWORK_BANDWIDTH || what == PlayStateParams.MEDIA_INFO_BUFFERING_BYTES_UPDATE) {
                     Log.e("dou361", "====extra=======" + extra);
                     if (tv_speed != null) {
                         tv_speed.setText(getFormatSize(extra));
@@ -1597,6 +1598,35 @@ public class PlayerView {
         }
     }
 
+
+    /**
+     * 设置界面方向
+     */
+    private void setFullScreen(boolean fullScreen) {
+        if (mActivity != null) {
+
+            WindowManager.LayoutParams attrs = mActivity.getWindow().getAttributes();
+            if (fullScreen) {
+                attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
+                mActivity.getWindow().setAttributes(attrs);
+                mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+//                    mActivity.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+//                }
+            } else {
+                attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
+                mActivity.getWindow().setAttributes(attrs);
+                mActivity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+//                    mActivity.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+//                }
+            }
+            toggleProcessDurationOrientation();
+        }
+
+    }
+
     /**
      * 设置界面方向带隐藏actionbar
      */
@@ -1614,26 +1644,6 @@ public class PlayerView {
         setFullScreen(fullScreen);
     }
 
-    /**
-     * 设置界面方向
-     */
-    private void setFullScreen(boolean fullScreen) {
-        if (mActivity != null) {
-
-            WindowManager.LayoutParams attrs = mActivity.getWindow().getAttributes();
-            if (fullScreen) {
-                attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
-                mActivity.getWindow().setAttributes(attrs);
-                mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-            } else {
-                attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
-                mActivity.getWindow().setAttributes(attrs);
-                mActivity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-            }
-            toggleProcessDurationOrientation();
-        }
-
-    }
 
     /**
      * 隐藏状态界面
@@ -1718,9 +1728,9 @@ public class PlayerView {
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime")).text(generateTime(position));
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime_full")).text(generateTime(position));
         query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime_left")).text(generateTime(position));
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime")).text(generateTime(this.duration));
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime_full")).text(generateTime(this.duration));
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime_left")).text(generateTime(this.duration));
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime")).text(generateTime(duration));
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime_full")).text(generateTime(duration));
+        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime_left")).text(generateTime(duration));
         return position;
     }
 

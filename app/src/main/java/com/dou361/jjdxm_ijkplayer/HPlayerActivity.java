@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -46,12 +48,33 @@ public class HPlayerActivity extends AppCompatActivity {
     private Context mContext;
     private List<VideoijkBean> list;
     private PowerManager.WakeLock wakeLock;
+    View main;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.mContext = this;
-        setContentView(R.layout.activity_h);
+        main = getLayoutInflater().from(this).inflate(R.layout.activity_h, null);
+        setContentView(main);
+        /**虚拟按键的隐藏方法*/
+        main.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+
+            @Override
+            public void onGlobalLayout() {
+
+                //比较Activity根布局与当前布局的大小
+                int heightDiff = main.getRootView().getHeight() - main.getHeight();
+                if (heightDiff > 100) {
+                    //大小超过100时，一般为显示虚拟键盘事件
+                    main.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+                } else {
+                    //大小小于100时，为不显示虚拟键盘或虚拟键盘隐藏
+                    main.setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+
+                }
+            }
+        });
+
         /**常亮*/
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "liveTAG");

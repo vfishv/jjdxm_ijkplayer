@@ -93,6 +93,13 @@ jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
 	compile 'tv.danmaku.ijk.media:ijkplayer-java:0.6.0'
     compile 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.6.0'
 
+如果你的项目中已经有依赖了v4或者v7包并且使用的版本不一样可能会造成冲突，可以类似下面的方式进行引入依赖
+
+	compile('com.dou361.ijkplayer:jjdxm-ijkplayer:1.0.5') {
+	    exclude group: 'com.android.support', module: 'appcompat-v7'
+	}
+
+
 如果要支持多种ABI类型的机型，可以根据需要添加以下依赖：
 
 	# required, enough for most devices.
@@ -105,7 +112,21 @@ jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
     compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.6.0'
     compile 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.6.0'  //最小版本21
 
-ijkplayer打包不同的ABI后，应该是对EXO支持才把部分ABI的最小版本设置为21，考虑到部分机型需要64的支持，然而项目最小版本又不行改到21，当前在项目中加入x86、x86_64、arm64文件，后期会提供最小版本为9的compile依赖出来
+ijkplayer打包不同的ABI后，应该是对EXO支持才把部分ABI的最小版本设置为21，考虑到部分机型需要64的支持，然而项目最小版本又不行改到21，当前在项目中加入x86、x86_64、arm64文件，以下是提供最小版本为9的compile依赖出来
+
+	//对应ijkplayer的  compile 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.6.0'
+	compile 'com.dou361.ijkplayer-armv7a:jjdxm-ijkplayer-armv7a:1.0.0'  
+	//对应ijkplayer的  compile 'tv.danmaku.ijk.media:ijkplayer-armv5:0.6.0'
+	compile 'com.dou361.ijkplayer-armv5:jjdxm-ijkplayer-armv5:1.0.0' 
+	//对应ijkplayer的  compile 'tv.danmaku.ijk.media:ijkplayer-arm64:0.6.0'
+	compile 'com.dou361.ijkplayer-arm64:jjdxm-ijkplayer-arm64:1.0.0' 
+	//对应ijkplayer的  compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.6.0'
+	compile 'com.dou361.ijkplayer-x86:jjdxm-ijkplayer-x86:1.0.0' 
+	//对应ijkplayer的  compile 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.6.0'
+	compile 'com.dou361.ijkplayer-x86_64:jjdxm-ijkplayer-x86_64:1.0.0'
+
+
+demo中原来的jniLibs目录下的文件，已经移除，都是使用上面的依赖方式，如果网络环境差compile不下来，可以到项目的release目录中去下载 
 
 #### step2: ####
 
@@ -243,8 +264,7 @@ ijkplayer打包不同的ABI后，应该是对EXO支持才把部分ABI的最小�
     5. PlayStateParams.f16_9:不剪裁,非等比例拉伸画面到16:9,并完全显示在View中
     6. PlayStateParams.f4_3:不剪裁,非等比例拉伸画面到4:3,并完全显示在View中
 
-1.自定义视频界面，可以复制以下布局内容到自己的项目中，注意已有的id不能修改或删除，可以增加view，可以对以下布局内容调整显示位置或者自行隐藏
-
+2.自定义视频界面，可以复制以下布局内容到自己的项目中，注意已有的id不能修改或删除，可以增加view，可以对以下布局内容调整显示位置或者自行隐藏
 
 	<?xml version="1.0" encoding="utf-8"?>
 	<RelativeLayout
@@ -349,6 +369,15 @@ ijkplayer打包不同的ABI后，应该是对EXO支持才把部分ABI的最小�
 	            android:layout_height="50dp"
 	            android:indeterminateBehavior="repeat"
 	            android:indeterminateOnly="true"/>
+	        <TextView
+	            android:id="@+id/app_video_speed"
+	            android:layout_width="wrap_content"
+	            android:layout_marginTop="4dp"
+	            android:layout_height="wrap_content"
+	            android:gravity="center"
+	            android:visibility="gone"
+	            android:text="188Kb/s"
+	            android:textColor="@android:color/white"/>
 	    </LinearLayout>
 	
 	    <!-- 中间触摸提示-->
@@ -367,13 +396,69 @@ ijkplayer打包不同的ABI后，应该是对EXO支持才把部分ABI的最小�
 	        android:layout_height="wrap_content"
 	        android:layout_alignParentBottom="true"/>
 	
-	    <ImageView
-	        android:id="@+id/play_icon"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_centerInParent="true"
-	        android:layout_marginTop="8dp"
-	        android:src="@drawable/simple_player_center_play"/>
+	    <!--声音亮度控制-->
+	    <LinearLayout
+	        android:id="@+id/simple_player_settings_container"
+	        android:layout_width="250dp"
+	        android:layout_height="match_parent"
+	        android:layout_alignParentLeft="true"
+	        android:background="#80000000"
+	        android:gravity="center_vertical"
+	        android:orientation="vertical"
+	        android:visibility="visible">
+	
+	        <LinearLayout
+	            android:id="@+id/simple_player_volume_controller_container"
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:gravity="center"
+	            android:orientation="horizontal">
+	
+	            <ImageView
+	                android:layout_width="30dp"
+	                android:layout_height="30dp"
+	                android:src="@drawable/qcloud_player_icon_audio_vol_mute"/>
+	
+	            <SeekBar
+	                android:id="@+id/simple_player_volume_controller"
+	                style="?android:attr/progressBarStyleHorizontal"
+	                android:layout_width="150dp"
+	                android:layout_height="wrap_content"/>
+	
+	            <ImageView
+	                android:layout_width="30dp"
+	                android:layout_height="30dp"
+	                android:src="@drawable/qcloud_player_icon_audio_vol"/>
+	        </LinearLayout>
+	
+	        <LinearLayout
+	            android:id="@+id/simple_player_brightness_controller_container"
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:layout_marginTop="20dp"
+	            android:gravity="center"
+	            android:orientation="horizontal">
+	
+	            <ImageView
+	                android:layout_width="30dp"
+	                android:layout_height="30dp"
+	                android:padding="5dp"
+	                android:src="@drawable/qcloud_player_icon_brightness"/>
+	
+	            <SeekBar
+	                android:id="@+id/simple_player_brightness_controller"
+	                style="?android:attr/progressBarStyleHorizontal"
+	                android:layout_width="150dp"
+	                android:layout_height="wrap_content"/>
+	
+	            <ImageView
+	                android:layout_width="30dp"
+	                android:layout_height="30dp"
+	                android:src="@drawable/qcloud_player_icon_brightness"/>
+	        </LinearLayout>
+	
+	    </LinearLayout>
+	
 	
 	    <!--分辨率选择-->
 	    <LinearLayout
@@ -391,9 +476,20 @@ ijkplayer打包不同的ABI后，应该是对EXO支持才把部分ABI的最小�
 	            android:layout_height="wrap_content"/>
 	    </LinearLayout>
 	
+	
+	    <ImageView
+	        android:id="@+id/play_icon"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_centerInParent="true"
+	        android:layout_marginTop="8dp"
+	        android:src="@drawable/simple_player_center_play"/>
+	
 	</RelativeLayout>
 
-2.播放器PlayerView对象的方法如下：
+
+
+3.播放器PlayerView对象的方法如下：
 
 	PlayerView(Activity activity)
 
@@ -511,6 +607,57 @@ ijkplayer打包不同的ABI后，应该是对EXO支持才把部分ABI的最小�
 	PlayerView setForbidHideControlPanl(boolean flag)
 
 
+4.全屏隐藏虚拟按键方法
+
+参考HPlayerActivity类，获取Activity的根目录
+
+	main = getLayoutInflater().from(this).inflate(R.layout.activity_h, null);
+
+然在在oncreate()方法中设置监听
+
+		/**虚拟按键的隐藏方法*/
+        main.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+
+            @Override
+            public void onGlobalLayout() {
+
+                //比较Activity根布局与当前布局的大小
+                int heightDiff = main.getRootView().getHeight() - main.getHeight();
+                if (heightDiff > 100) {
+                    //大小超过100时，一般为显示虚拟键盘事件
+                    main.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+                } else {
+                    //大小小于100时，为不显示虚拟键盘或虚拟键盘隐藏
+                    main.setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+
+                }
+            }
+        });
+
+5.半屏视频，横竖屏切换时不填满问题
+
+1.确保Activity中调用生命周期方法
+
+	@Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (player != null) {
+            player.onConfigurationChanged(newConfig);
+        }
+    }
+
+2.确保清单文件中配置属性
+
+	android:configChanges="orientation|keyboardHidden|screenSize"
+            android:screenOrientation="portrait"
+
+例如
+
+	<activity
+            android:name="com.dou361.jjdxm_ijkplayer.HPlayerActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"/>
 
 
 #### 关于定制 ####
@@ -663,6 +810,21 @@ ijkplayer打包不同的ABI后，应该是对EXO支持才把部分ABI的最小�
 
 
 ## ChangeLog ##
+
+2016.08.30 修复播放时长为零问题；修复使用拉伸方法横屏方向不起效问题；修改最小支持版本为9；添加了SO文件的最小版本为9的类库；添加VideoijkBean比较方法，可以比对视频对象是不是同一个；添加横竖屏配置说明；添加隐藏虚拟按键的方法。
+遗留问题：
+触摸时，隐藏动作取消
+触摸时，进度条面会有点共用
+直播停止开始卡帧
+手动换源卡帧
+直播判断问题
+进度条隐藏提取方法出来
+直播地址获取，提供可观看案例
+修改初始化方法
+本地视频播放问题
+播放加载状态的监听问题比如说链接失效，请求超时，断流了，断网了之类的
+缓冲好内容使用seekto之后还是需要重新缓冲
+乐视手机  点开亮度为0
 
 2016.08.26 1.0.5添加上下操作工具栏的隐藏定制，主要是hideControlPanl，hideHideTopBar和hideBottonBar方法控制
 
