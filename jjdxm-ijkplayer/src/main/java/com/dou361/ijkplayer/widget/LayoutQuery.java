@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 /**
  * ========================================
  * <p>
@@ -30,15 +31,29 @@ import android.widget.TextView;
  * ========================================
  */
 public class LayoutQuery {
-    private final Activity activity;
+    private Context context;
+    private Activity activity;
+    private View rootView;
     private View view;
 
+    /**拓展播放器view的方法使用*/
+    public LayoutQuery(Context context, View view) {
+        this.context = context;
+        this.rootView = view;
+    }
+
+    /**原来的方式使用*/
     public LayoutQuery(Activity activity) {
+        this.context = activity;
         this.activity = activity;
     }
 
     public LayoutQuery id(int id) {
-        view = activity.findViewById(id);
+        if (rootView == null) {
+            view = activity.findViewById(id);
+        } else {
+            view = rootView.findViewById(id);
+        }
         return this;
     }
 
@@ -99,7 +114,7 @@ public class LayoutQuery {
 
 
             if (n > 0 && dip) {
-                n = dip2pixel(activity, n);
+                n = dip2pixel(context, n);
             }
 
             if (width) {

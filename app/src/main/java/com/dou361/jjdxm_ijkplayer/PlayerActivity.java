@@ -45,6 +45,7 @@ public class PlayerActivity extends Activity {
         this.mContext = this;
         setContentView(R.layout.simple_player_view_player);
 //        String url = "http://krtv.qiniudn.com/150522nextapp";
+//        String url = "https://d1xt92umcvcx4v.cloudfront.net/upload/documents/paper/70/20/00/00/20160420_115018_b544.mp4";
         String url = "http://pull.kktv8.com/livekktv/107733781.flv";
         player = new PlayerView(this)
                 .setTitle("什么")
