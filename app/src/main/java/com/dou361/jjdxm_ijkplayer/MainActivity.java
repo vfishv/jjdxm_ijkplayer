@@ -5,6 +5,11 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
+import com.dou361.jjdxm_ijkplayer.bean.LiveBean;
+import com.dou361.jjdxm_ijkplayer.module.ApiServiceUtils;
+
+import java.util.List;
+
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -29,6 +34,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(PlayerActivity.class);
                 break;
             case R.id.btn_live:
+
                 /**竖屏直播播放器*/
                 startActivity(PlayerLiveActivity.class);
                 break;
