@@ -55,15 +55,7 @@ dependencies {
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile project(':jjdxm-ijkplayer')
 
-//    ijkplayer0.6.0版本的所有SO库，ijkplayer-arm64、ijkplayer-x86_64这两个最低是21的，
-//    compile 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.6.0'
-//    compile 'tv.danmaku.ijk.media:ijkplayer-armv5:0.6.0'
-//    compile 'tv.danmaku.ijk.media:ijkplayer-arm64:0.6.0'
-//    compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.6.0'
-//    compile 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.6.0'
-
-//    需要使用这两个库但又想最小版本能够兼容自身的项目可以使用以下的类库去替换上面的，so文件和上面的是一样的，最是在最低版本上做了修改
-//    compile 'com.dou361.ijkplayer-armv7a:jjdxm-ijkplayer-armv7a:1.0.0'
+//    根据需要支持去拓展，在jjdxm-ijkplayer中默认加入了armv7a的了
 //    compile 'com.dou361.ijkplayer-armv5:jjdxm-ijkplayer-armv5:1.0.0'
     compile 'com.dou361.ijkplayer-arm64:jjdxm-ijkplayer-arm64:1.0.0'
     compile 'com.dou361.ijkplayer-x86:jjdxm-ijkplayer-x86:1.0.0'

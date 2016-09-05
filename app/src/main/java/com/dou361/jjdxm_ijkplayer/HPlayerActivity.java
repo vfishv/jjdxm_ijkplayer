@@ -48,28 +48,28 @@ public class HPlayerActivity extends AppCompatActivity {
     private Context mContext;
     private List<VideoijkBean> list;
     private PowerManager.WakeLock wakeLock;
-    View main;
+    View rootView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.mContext = this;
-        main = getLayoutInflater().from(this).inflate(R.layout.activity_h, null);
-        setContentView(main);
+        rootView = getLayoutInflater().from(this).inflate(R.layout.activity_h, null);
+        setContentView(rootView);
         /**虚拟按键的隐藏方法*/
-        main.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+        rootView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
 
             @Override
             public void onGlobalLayout() {
 
                 //比较Activity根布局与当前布局的大小
-                int heightDiff = main.getRootView().getHeight() - main.getHeight();
+                int heightDiff = rootView.getRootView().getHeight() - rootView.getHeight();
                 if (heightDiff > 100) {
                     //大小超过100时，一般为显示虚拟键盘事件
-                    main.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+                    rootView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
                 } else {
                     //大小小于100时，为不显示虚拟键盘或虚拟键盘隐藏
-                    main.setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+                    rootView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
 
                 }
             }
@@ -90,7 +90,7 @@ public class HPlayerActivity extends AppCompatActivity {
         m2.setUrl(url2);
         list.add(m1);
         list.add(m2);
-        player = new PlayerView(this) {
+        player = new PlayerView(this, rootView) {
             @Override
             public PlayerView toggleProcessDurationOrientation() {
                 hideSteam(getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);

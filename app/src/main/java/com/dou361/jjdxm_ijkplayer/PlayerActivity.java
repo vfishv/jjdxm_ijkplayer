@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.view.View;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -16,38 +17,38 @@ import com.dou361.ijkplayer.widget.PlayerView;
 
 /**
  * ========================================
- * <p>
+ * <p/>
  * 版 权：深圳市晶网科技控股有限公司 版权所有 （C） 2015
- * <p>
+ * <p/>
  * 作 者：陈冠明
- * <p>
+ * <p/>
  * 个人网站：http://www.dou361.com
- * <p>
+ * <p/>
  * 版 本：1.0
- * <p>
+ * <p/>
  * 创建日期：2015/11/18 9:40
- * <p>
+ * <p/>
  * 描 述：点播全屏竖屏场景
- * <p>
- * <p>
+ * <p/>
+ * <p/>
  * 修订历史：
- * <p>
+ * <p/>
  * ========================================
  */
 public class PlayerActivity extends Activity {
 
     private PlayerView player;
     private Context mContext;
+    private View rootView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.mContext = this;
-        setContentView(R.layout.simple_player_view_player);
-//        String url = "http://krtv.qiniudn.com/150522nextapp";
-//        String url = "https://d1xt92umcvcx4v.cloudfront.net/upload/documents/paper/70/20/00/00/20160420_115018_b544.mp4";
-        String url = "http://pull.kktv8.com/livekktv/107733781.flv";
-        player = new PlayerView(this)
+        rootView = getLayoutInflater().from(this).inflate(R.layout.simple_player_view_player, null);
+        setContentView(rootView);
+        String url = "http://krtv.qiniudn.com/150522nextapp";
+        player = new PlayerView(this, rootView)
                 .setTitle("什么")
                 .setScaleType(PlayStateParams.fitparent)
                 .forbidTouch(false)
@@ -66,7 +67,8 @@ public class PlayerActivity extends Activity {
                 .setPlayerBackListener(new OnPlayerBackListener() {
                     @Override
                     public void onPlayerBack() {
-//                        finish();
+                        //这里可以简单播放器点击返回键
+                        finish();
                     }
                 })
                 .startPlay();

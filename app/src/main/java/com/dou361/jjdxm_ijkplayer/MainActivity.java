@@ -34,7 +34,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(PlayerActivity.class);
                 break;
             case R.id.btn_live:
-
                 /**竖屏直播播放器*/
                 startActivity(PlayerLiveActivity.class);
                 break;

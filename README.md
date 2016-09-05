@@ -56,6 +56,7 @@ or Gradle:
 
 历史版本：
 
+    compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:1.0.6'
 	compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:1.0.5'
 	compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:1.0.4'
 	compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:1.0.3'
@@ -64,7 +65,7 @@ or Gradle:
 	compile 'com.dou361.ijkplayer:jjdxm-ijkplayer:1.0.0'
 
 
-jjdxm-ijkplayer requires at minimum Java 15 or Android 4.0.
+jjdxm-ijkplayer requires at minimum Java 9 or Android 2.3.
 
 [架包的打包引用以及冲突解决][jaraar]
 
@@ -134,9 +135,10 @@ demo中原来的jniLibs目录下的文件，已经移除，都是使用上面的
 
 #### 1.简单的播放器实现 ####
 
-	setContentView(R.layout.simple_player_view_player);
+    rootView = getLayoutInflater().from(this).inflate(R.layout.simple_player_view_player, null);
+	setContentView(rootView);
 	String url = "http://9890.vod.myqcloud.com/9890_9c1fa3e2aea011e59fc841df10c92278.f20.mp4";
-    player = new PlayerView(this)
+    player = new PlayerView(this,rootView)
             .setTitle("什么")
             .setScaleType(PlayStateParams.fitparent)
             .hideMenu(true)
@@ -177,7 +179,9 @@ demo中原来的jniLibs目录下的文件，已经移除，都是使用上面的
     list.add(m1);
     list.add(m2);
 	/**播放器*/
-	player = new PlayerView(this)
+	rootView = getLayoutInflater().from(this).inflate(你的布局, null);
+	setContentView(rootView);
+	player = new PlayerView(this,rootView)
                 .setTitle("什么")
                 .setScaleType(PlayStateParams.fitparent)
                 .hideMenu(true)
@@ -695,7 +699,9 @@ demo中原来的jniLibs目录下的文件，已经移除，都是使用上面的
 
 1.横竖屏都为上下样式
 
-	player = new PlayerView(this) {
+    rootView = getLayoutInflater().from(this).inflate(你的布局, null);
+	setContentView(rootView);
+	player = new PlayerView(this,rootView) {
             @Override
             public PlayerView toggleProcessDurationOrientation() {
                 return setProcessDurationOrientation(PlayStateParams.PROCESS_PORTRAIT);
@@ -711,7 +717,9 @@ demo中原来的jniLibs目录下的文件，已经移除，都是使用上面的
 
 2.横竖屏都为左右样式
 
-	player = new PlayerView(this) {
+    rootView = getLayoutInflater().from(this).inflate(你的布局, null);
+	setContentView(rootView);
+	player = new PlayerView(this,rootView) {
             @Override
             public PlayerView toggleProcessDurationOrientation() {
                 return setProcessDurationOrientation(PlayStateParams.PROCESS_LANDSCAPE);
@@ -727,7 +735,9 @@ demo中原来的jniLibs目录下的文件，已经移除，都是使用上面的
 
 3.横屏为上下样式竖屏为左右样式
 
-	player = new PlayerView(this) {
+    rootView = getLayoutInflater().from(this).inflate(你的布局, null);
+	setContentView(rootView);
+	player = new PlayerView(this,rootView) {
             @Override
             public PlayerView toggleProcessDurationOrientation() {
                 return setProcessDurationOrientation(getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE?PlayStateParams.PROCESS_LANDSCAPE:PlayStateParams.PROCESS_PORTRAIT);
@@ -743,7 +753,9 @@ demo中原来的jniLibs目录下的文件，已经移除，都是使用上面的
 
 4.横屏为左右样式竖屏为上下样式
 
-	player = new PlayerView(this) {
+    rootView = getLayoutInflater().from(this).inflate(你的布局, null);
+	setContentView(rootView);
+	player = new PlayerView(this,rootView) {
             @Override
             public PlayerView toggleProcessDurationOrientation() {
                 return setProcessDurationOrientation(getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT?PlayStateParams.PROCESS_PORTRAIT:PlayStateParams.PROCESS_LANDSCAPE);
@@ -759,7 +771,9 @@ demo中原来的jniLibs目录下的文件，已经移除，都是使用上面的
 
 5.横屏为左右样式竖屏为中间两边样式
 
-	player = new PlayerView(this) {
+    rootView = getLayoutInflater().from(this).inflate(你的布局, null);
+	setContentView(rootView);
+	player = new PlayerView(this,rootView) {
             @Override
             public PlayerView toggleProcessDurationOrientation() {
                 return setProcessDurationOrientation(getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT?PlayStateParams.PROCESS_CENTER:PlayStateParams.PROCESS_LANDSCAPE);
@@ -811,7 +825,7 @@ demo中原来的jniLibs目录下的文件，已经移除，都是使用上面的
 
 ## ChangeLog ##
 
-2016.08.30 修复播放时长为零问题；修复使用拉伸方法横屏方向不起效问题；修改最小支持版本为9；添加了SO文件的最小版本为9的类库；添加VideoijkBean比较方法，可以比对视频对象是不是同一个；添加横竖屏配置说明；添加隐藏虚拟按键的方法。
+2016.09.05 修改支持非Activity中使用当前播放器view，例如fragment、holder之类使用，添加直播地址获取，提供可观看案例（如直播地址有不妥的地方可联系删除，多有得罪啦）
 遗留问题：
 触摸时，隐藏动作取消
 触摸时，进度条面会有点共用
@@ -819,12 +833,13 @@ demo中原来的jniLibs目录下的文件，已经移除，都是使用上面的
 手动换源卡帧
 直播判断问题
 进度条隐藏提取方法出来
-直播地址获取，提供可观看案例
 修改初始化方法
 本地视频播放问题
 播放加载状态的监听问题比如说链接失效，请求超时，断流了，断网了之类的
 缓冲好内容使用seekto之后还是需要重新缓冲
 乐视手机  点开亮度为0
+
+2016.08.30 修复播放时长为零问题；修复使用拉伸方法横屏方向不起效问题；修改最小支持版本为9；添加了SO文件的最小版本为9的类库；添加VideoijkBean比较方法，可以比对视频对象是不是同一个；添加横竖屏配置说明；添加隐藏虚拟按键的方法。
 
 2016.08.26 1.0.5添加上下操作工具栏的隐藏定制，主要是hideControlPanl，hideHideTopBar和hideBottonBar方法控制
 

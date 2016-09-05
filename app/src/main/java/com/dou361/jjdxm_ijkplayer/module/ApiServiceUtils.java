@@ -3,7 +3,8 @@ package com.dou361.jjdxm_ijkplayer.module;
 import com.alibaba.fastjson.JSON;
 import com.dou361.jjdxm_ijkplayer.bean.LiveBean;
 
-import java.io.IOException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -45,22 +46,23 @@ public class ApiServiceUtils {
                 .readTimeout(30, TimeUnit.SECONDS)
                 .build();
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("")
+                .baseUrl("http://apikg.kktv1.com:8080")
                 .client(client)
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         ApiService mApiServicePresenter = retrofit.create(ApiService.class);
-        Call<String> call = mApiServicePresenter.live("");
+        Call<String> call = mApiServicePresenter.live("{\"platform\":2,\"count\":2,\"start\":0,\"c\":90013,\"FuncTag\":80010001,\"a\":10}");
         Response<String> response = null;
         try {
             response = call.execute();
             String body = response.body();
+            JSONObject js = new JSONObject(body);
             if (body != null) {
-                List<LiveBean> temp = JSON.parseArray(body, LiveBean.class);
+                List<LiveBean> temp = JSON.parseArray(js.getJSONArray("roomList").toString(), LiveBean.class);
                 list.addAll(temp);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return list;
