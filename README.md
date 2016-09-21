@@ -17,7 +17,7 @@
 ## Introduction ##
 
 当前项目是基于[ijkplayer][url1]项目进行的播放器界面UI封装。
-是一个适用于 Android 的 RTMP 直播推流 SDK，可高度定制化和二次开发。特色是同时支持 H.264 软编／硬编和 AAC 软编／硬编。主要是支持RIMP、HLS、MP4、M4A等视频格式的播放。
+是一个适用于 Android 的 RTMP 直播播放 SDK，可高度定制化和二次开发。特色是同时支持 H.264 软编／硬编和 AAC 软编／硬编。主要是支持RIMP、HLS、MP4、M4A等视频格式的播放。
 
 ## Features ##
 

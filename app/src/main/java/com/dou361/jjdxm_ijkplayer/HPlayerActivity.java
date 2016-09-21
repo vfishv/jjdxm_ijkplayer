@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -18,28 +19,29 @@ import com.dou361.ijkplayer.widget.PlayStateParams;
 import com.dou361.ijkplayer.widget.PlayerView;
 import com.dou361.jjdxm_ijkplayer.utlis.MediaUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 
 /**
  * ========================================
- * <p>
+ * <p/>
  * 版 权：深圳市晶网科技控股有限公司 版权所有 （C） 2015
- * <p>
+ * <p/>
  * 作 者：陈冠明
- * <p>
+ * <p/>
  * 个人网站：http://www.dou361.com
- * <p>
+ * <p/>
  * 版 本：1.0
- * <p>
+ * <p/>
  * 创建日期：2015/11/18 9:40
- * <p>
+ * <p/>
  * 描 述：半屏界面
- * <p>
- * <p>
+ * <p/>
+ * <p/>
  * 修订历史：
- * <p>
+ * <p/>
  * ========================================
  */
 public class HPlayerActivity extends AppCompatActivity {
@@ -80,7 +82,12 @@ public class HPlayerActivity extends AppCompatActivity {
         wakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "liveTAG");
         wakeLock.acquire();
         list = new ArrayList<VideoijkBean>();
-        String url1 = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f20.mp4";
+        //有部分视频加载有问题，这个视频是有声音显示不出图像的，没有解决http://fzkt-biz.oss-cn-hangzhou.aliyuncs.com/vedio/2f58be65f43946c588ce43ea08491515.mp4
+        //这里模拟一个本地视频的播放，视频需要将testvideo文件夹的视频放到安卓设备的内置sd卡根目录中
+        String url1 = getLocalVideoPath("my_video.mp4");
+        if (!new File(url1).exists()) {
+            url1 = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f20.mp4";
+        }
         String url2 = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f30.mp4";
         VideoijkBean m1 = new VideoijkBean();
         m1.setStream("标清");
@@ -120,6 +127,17 @@ public class HPlayerActivity extends AppCompatActivity {
                 })
                 .setPlaySource(list)
                 .startPlay();
+    }
+
+
+    /**
+     * 播放本地视频
+     */
+
+    private String getLocalVideoPath(String name) {
+        String sdCard = Environment.getExternalStorageDirectory().getPath();
+        String uri = sdCard + File.separator + name;
+        return uri;
     }
 
     @Override

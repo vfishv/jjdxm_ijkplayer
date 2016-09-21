@@ -50,7 +50,7 @@ public class OriginPlayerActivity extends AppCompatActivity {
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "liveTAG");
         wakeLock.acquire();
-        String url = "rtmp://stream.nodemedia.cn/live/demo";
+        String url = "http://183.6.245.249/v.cctv.com/flash/mp4video6/TMS/2011/01/05/cf752b1c12ce452b3040cab2f90bc265_h264818000nero_aac32-1.mp4";
         player = new PlayerView(this)
                 .setTitle("什么")
                 .setScaleType(PlayStateParams.fitparent)
