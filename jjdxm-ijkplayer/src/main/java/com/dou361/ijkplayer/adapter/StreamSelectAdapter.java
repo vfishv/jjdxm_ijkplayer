@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.dou361.ijkplayer.R;
 import com.dou361.ijkplayer.bean.VideoijkBean;
 import com.dou361.ijkplayer.utils.ResourceUtils;
 
@@ -68,9 +69,9 @@ public class StreamSelectAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
         if (convertView == null) {
-            convertView = this.layoutInflater.inflate(ResourceUtils.getResourceIdByName(mContext, "layout", "simple_player_list_item"), (ViewGroup) null);
+            convertView = this.layoutInflater.inflate(R.layout.simple_player_list_item, (ViewGroup) null);
             holder = new ViewHolder();
-            holder.streamName = (TextView) convertView.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_stream_name"));
+            holder.streamName = (TextView) convertView.findViewById(R.id.simple_player_stream_name);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -79,9 +80,9 @@ public class StreamSelectAdapter extends BaseAdapter {
         String streamName = mVideoijkBean.getStream();
         holder.streamName.setText(streamName);
         if (mVideoijkBean.isSelect()) {
-            holder.streamName.setTextColor(mContext.getResources().getColor(ResourceUtils.getResourceIdByName(mContext, "color", "simple_player_stream_name_playing")));
+            holder.streamName.setTextColor(mContext.getResources().getColor(R.color.simple_player_stream_name_playing));
         } else {
-            holder.streamName.setTextColor(mContext.getResources().getColor(ResourceUtils.getResourceIdByName(mContext, "color", "simple_player_stream_name_normal")));
+            holder.streamName.setTextColor(mContext.getResources().getColor(R.color.simple_player_stream_name_normal));
         }
         return convertView;
     }

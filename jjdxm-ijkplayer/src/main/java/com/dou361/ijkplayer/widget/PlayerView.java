@@ -26,6 +26,7 @@ import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.dou361.ijkplayer.R;
 import com.dou361.ijkplayer.adapter.StreamSelectAdapter;
 import com.dou361.ijkplayer.bean.VideoijkBean;
 import com.dou361.ijkplayer.listener.OnControlPanelVisibilityChangeListener;
@@ -263,6 +264,9 @@ public class PlayerView {
      * 播放的时候是否需要网络提示，默认显示网络提示，true为显示网络提示，false不显示网络提示
      */
     private boolean isGNetWork = true;
+
+    private boolean isCharge;
+    private int maxPlaytime;
     /**
      * 是否只有全屏，默认非全屏，true为全屏，false为非全屏
      */
@@ -329,9 +333,9 @@ public class PlayerView {
             switch (msg.what) {
                 /**滑动完成，隐藏滑动提示的box*/
                 case MESSAGE_HIDE_CENTER_BOX:
-                    query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_volume_box")).gone();
-                    query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_brightness_box")).gone();
-                    query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fastForward_box")).gone();
+                    query.id(R.id.app_video_volume_box).gone();
+                    query.id(R.id.app_video_brightness_box).gone();
+                    query.id(R.id.app_video_fastForward_box).gone();
                     break;
                 /**滑动完成，设置播放进度*/
                 case MESSAGE_SEEK_NEW_POSITION:
@@ -392,19 +396,19 @@ public class PlayerView {
     private final View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_menu")) {
+            if (v.getId() == R.id.app_video_menu) {
                 /**菜单*/
                 showMenu();
-            } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_stream")) {
+            } else if (v.getId() == R.id.app_video_stream) {
                 /**选择分辨率*/
                 showStreamSelectView();
-            } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "ijk_iv_rotation")) {
+            } else if (v.getId() == R.id.ijk_iv_rotation) {
                 /**旋转视频方向*/
                 setPlayerRotation();
-            } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen")) {
+            } else if (v.getId() == R.id.app_video_fullscreen) {
                 /**视频全屏切换*/
                 toggleFullScreen();
-            } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_play") || v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "play_icon")) {
+            } else if (v.getId() == R.id.app_video_play || v.getId() == R.id.play_icon) {
                 /**视频播放和暂停*/
                 if (videoView.isPlaying()) {
                     if (isLive) {
@@ -421,7 +425,7 @@ public class PlayerView {
                     }
                 }
                 updatePausePlay();
-            } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_finish")) {
+            } else if (v.getId() == R.id.app_video_finish) {
                 /**返回*/
                 if (!isOnlyFullScreen && !isPortrait) {
                     mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -432,13 +436,13 @@ public class PlayerView {
                         mActivity.finish();
                     }
                 }
-            } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie_icon")) {
+            } else if (v.getId() == R.id.app_video_netTie_icon) {
                 /**使用移动网络提示继续播放*/
                 isGNetWork = false;
                 hideStatusUI();
                 startPlay();
                 updatePausePlay();
-            } else if (v.getId() == ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay_icon")) {
+            } else if (v.getId() == R.id.app_video_replay_icon) {
                 /**重新播放*/
                 status = PlayStateParams.STATE_ERROR;
                 hideStatusUI();
@@ -463,9 +467,9 @@ public class PlayerView {
                 long duration = getDuration();
                 int position = (int) ((duration * progress * 1.0) / 1000);
                 String time = generateTime(position);
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime")).text(time);
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime_full")).text(time);
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime_left")).text(time);
+                query.id(R.id.app_video_currentTime).text(time);
+                query.id(R.id.app_video_currentTime_full).text(time);
+                query.id(R.id.app_video_currentTime_left).text(time);
             }
 
         }
@@ -590,33 +594,33 @@ public class PlayerView {
         mMaxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         if (rootView == null) {
             query = new LayoutQuery(mActivity);
-            rl_box = mActivity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_box"));
-            videoView = (IjkVideoView) mActivity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "video_view"));
-            settingsContainer = mActivity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_settings_container"));
+            rl_box = mActivity.findViewById(R.id.app_video_box);
+            videoView = (IjkVideoView) mActivity.findViewById(R.id.video_view);
+            settingsContainer = mActivity.findViewById(R.id.simple_player_settings_container);
             settingsContainer.setVisibility(View.GONE);
-            volumeControllerContainer = mActivity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_volume_controller_container"));
+            volumeControllerContainer = mActivity.findViewById(R.id.simple_player_volume_controller_container);
             /**声音进度*/
-            volumeController = (SeekBar) mActivity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_volume_controller"));
+            volumeController = (SeekBar) mActivity.findViewById(R.id.simple_player_volume_controller);
             volumeController.setMax(100);
             volumeController.setOnSeekBarChangeListener(this.onVolumeControllerChangeListener);
             /**亮度进度*/
-            brightnessControllerContainer = mActivity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_brightness_controller_container"));
-            brightnessController = (SeekBar) mActivity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_brightness_controller"));
+            brightnessControllerContainer = mActivity.findViewById(R.id.simple_player_brightness_controller_container);
+            brightnessController = (SeekBar) mActivity.findViewById(R.id.simple_player_brightness_controller);
             brightnessController.setMax(100);
         } else {
             query = new LayoutQuery(mActivity, rootView);
-            rl_box = rootView.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_box"));
-            videoView = (IjkVideoView) rootView.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "video_view"));
-            settingsContainer = rootView.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_settings_container"));
+            rl_box = rootView.findViewById(R.id.app_video_box);
+            videoView = (IjkVideoView) rootView.findViewById(R.id.video_view);
+            settingsContainer = rootView.findViewById(R.id.simple_player_settings_container);
             settingsContainer.setVisibility(View.GONE);
-            volumeControllerContainer = rootView.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_volume_controller_container"));
+            volumeControllerContainer = rootView.findViewById(R.id.simple_player_volume_controller_container);
             /**声音进度*/
-            volumeController = (SeekBar) rootView.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_volume_controller"));
+            volumeController = (SeekBar) rootView.findViewById(R.id.simple_player_volume_controller);
             volumeController.setMax(100);
             volumeController.setOnSeekBarChangeListener(this.onVolumeControllerChangeListener);
             /**亮度进度*/
-            brightnessControllerContainer = rootView.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_brightness_controller_container"));
-            brightnessController = (SeekBar) rootView.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_brightness_controller"));
+            brightnessControllerContainer = rootView.findViewById(R.id.simple_player_brightness_controller_container);
+            brightnessController = (SeekBar) rootView.findViewById(R.id.simple_player_brightness_controller);
             brightnessController.setMax(100);
         }
 
@@ -631,35 +635,35 @@ public class PlayerView {
         }
         brightnessController.setOnSeekBarChangeListener(this.onBrightnessControllerChangeListener);
         if (rootView == null) {
-            streamSelectView = (LinearLayout) mActivity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_stream_container"));
-            streamSelectListView = (ListView) mActivity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_streams_list"));
-            ll_topbar = mActivity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_top_box"));
-            ll_bottombar = mActivity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "ll_bottom_bar"));
-            iv_trumb = (ImageView) mActivity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "iv_trumb"));
-            iv_back = (ImageView) mActivity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_finish"));
-            iv_menu = (ImageView) mActivity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_menu"));
-            iv_bar_player = (ImageView) mActivity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_play"));
-            iv_player = (ImageView) mActivity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon"));
-            iv_rotation = (ImageView) mActivity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "ijk_iv_rotation"));
-            iv_fullscreen = (ImageView) mActivity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen"));
-            tv_steam = (TextView) mActivity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_stream"));
-            tv_speed = (TextView) mActivity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_speed"));
-            seekBar = (SeekBar) mActivity.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_seekBar"));
+            streamSelectView = (LinearLayout) mActivity.findViewById(R.id.simple_player_select_stream_container);
+            streamSelectListView = (ListView) mActivity.findViewById(R.id.simple_player_select_streams_list);
+            ll_topbar = mActivity.findViewById(R.id.app_video_top_box);
+            ll_bottombar = mActivity.findViewById(R.id.ll_bottom_bar);
+            iv_trumb = (ImageView) mActivity.findViewById(R.id.iv_trumb);
+            iv_back = (ImageView) mActivity.findViewById(R.id.app_video_finish);
+            iv_menu = (ImageView) mActivity.findViewById(R.id.app_video_menu);
+            iv_bar_player = (ImageView) mActivity.findViewById(R.id.app_video_play);
+            iv_player = (ImageView) mActivity.findViewById(R.id.play_icon);
+            iv_rotation = (ImageView) mActivity.findViewById(R.id.ijk_iv_rotation);
+            iv_fullscreen = (ImageView) mActivity.findViewById(R.id.app_video_fullscreen);
+            tv_steam = (TextView) mActivity.findViewById(R.id.app_video_stream);
+            tv_speed = (TextView) mActivity.findViewById(R.id.app_video_speed);
+            seekBar = (SeekBar) mActivity.findViewById(R.id.app_video_seekBar);
         } else {
-            streamSelectView = (LinearLayout) rootView.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_stream_container"));
-            streamSelectListView = (ListView) rootView.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_streams_list"));
-            ll_topbar = rootView.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_top_box"));
-            ll_bottombar = rootView.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "ll_bottom_bar"));
-            iv_trumb = (ImageView) rootView.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "iv_trumb"));
-            iv_back = (ImageView) rootView.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_finish"));
-            iv_menu = (ImageView) rootView.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_menu"));
-            iv_bar_player = (ImageView) rootView.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_play"));
-            iv_player = (ImageView) rootView.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "play_icon"));
-            iv_rotation = (ImageView) rootView.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "ijk_iv_rotation"));
-            iv_fullscreen = (ImageView) rootView.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fullscreen"));
-            tv_steam = (TextView) rootView.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_stream"));
-            tv_speed = (TextView) rootView.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_speed"));
-            seekBar = (SeekBar) rootView.findViewById(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_seekBar"));
+            streamSelectView = (LinearLayout) rootView.findViewById(R.id.simple_player_select_stream_container);
+            streamSelectListView = (ListView) rootView.findViewById(R.id.simple_player_select_streams_list);
+            ll_topbar = rootView.findViewById(R.id.app_video_top_box);
+            ll_bottombar = rootView.findViewById(R.id.ll_bottom_bar);
+            iv_trumb = (ImageView) rootView.findViewById(R.id.iv_trumb);
+            iv_back = (ImageView) rootView.findViewById(R.id.app_video_finish);
+            iv_menu = (ImageView) rootView.findViewById(R.id.app_video_menu);
+            iv_bar_player = (ImageView) rootView.findViewById(R.id.app_video_play);
+            iv_player = (ImageView) rootView.findViewById(R.id.play_icon);
+            iv_rotation = (ImageView) rootView.findViewById(R.id.ijk_iv_rotation);
+            iv_fullscreen = (ImageView) rootView.findViewById(R.id.app_video_fullscreen);
+            tv_steam = (TextView) rootView.findViewById(R.id.app_video_stream);
+            tv_speed = (TextView) rootView.findViewById(R.id.app_video_speed);
+            seekBar = (SeekBar) rootView.findViewById(R.id.app_video_seekBar);
         }
 
         seekBar.setMax(1000);
@@ -671,13 +675,13 @@ public class PlayerView {
         tv_steam.setOnClickListener(onClickListener);
         iv_back.setOnClickListener(onClickListener);
         iv_menu.setOnClickListener(onClickListener);
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie_icon")).clicked(onClickListener);
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay_icon")).clicked(onClickListener);
+        query.id(R.id.app_video_netTie_icon).clicked(onClickListener);
+        query.id(R.id.app_video_replay_icon).clicked(onClickListener);
         videoView.setOnInfoListener(new IMediaPlayer.OnInfoListener() {
             @Override
             public boolean onInfo(IMediaPlayer mp, int what, int extra) {
                 if (what == PlayStateParams.MEDIA_INFO_NETWORK_BANDWIDTH || what == PlayStateParams.MEDIA_INFO_BUFFERING_BYTES_UPDATE) {
-                    Log.e("dou361", "====extra=======" + extra);
+                    Log.e("","dou361.====extra=======" + extra);
                     if (tv_speed != null) {
                         tv_speed.setText(getFormatSize(extra));
                     }
@@ -760,9 +764,9 @@ public class PlayerView {
         initHeight = rl_box.getLayoutParams().height;
         hideAll();
         if (!playerSupport) {
-            showStatus(mActivity.getResources().getString(ResourceUtils.getResourceIdByName(mContext, "string", "not_support")));
+            showStatus(mActivity.getResources().getString(R.string.not_support));
         } else {
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "ll_bg")).visible();
+            query.id(R.id.ll_bg).visible();
         }
     }
 
@@ -1016,13 +1020,13 @@ public class PlayerView {
         }
         hideStatusUI();
         if (isGNetWork && (NetworkUtils.getNetworkType(mContext) == 4 || NetworkUtils.getNetworkType(mContext) == 5 || NetworkUtils.getNetworkType(mContext) == 6)) {
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie")).visible();
+            query.id(R.id.app_video_netTie).visible();
         } else {
             if (playerSupport) {
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_loading")).visible();
+                query.id(R.id.app_video_loading).visible();
                 videoView.start();
             } else {
-                showStatus(mActivity.getResources().getString(ResourceUtils.getResourceIdByName(mContext, "string", "not_support")));
+                showStatus(mActivity.getResources().getString(R.string.not_support));
             }
         }
         return this;
@@ -1032,7 +1036,7 @@ public class PlayerView {
      * 设置视频名称
      */
     public PlayerView setTitle(String title) {
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_title")).text(title);
+        query.id(R.id.app_video_title).text(title);
         return this;
     }
 
@@ -1123,6 +1127,8 @@ public class PlayerView {
      * @param maxPlaytime 最大能播放时长
      */
     public PlayerView setChargeTie(boolean isCharge, int maxPlaytime) {
+        this.isCharge = isCharge;
+        this.maxPlaytime = maxPlaytime;
         return this;
     }
 
@@ -1336,15 +1342,15 @@ public class PlayerView {
      */
     public PlayerView operatorPanl() {
         isShowControlPanl = !isShowControlPanl;
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_settings_container")).gone();
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_stream_container")).gone();
+        query.id(R.id.simple_player_settings_container).gone();
+        query.id(R.id.simple_player_select_stream_container).gone();
         if (isShowControlPanl) {
             ll_topbar.setVisibility(isHideTopBar ? View.GONE : View.VISIBLE);
             ll_bottombar.setVisibility(isHideBottonBar ? View.GONE : View.VISIBLE);
             if (isLive) {
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_process_panl")).invisible();
+                query.id(R.id.app_video_process_panl).invisible();
             } else {
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_process_panl")).visible();
+                query.id(R.id.app_video_process_panl).visible();
             }
             if (isOnlyFullScreen || isForbidDoulbeUp) {
                 iv_fullscreen.setVisibility(View.GONE);
@@ -1450,20 +1456,20 @@ public class PlayerView {
      */
     public PlayerView setProcessDurationOrientation(int portrait) {
         if (portrait == PlayStateParams.PROCESS_CENTER) {
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime_full")).gone();
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime_full")).gone();
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_center")).gone();
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_lift")).visible();
+            query.id(R.id.app_video_currentTime_full).gone();
+            query.id(R.id.app_video_endTime_full).gone();
+            query.id(R.id.app_video_center).gone();
+            query.id(R.id.app_video_lift).visible();
         } else if (portrait == PlayStateParams.PROCESS_LANDSCAPE) {
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime_full")).visible();
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime_full")).visible();
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_center")).gone();
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_lift")).gone();
+            query.id(R.id.app_video_currentTime_full).visible();
+            query.id(R.id.app_video_endTime_full).visible();
+            query.id(R.id.app_video_center).gone();
+            query.id(R.id.app_video_lift).gone();
         } else {
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime_full")).gone();
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime_full")).gone();
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_center")).visible();
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_lift")).gone();
+            query.id(R.id.app_video_currentTime_full).gone();
+            query.id(R.id.app_video_endTime_full).gone();
+            query.id(R.id.app_video_center).visible();
+            query.id(R.id.app_video_lift).gone();
         }
         return this;
     }
@@ -1554,7 +1560,7 @@ public class PlayerView {
             status = PlayStateParams.STATE_PREPARING;
             /**视频缓冲*/
             hideStatusUI();
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_loading")).visible();
+            query.id(R.id.app_video_loading).visible();
         } else if (newStatus == PlayStateParams.MEDIA_INFO_VIDEO_RENDERING_START
                 || newStatus == PlayStateParams.STATE_PLAYING
                 || newStatus == PlayStateParams.STATE_PREPARED
@@ -1576,7 +1582,7 @@ public class PlayerView {
                         operatorPanl();
                     }
                     /**延迟0.5秒隐藏视频封面隐藏*/
-                    query.id(ResourceUtils.getResourceIdByName(mContext, "id", "ll_bg")).gone();
+                    query.id(R.id.ll_bg).gone();
                 }
             }, 500);
         } else if (newStatus == PlayStateParams.MEDIA_INFO_VIDEO_INTERRUPT) {
@@ -1590,14 +1596,14 @@ public class PlayerView {
                 if (isLive) {
                     showStatus("获取不到直播源");
                 } else {
-                    showStatus(mActivity.getResources().getString(ResourceUtils.getResourceIdByName(mContext, "string", "small_problem")));
+                    showStatus(mActivity.getResources().getString(R.string.small_problem));
                 }
                 /**5秒尝试重连*/
                 if (!isErrorStop && isAutoReConnect) {
                     mHandler.sendEmptyMessageDelayed(MESSAGE_RESTART_PLAY, autoConnectTime);
                 }
             } else {
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie")).visible();
+                query.id(R.id.app_video_netTie).visible();
             }
 
         } else if (newStatus == PlayStateParams.STATE_ERROR
@@ -1611,16 +1617,16 @@ public class PlayerView {
             if (!(isGNetWork && (NetworkUtils.getNetworkType(mContext) == 4 || NetworkUtils.getNetworkType(mContext) == 5 || NetworkUtils.getNetworkType(mContext) == 6))) {
                 hideStatusUI();
                 if (isLive) {
-                    showStatus(mActivity.getResources().getString(ResourceUtils.getResourceIdByName(mContext, "string", "small_problem")));
+                    showStatus(mActivity.getResources().getString(R.string.small_problem));
                 } else {
-                    showStatus(mActivity.getResources().getString(ResourceUtils.getResourceIdByName(mContext, "string", "small_problem")));
+                    showStatus(mActivity.getResources().getString(R.string.small_problem));
                 }
                 /**5秒尝试重连*/
                 if (!isErrorStop && isAutoReConnect) {
                     mHandler.sendEmptyMessageDelayed(MESSAGE_RESTART_PLAY, autoConnectTime);
                 }
             } else {
-                query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie")).visible();
+                query.id(R.id.app_video_netTie).visible();
             }
         }
     }
@@ -1629,8 +1635,8 @@ public class PlayerView {
      * 显示视频播放状态提示
      */
     private void showStatus(String statusText) {
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay")).visible();
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_status_text")).text(statusText);
+        query.id(R.id.app_video_replay).visible();
+        query.id(R.id.app_video_status_text).text(statusText);
     }
 
     /**
@@ -1643,11 +1649,11 @@ public class PlayerView {
                 public void run() {
                     tryFullScreen(!portrait);
                     if (portrait) {
-                        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_box")).height(initHeight, false);
+                        query.id(R.id.app_video_box).height(initHeight, false);
                     } else {
                         int heightPixels = mActivity.getResources().getDisplayMetrics().heightPixels;
                         int widthPixels = mActivity.getResources().getDisplayMetrics().widthPixels;
-                        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_box")).height(Math.min(heightPixels, widthPixels), false);
+                        query.id(R.id.app_video_box).height(Math.min(heightPixels, widthPixels), false);
                     }
                     updateFullScreenButton();
                 }
@@ -1701,11 +1707,11 @@ public class PlayerView {
      */
     private void hideStatusUI() {
         iv_player.setVisibility(View.GONE);
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_settings_container")).gone();
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "simple_player_select_stream_container")).gone();
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_replay")).gone();
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_netTie")).gone();
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_loading")).gone();
+        query.id(R.id.simple_player_settings_container).gone();
+        query.id(R.id.simple_player_select_stream_container).gone();
+        query.id(R.id.app_video_replay).gone();
+        query.id(R.id.app_video_netTie).gone();
+        query.id(R.id.app_video_loading).gone();
         if (onControlPanelVisibilityChangeListener != null) {
             onControlPanelVisibilityChangeListener.change(false);
         }
@@ -1779,12 +1785,12 @@ public class PlayerView {
             int percent = videoView.getBufferPercentage();
             seekBar.setSecondaryProgress(percent * 10);
         }
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime")).text(generateTime(position));
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime_full")).text(generateTime(position));
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_currentTime_left")).text(generateTime(position));
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime")).text(generateTime(duration));
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime_full")).text(generateTime(duration));
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_endTime_left")).text(generateTime(duration));
+        query.id(R.id.app_video_currentTime).text(generateTime(position));
+        query.id(R.id.app_video_currentTime_full).text(generateTime(position));
+        query.id(R.id.app_video_currentTime_left).text(generateTime(position));
+        query.id(R.id.app_video_endTime).text(generateTime(duration));
+        query.id(R.id.app_video_endTime_full).text(generateTime(duration));
+        query.id(R.id.app_video_endTime_left).text(generateTime(duration));
         return position;
     }
 
@@ -1822,14 +1828,14 @@ public class PlayerView {
     private void updatePausePlay() {
         if (videoView.isPlaying()) {
             if (isLive) {
-                iv_bar_player.setImageResource(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_stop_white_24dp"));
+                iv_bar_player.setImageResource(R.drawable.simple_player_stop_white_24dp);
             } else {
-                iv_bar_player.setImageResource(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_icon_media_pause"));
-                iv_player.setImageResource(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_center_pause"));
+                iv_bar_player.setImageResource(R.drawable.simple_player_icon_media_pause);
+                iv_player.setImageResource(R.drawable.simple_player_center_pause);
             }
         } else {
-            iv_bar_player.setImageResource(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_arrow_white_24dp"));
-            iv_player.setImageResource(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_center_play"));
+            iv_bar_player.setImageResource(R.drawable.simple_player_arrow_white_24dp);
+            iv_player.setImageResource(R.drawable.simple_player_center_play);
         }
     }
 
@@ -1838,9 +1844,9 @@ public class PlayerView {
      */
     private void updateFullScreenButton() {
         if (getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-            iv_fullscreen.setImageResource(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_icon_fullscreen_shrink"));
+            iv_fullscreen.setImageResource(R.drawable.simple_player_icon_fullscreen_shrink);
         } else {
-            iv_fullscreen.setImageResource(ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_icon_fullscreen_stretch"));
+            iv_fullscreen.setImageResource(R.drawable.simple_player_icon_fullscreen_stretch);
         }
     }
 
@@ -1871,11 +1877,11 @@ public class PlayerView {
             s = "off";
         }
         // 显示
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_volume_icon")).image(i == 0 ? ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_volume_off_white_36dp") : ResourceUtils.getResourceIdByName(mContext, "drawable", "simple_player_volume_up_white_36dp"));
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_brightness_box")).gone();
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_volume_box")).visible();
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_volume_box")).visible();
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_volume")).text(s).visible();
+        query.id(R.id.app_video_volume_icon).image(i == 0 ? R.drawable.simple_player_volume_off_white_36dp : R.drawable.simple_player_volume_up_white_36dp);
+        query.id(R.id.app_video_brightness_box).gone();
+        query.id(R.id.app_video_volume_box).visible();
+        query.id(R.id.app_video_volume_box).visible();
+        query.id(R.id.app_video_volume).text(s).visible();
     }
 
     /**
@@ -1897,11 +1903,11 @@ public class PlayerView {
         }
         int showDelta = (int) delta / 1000;
         if (showDelta != 0) {
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fastForward_box")).visible();
+            query.id(R.id.app_video_fastForward_box).visible();
             String text = showDelta > 0 ? ("+" + showDelta) : "" + showDelta;
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fastForward")).text(text + "s");
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fastForward_target")).text(generateTime(newPosition) + "/");
-            query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_fastForward_all")).text(generateTime(duration));
+            query.id(R.id.app_video_fastForward).text(text + "s");
+            query.id(R.id.app_video_fastForward_target).text(generateTime(newPosition) + "/");
+            query.id(R.id.app_video_fastForward_all).text(generateTime(duration));
         }
     }
 
@@ -1920,7 +1926,7 @@ public class PlayerView {
             }
         }
         Log.d(this.getClass().getSimpleName(), "brightness:" + brightness + ",percent:" + percent);
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_brightness_box")).visible();
+        query.id(R.id.app_video_brightness_box).visible();
         WindowManager.LayoutParams lpa = mActivity.getWindow().getAttributes();
         lpa.screenBrightness = brightness + percent;
         if (lpa.screenBrightness > 1.0f) {
@@ -1928,7 +1934,7 @@ public class PlayerView {
         } else if (lpa.screenBrightness < 0.01f) {
             lpa.screenBrightness = 0.01f;
         }
-        query.id(ResourceUtils.getResourceIdByName(mContext, "id", "app_video_brightness")).text(((int) (lpa.screenBrightness * 100)) + "%");
+        query.id(R.id.app_video_brightness).text(((int) (lpa.screenBrightness * 100)) + "%");
         mActivity.getWindow().setAttributes(lpa);
     }
 

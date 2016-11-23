@@ -126,6 +126,7 @@ public class HPlayerActivity extends AppCompatActivity {
                     }
                 })
                 .setPlaySource(list)
+                .setChargeTie(true,5)
                 .startPlay();
     }
 
