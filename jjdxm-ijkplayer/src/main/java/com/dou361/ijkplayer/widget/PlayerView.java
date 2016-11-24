@@ -33,7 +33,6 @@ import com.dou361.ijkplayer.listener.OnControlPanelVisibilityChangeListener;
 import com.dou361.ijkplayer.listener.OnPlayerBackListener;
 import com.dou361.ijkplayer.listener.OnShowThumbnailListener;
 import com.dou361.ijkplayer.utils.NetworkUtils;
-import com.dou361.ijkplayer.utils.ResourceUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -681,7 +680,7 @@ public class PlayerView {
             @Override
             public boolean onInfo(IMediaPlayer mp, int what, int extra) {
                 if (what == PlayStateParams.MEDIA_INFO_NETWORK_BANDWIDTH || what == PlayStateParams.MEDIA_INFO_BUFFERING_BYTES_UPDATE) {
-                    Log.e("","dou361.====extra=======" + extra);
+                    Log.e("", "dou361.====extra=======" + extra);
                     if (tv_speed != null) {
                         tv_speed.setText(getFormatSize(extra));
                     }
@@ -689,6 +688,10 @@ public class PlayerView {
                 statusChange(what);
                 if (onInfoListener != null) {
                     onInfoListener.onInfo(mp, what, extra);
+                }
+                if (isCharge && maxPlaytime < getCurrentPosition()) {
+                    query.id(R.id.app_video_freeTie).visible();
+                    pausePlay();
                 }
                 return true;
             }
@@ -1022,11 +1025,16 @@ public class PlayerView {
         if (isGNetWork && (NetworkUtils.getNetworkType(mContext) == 4 || NetworkUtils.getNetworkType(mContext) == 5 || NetworkUtils.getNetworkType(mContext) == 6)) {
             query.id(R.id.app_video_netTie).visible();
         } else {
-            if (playerSupport) {
-                query.id(R.id.app_video_loading).visible();
-                videoView.start();
+            if (isCharge && maxPlaytime < getCurrentPosition()) {
+                query.id(R.id.app_video_freeTie).visible();
+
             } else {
-                showStatus(mActivity.getResources().getString(R.string.not_support));
+                if (playerSupport) {
+                    query.id(R.id.app_video_loading).visible();
+                    videoView.start();
+                } else {
+                    showStatus(mActivity.getResources().getString(R.string.not_support));
+                }
             }
         }
         return this;
@@ -1124,11 +1132,11 @@ public class PlayerView {
      * 设置最大观看时长
      *
      * @param isCharge    true为收费 false为免费即不做限制
-     * @param maxPlaytime 最大能播放时长
+     * @param maxPlaytime 最大能播放时长，单位秒
      */
     public PlayerView setChargeTie(boolean isCharge, int maxPlaytime) {
         this.isCharge = isCharge;
-        this.maxPlaytime = maxPlaytime;
+        this.maxPlaytime = maxPlaytime * 1000;
         return this;
     }
 
@@ -1375,7 +1383,7 @@ public class PlayerView {
             }
             updatePausePlay();
             mHandler.sendEmptyMessage(MESSAGE_SHOW_PROGRESS);
-//            mAutoPlayRunnable.start();
+            mAutoPlayRunnable.start();
         } else {
             if (isHideTopBar) {
                 ll_topbar.setVisibility(View.GONE);
@@ -1403,7 +1411,7 @@ public class PlayerView {
             if (onControlPanelVisibilityChangeListener != null) {
                 onControlPanelVisibilityChangeListener.change(false);
             }
-//            mAutoPlayRunnable.stop();
+            mAutoPlayRunnable.stop();
         }
         return this;
     }
@@ -1592,15 +1600,20 @@ public class PlayerView {
                     (NetworkUtils.getNetworkType(mContext) == 4
                             || NetworkUtils.getNetworkType(mContext) == 5
                             || NetworkUtils.getNetworkType(mContext) == 6))) {
-                hideAll();
-                if (isLive) {
-                    showStatus("获取不到直播源");
+                if (isCharge && maxPlaytime < getCurrentPosition()) {
+                    query.id(R.id.app_video_freeTie).visible();
                 } else {
-                    showStatus(mActivity.getResources().getString(R.string.small_problem));
-                }
-                /**5秒尝试重连*/
-                if (!isErrorStop && isAutoReConnect) {
-                    mHandler.sendEmptyMessageDelayed(MESSAGE_RESTART_PLAY, autoConnectTime);
+                    hideAll();
+                    if (isLive) {
+                        showStatus("获取不到直播源");
+                    } else {
+                        showStatus(mActivity.getResources().getString(R.string.small_problem));
+                    }
+                    /**5秒尝试重连*/
+                    if (!isErrorStop && isAutoReConnect) {
+                        mHandler.sendEmptyMessageDelayed(MESSAGE_RESTART_PLAY, autoConnectTime);
+                    }
+
                 }
             } else {
                 query.id(R.id.app_video_netTie).visible();
@@ -1615,15 +1628,19 @@ public class PlayerView {
                 || newStatus == PlayStateParams.MEDIA_ERROR_SERVER_DIED) {
             status = PlayStateParams.STATE_ERROR;
             if (!(isGNetWork && (NetworkUtils.getNetworkType(mContext) == 4 || NetworkUtils.getNetworkType(mContext) == 5 || NetworkUtils.getNetworkType(mContext) == 6))) {
-                hideStatusUI();
-                if (isLive) {
-                    showStatus(mActivity.getResources().getString(R.string.small_problem));
+                if (isCharge && maxPlaytime < getCurrentPosition()) {
+                    query.id(R.id.app_video_freeTie).visible();
                 } else {
-                    showStatus(mActivity.getResources().getString(R.string.small_problem));
-                }
-                /**5秒尝试重连*/
-                if (!isErrorStop && isAutoReConnect) {
-                    mHandler.sendEmptyMessageDelayed(MESSAGE_RESTART_PLAY, autoConnectTime);
+                    hideStatusUI();
+                    if (isLive) {
+                        showStatus(mActivity.getResources().getString(R.string.small_problem));
+                    } else {
+                        showStatus(mActivity.getResources().getString(R.string.small_problem));
+                    }
+                    /**5秒尝试重连*/
+                    if (!isErrorStop && isAutoReConnect) {
+                        mHandler.sendEmptyMessageDelayed(MESSAGE_RESTART_PLAY, autoConnectTime);
+                    }
                 }
             } else {
                 query.id(R.id.app_video_netTie).visible();
@@ -1711,6 +1728,7 @@ public class PlayerView {
         query.id(R.id.simple_player_select_stream_container).gone();
         query.id(R.id.app_video_replay).gone();
         query.id(R.id.app_video_netTie).gone();
+        query.id(R.id.app_video_freeTie).gone();
         query.id(R.id.app_video_loading).gone();
         if (onControlPanelVisibilityChangeListener != null) {
             onControlPanelVisibilityChangeListener.change(false);
@@ -1785,12 +1803,18 @@ public class PlayerView {
             int percent = videoView.getBufferPercentage();
             seekBar.setSecondaryProgress(percent * 10);
         }
-        query.id(R.id.app_video_currentTime).text(generateTime(position));
-        query.id(R.id.app_video_currentTime_full).text(generateTime(position));
-        query.id(R.id.app_video_currentTime_left).text(generateTime(position));
-        query.id(R.id.app_video_endTime).text(generateTime(duration));
-        query.id(R.id.app_video_endTime_full).text(generateTime(duration));
-        query.id(R.id.app_video_endTime_left).text(generateTime(duration));
+
+        if (isCharge && maxPlaytime + 1000 < getCurrentPosition()) {
+            query.id(R.id.app_video_freeTie).visible();
+            pausePlay();
+        } else {
+            query.id(R.id.app_video_currentTime).text(generateTime(position));
+            query.id(R.id.app_video_currentTime_full).text(generateTime(position));
+            query.id(R.id.app_video_currentTime_left).text(generateTime(position));
+            query.id(R.id.app_video_endTime).text(generateTime(duration));
+            query.id(R.id.app_video_endTime_full).text(generateTime(duration));
+            query.id(R.id.app_video_endTime_left).text(generateTime(duration));
+        }
         return position;
     }
 
