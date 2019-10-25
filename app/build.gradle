@@ -24,6 +24,11 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
     defaultConfig {
         applicationId "com.dou361.jjdxm_ijkplayer"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -54,22 +59,25 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
     compile rootProject.ext.jjdxm_v7
-    compile 'com.jakewharton:butterknife:7.0.1'
+    compile 'com.jakewharton:butterknife:9.0.0'
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile project(':jjdxm-ijkplayer')
 
 //    根据需要支持去拓展，在jjdxm-ijkplayer中默认加入了armv7a的了
-    compile 'com.dou361.ijkplayer-armv7a:jjdxm-ijkplayer-armv7a:1.0.0'
-    compile 'com.dou361.ijkplayer-armv5:jjdxm-ijkplayer-armv5:1.0.0'
-    compile 'com.dou361.ijkplayer-arm64:jjdxm-ijkplayer-arm64:1.0.0'
-    compile 'com.dou361.ijkplayer-x86:jjdxm-ijkplayer-x86:1.0.0'
-    compile 'com.dou361.ijkplayer-x86_64:jjdxm-ijkplayer-x86_64:1.0.0'
+//    compile 'com.dou361.ijkplayer-armv7a:jjdxm-ijkplayer-armv7a:1.0.0'
+//    compile 'com.dou361.ijkplayer-armv5:jjdxm-ijkplayer-armv5:1.0.0'
+//    compile 'com.dou361.ijkplayer-arm64:jjdxm-ijkplayer-arm64:1.0.0'
+//    compile 'com.dou361.ijkplayer-x86:jjdxm-ijkplayer-x86:1.0.0'
+//    compile 'com.dou361.ijkplayer-x86_64:jjdxm-ijkplayer-x86_64:1.0.0'
+
+    //compile 'com.dou361.ijkplaye:jjdxm-ijkplayer:1.0.6'
+
 
 
     //网络获取直播视频
-    compile 'com.squareup.retrofit2:retrofit:2.0.0-beta4'
+    compile 'com.squareup.retrofit2:retrofit:2.0.0'
     compile 'com.squareup.retrofit2:converter-scalars:2.0.0'
-    compile 'com.squareup.retrofit2:converter-gson:2.0.0-beta4'
+    compile 'com.squareup.retrofit2:converter-gson:2.0.0'
     compile 'com.squareup.okhttp3:okhttp:3.0.1'
     compile 'com.alibaba:fastjson:1.2.14'
 
